@@ -22,9 +22,10 @@ const db = new sqlite3.Database('./database.db', (err) => {
     } else {
         console.log('Connected to SQLite database');
         // Create questions table if not exists
+        // Note: Using program_type to match existing database schema
         db.run(`CREATE TABLE IF NOT EXISTS questions (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
-            program TEXT,
+            program_type TEXT,
             grade TEXT,
             subject TEXT,
             topic TEXT,
@@ -54,7 +55,8 @@ const db = new sqlite3.Database('./database.db', (err) => {
 // Migration function to add missing columns
 function migrateDatabase() {
     const columnsToCheck = [
-        { name: 'program', type: 'TEXT' },
+        { name: 'program_type', type: 'TEXT' },
+        { name: 'program', type: 'TEXT' }, // Also check for 'program' for backward compatibility
         { name: 'grade', type: 'TEXT' },
         { name: 'subject', type: 'TEXT' },
         { name: 'topic', type: 'TEXT' },
@@ -115,16 +117,21 @@ function migrateDatabase() {
 // Lưu câu hỏi mới
 app.post('/api/questions', (req, res) => {
     const {
-        program, grade, subject, topic, skill,
+        program, program_type, grade, subject, topic, skill,
         question_type, difficulty, content, answer,
         correct_answer, solution, year, note
     } = req.body;
 
+    // Map program to program_type if needed (for backward compatibility)
+    const programValue = program_type || program || '';
+
+    // Check which column exists in database and use appropriate SQL
+    // Try to insert with both program and program_type support
     const sql = `INSERT INTO questions 
-        (program, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note)
+        (program_type, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note)
         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
 
-    db.run(sql, [program, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note], function(err) {
+    db.run(sql, [programValue, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note], function(err) {
         if (err) {
             console.error('Error saving question:', err);
             res.json({ success: false, message: err.message });
@@ -165,7 +172,10 @@ app.post('/api/questions/search', (req, res) => {
         }
     };
 
-    addFilter('program', program, 'program');
+    // Check for both program and program_type
+    if (program) {
+        addFilter('program', program, 'program_type'); // Map to program_type column
+    }
     addFilter('grade', grade, 'grade');
     addFilter('subject', subject, 'subject');
     addFilter('topic', topic, 'topic');
@@ -293,19 +303,22 @@ app.delete('/api/questions/:id', (req, res) => {
 app.put('/api/questions/:id', (req, res) => {
     const { id } = req.params;
     const {
-        program, grade, subject, topic, skill,
+        program, program_type, grade, subject, topic, skill,
         question_type, difficulty, content, answer,
         correct_answer, solution, year, note
     } = req.body;
 
+    // Map program to program_type if needed
+    const programValue = program_type || program || '';
+
     const sql = `UPDATE questions SET 
-        program = ?, grade = ?, subject = ?, topic = ?, skill = ?,
+        program_type = ?, grade = ?, subject = ?, topic = ?, skill = ?,
         question_type = ?, difficulty = ?, content = ?, answer = ?,
         correct_answer = ?, solution = ?, year = ?, note = ?,
         updated_at = CURRENT_TIMESTAMP
         WHERE id = ?`;
 
-    db.run(sql, [program, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note, id], function(err) {
+    db.run(sql, [programValue, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note, id], function(err) {
         if (err) {
             res.json({ success: false, message: err.message });
         } else if (this.changes > 0) {

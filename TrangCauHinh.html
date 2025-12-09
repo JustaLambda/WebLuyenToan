@@ -6,6 +6,7 @@
     <title>Cấu Hình Ma Trận Đề - TOAN.VN</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <script src="api.js"></script>
     
     <style>
         body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; padding-bottom: 120px;}
@@ -728,8 +729,122 @@
                 return;
             }
 
-            localStorage.setItem('examConfig', JSON.stringify(examData));
-            window.location.href = 'exam_interface.html';
+            // Gọi API để tạo đề thi từ server
+            generateExamFromServer(examData);
+        }
+
+        // Hàm gọi API để tạo đề thi
+        async function generateExamFromServer(examData) {
+            // Hiển thị loading
+            const loadingMsg = document.createElement('div');
+            loadingMsg.id = 'loadingMsg';
+            loadingMsg.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); z-index: 10000; text-align: center;';
+            loadingMsg.innerHTML = '<i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: #27ae60; margin-bottom: 15px;"></i><br><div style="font-weight: bold; color: #2c3e50;">Đang tạo đề thi từ ngân hàng câu hỏi...</div>';
+            document.body.appendChild(loadingMsg);
+
+            try {
+                // Kiểm tra xem API có sẵn không
+                if (typeof API === 'undefined') {
+                    throw new Error('API module chưa được load. Vui lòng đảm bảo api.js được include.');
+                }
+
+                // Gọi API generateExam
+                const result = await API.generateExam(examData);
+
+                if (result.success && result.data && result.data.length > 0) {
+                    // Chuyển đổi format câu hỏi từ database sang format exam_interface.html
+                    const formattedQuestions = result.data.map(q => {
+                        // Parse answer JSON nếu là string
+                        let answers = [];
+                        let correctAnswer = null;
+                        let subQuestions = null;
+
+                        try {
+                            if (q.answer) {
+                                const answerData = typeof q.answer === 'string' ? JSON.parse(q.answer) : q.answer;
+                                
+                                // Map question_type từ database sang exam format
+                                if (q.question_type === 'mc') {
+                                    // Trắc nghiệm: answer là array of strings
+                                    answers = Array.isArray(answerData) ? answerData : [];
+                                    // correct_answer có thể là index (0,1,2,3) hoặc letter (A,B,C,D)
+                                    if (q.correct_answer) {
+                                        try {
+                                            const correct = typeof q.correct_answer === 'string' ? JSON.parse(q.correct_answer) : q.correct_answer;
+                                            correctAnswer = correct;
+                                        } catch (e) {
+                                            // Nếu không parse được, dùng trực tiếp
+                                            correctAnswer = q.correct_answer;
+                                        }
+                                    }
+                                } else if (q.question_type === 'tf') {
+                                    // Đúng/Sai: answer là array of {text, correct}
+                                    if (Array.isArray(answerData)) {
+                                        subQuestions = answerData.map((item, idx) => {
+                                            // Map difficulty levels: 1=NB, 2=TH, 3=VD, 4=VDC
+                                            const levelMap = { 1: 'NB', 2: 'TH', 3: 'VD', 4: 'VDC' };
+                                            return {
+                                                level: item.level || levelMap[q.difficulty] || 'NB',
+                                                text: item.text || (typeof item === 'string' ? item : '')
+                                            };
+                                        });
+                                    }
+                                } else if (q.question_type === 'short') {
+                                    // Trả lời ngắn: answer là array of possible answers
+                                    answers = Array.isArray(answerData) ? answerData : [];
+                                } else if (q.question_type === 'drag') {
+                                    // Kéo/Thả: answer là array of option texts
+                                    answers = Array.isArray(answerData) ? answerData : [];
+                                }
+                            }
+                        } catch (e) {
+                            console.warn('Error parsing answer for question', q.id, e);
+                        }
+
+                        // Format câu hỏi theo exam_interface.html
+                        const formatted = {
+                            id: q.id,
+                            type: q.question_type || 'mc',
+                            content: q.content || ''
+                        };
+
+                        if (q.question_type === 'mc') {
+                            formatted.answers = answers;
+                            if (correctAnswer !== null) {
+                                formatted.correctAnswer = correctAnswer;
+                            }
+                        } else if (q.question_type === 'tf') {
+                            formatted.sub_questions = subQuestions || [];
+                        } else if (q.question_type === 'drag') {
+                            formatted.options = answers;
+                        }
+
+                        if (q.solution) {
+                            formatted.solution = q.solution;
+                        }
+
+                        return formatted;
+                    });
+
+                    // Lưu examConfig với questions đã được generate
+                    examData.questions = formattedQuestions;
+                    localStorage.setItem('examConfig', JSON.stringify(examData));
+                    
+                    // Chuyển đến trang exam
+                    window.location.href = 'exam_interface.html';
+                } else {
+                    throw new Error(result.message || 'Không tìm thấy đủ câu hỏi phù hợp với cấu hình. Vui lòng kiểm tra lại ngân hàng câu hỏi.');
+                }
+            } catch (error) {
+                console.error('Error generating exam:', error);
+                alert('Lỗi khi tạo đề thi: ' + error.message + '\n\nVui lòng kiểm tra:\n- Kết nối server\n- Ngân hàng câu hỏi có đủ câu hỏi phù hợp\n- Cấu hình đề thi');
+            } finally {
+                // Xóa loading message
+                const loading = document.getElementById('loadingMsg');
+                if (loading) {
+                    loading.remove();
+                }
+            }
         }
     </script>
 </body>

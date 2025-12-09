@@ -44,10 +44,71 @@ const db = new sqlite3.Database('./database.db', (err) => {
                 console.error('Error creating table:', err);
             } else {
                 console.log('Questions table ready');
+                // Migrate existing table: add missing columns if needed
+                migrateDatabase();
             }
         });
     }
 });
+
+// Migration function to add missing columns
+function migrateDatabase() {
+    const columnsToCheck = [
+        { name: 'program', type: 'TEXT' },
+        { name: 'grade', type: 'TEXT' },
+        { name: 'subject', type: 'TEXT' },
+        { name: 'topic', type: 'TEXT' },
+        { name: 'skill', type: 'TEXT' },
+        { name: 'question_type', type: 'TEXT' },
+        { name: 'difficulty', type: 'INTEGER' },
+        { name: 'content', type: 'TEXT' },
+        { name: 'answer', type: 'TEXT' },
+        { name: 'correct_answer', type: 'TEXT' },
+        { name: 'solution', type: 'TEXT' },
+        { name: 'year', type: 'INTEGER' },
+        { name: 'note', type: 'TEXT' },
+        { name: 'created_at', type: 'DATETIME', defaultValue: 'CURRENT_TIMESTAMP' },
+        { name: 'updated_at', type: 'DATETIME', defaultValue: 'CURRENT_TIMESTAMP' }
+    ];
+
+    // Get existing columns
+    db.all("PRAGMA table_info(questions)", [], (err, rows) => {
+        if (err) {
+            console.error('Error checking table info:', err);
+            return;
+        }
+
+        const existingColumns = rows.map(row => row.name);
+        let migrationCount = 0;
+
+        columnsToCheck.forEach(col => {
+            if (!existingColumns.includes(col.name)) {
+                migrationCount++;
+                // SQLite doesn't support DEFAULT in ALTER TABLE ADD COLUMN for some versions
+                // So we add the column first, then update existing rows if needed
+                let sql = `ALTER TABLE questions ADD COLUMN ${col.name} ${col.type}`;
+                if (col.defaultValue && (col.name === 'created_at' || col.name === 'updated_at')) {
+                    // For timestamp columns, we'll handle defaults in INSERT/UPDATE queries
+                    sql = `ALTER TABLE questions ADD COLUMN ${col.name} ${col.type}`;
+                }
+                
+                db.run(sql, (err) => {
+                    if (err) {
+                        console.error(`Error adding column ${col.name}:`, err);
+                    } else {
+                        console.log(`✓ Added column: ${col.name}`);
+                    }
+                });
+            }
+        });
+
+        if (migrationCount === 0) {
+            console.log('Database schema is up to date');
+        } else {
+            console.log(`Migration: Added ${migrationCount} missing column(s)`);
+        }
+    });
+}
 
 // ============ API ROUTES ============
 
@@ -257,50 +318,104 @@ app.put('/api/questions/:id', (req, res) => {
 
 // Tạo đề thi
 app.post('/api/exams/generate', (req, res) => {
-    const { sections } = req.body;
-    let allQuestions = [];
-    let completed = 0;
-
-    if (!sections || sections.length === 0) {
-        res.json({ success: true, data: [], total: 0 });
+    const { grade, config, selectedTypes } = req.body;
+    
+    // Validate input
+    if (!config || !Array.isArray(config) || config.length === 0) {
+        res.json({ success: false, message: 'Cấu hình đề thi không hợp lệ', data: [], total: 0 });
         return;
     }
 
-    sections.forEach((section, index) => {
+    let allQuestions = [];
+    let completed = 0;
+    let hasError = false;
+
+    // Map difficulty levels: nb=1, th=2, vd=3, vdc=4
+    const difficultyMap = {
+        'nb': 1,
+        'th': 2,
+        'vd': 3,
+        'vdc': 4
+    };
+
+    // Map question types: tn=mc, ds=tf, tl=short, kt=drag
+    const questionTypeMap = {
+        'tn': 'mc',
+        'ds': 'tf',
+        'tl': 'short',
+        'kt': 'drag'
+    };
+
+    config.forEach((section, index) => {
         let sql = 'SELECT * FROM questions WHERE 1=1';
         let params = [];
 
-        if (section.type) {
+        // Filter by grade if provided
+        if (grade) {
+            sql += ' AND grade = ?';
+            params.push(grade);
+        }
+
+        // Map question type (tn -> mc, ds -> tf, etc.)
+        const dbQuestionType = questionTypeMap[section.questionType] || section.questionType;
+        if (dbQuestionType) {
             sql += ' AND question_type = ?';
-            params.push(section.type);
+            params.push(dbQuestionType);
         }
-        if (section.difficulty) {
-            sql += ' AND difficulty = ?';
-            params.push(section.difficulty);
+
+        // Map difficulty level
+        if (section.level && section.level !== 'all') {
+            const difficulty = difficultyMap[section.level];
+            if (difficulty) {
+                sql += ' AND difficulty = ?';
+                params.push(difficulty);
+            }
+        } else if (section.level === 'all') {
+            // For DS (Đúng/Sai), include all difficulty levels
+            sql += ' AND difficulty IN (1, 2, 3, 4)';
         }
-        if (section.topic) {
+
+        // Filter by topic (typeId is the topic ID)
+        if (section.typeId) {
             sql += ' AND topic = ?';
-            params.push(section.topic);
+            params.push(section.typeId);
         }
-        if (section.skill) {
-            sql += ' AND skill = ?';
-            params.push(section.skill);
-        }
+
+        // Get the count of questions needed
+        const count = section.count || 1;
 
         sql += ' ORDER BY RANDOM() LIMIT ?';
-        params.push(section.count || 1);
+        params.push(count);
 
         db.all(sql, params, (err, rows) => {
-            if (!err && rows) {
+            if (err) {
+                console.error('Error fetching questions for section:', err);
+                hasError = true;
+            } else if (rows) {
+                // Check if we got enough questions
+                if (rows.length < count) {
+                    console.warn(`Warning: Only found ${rows.length} questions for section ${index}, requested ${count}`);
+                }
                 allQuestions = allQuestions.concat(rows);
             }
+            
             completed++;
-            if (completed === sections.length) {
-                res.json({
-                    success: true,
-                    data: allQuestions,
-                    total: allQuestions.length
-                });
+            if (completed === config.length) {
+                if (hasError) {
+                    res.json({ 
+                        success: false, 
+                        message: 'Có lỗi xảy ra khi tạo đề thi', 
+                        data: allQuestions, 
+                        total: allQuestions.length 
+                    });
+                } else {
+                    res.json({
+                        success: true,
+                        data: allQuestions,
+                        total: allQuestions.length,
+                        message: `Đã tạo đề thi với ${allQuestions.length} câu hỏi`
+                    });
+                }
             }
         });
     });

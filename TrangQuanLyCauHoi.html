@@ -731,7 +731,7 @@
 </head>
 <body>
     <div class="top-bar">
-        <button class="btn-back" onclick="window.location.href='index.html'">
+        <button class="btn-back" onclick="showQuestionList()" id="btnBackToList" style="display: none;">
             <i class="fas fa-arrow-left"></i> Quay lại
         </button>
         <h1 class="page-title">Quản Lý Câu Hỏi</h1>
@@ -914,9 +914,9 @@
             <!-- Global Language Toggle -->
             <div id="globalLanguageToggle" style="display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <strong style="color: #2c3e50;">Chuyển đổi đồng loạt ngôn ngữ nhập:</strong>
-                    <button class="btn-lang-toggle active" data-lang="visual" onclick="switchAllEditors('visual')">Visual</button>
-                    <button class="btn-lang-toggle" data-lang="html" onclick="switchAllEditors('html')">HTML</button>
+                    <strong style="color: #2c3e50;">Chuyển đổi ngôn ngữ nhập cho toàn bộ:</strong>
+                    <button class="btn-lang-toggle active" data-lang="visual" onclick="switchAllEditors('visual')" style="padding: 10px 20px; font-size: 1rem; font-weight: bold;">LaTeX</button>
+                    <button class="btn-lang-toggle" data-lang="html" onclick="switchAllEditors('html')" style="padding: 10px 20px; font-size: 1rem; font-weight: bold;">HTML</button>
                 </div>
             </div>
 
@@ -1806,20 +1806,42 @@
         function triggerMathJaxRender(element) {
             if (!element) return;
             
-            // Đảm bảo có class để MathJax nhận diện (nếu config yêu cầu)
+            // Đảm bảo có class để MathJax nhận diện
             element.classList.add('tex2jax_process');
             
-            if (window.MathJax && window.MathJax.typesetPromise) {
-                // Xóa các element MathJax cũ (nếu có) để tránh hiển thị trùng lặp
-                // MathJax 3 thông minh hơn nhưng đôi khi cần clear thủ công nếu DOM update nhanh
-                element.querySelectorAll('mjx-container').forEach(el => el.remove());
+            // Đợi MathJax sẵn sàng
+            if (!window.MathJax) {
+                // Nếu MathJax chưa load, đợi một chút rồi thử lại
+                setTimeout(() => triggerMathJaxRender(element), 100);
+                return;
+            }
+            
+            if (window.MathJax.typesetPromise) {
+                // Xóa tất cả MathJax cũ để tránh trùng lặp
+                element.querySelectorAll('mjx-container, .MathJax, script[type="math/tex"]').forEach(el => el.remove());
 
-                // Yêu cầu MathJax vẽ lại
-                MathJax.typesetPromise([element]).catch((err) => {
-                    console.error('MathJax error:', err);
-                    // Fallback: Clear nội dung và vẽ lại nếu lỗi
-                    element.innerHTML = element.innerHTML;
-                    MathJax.typesetPromise([element]);
+                // Sử dụng requestAnimationFrame để đảm bảo DOM đã render xong
+                requestAnimationFrame(() => {
+                    // Yêu cầu MathJax vẽ lại với retry mechanism
+                    MathJax.typesetPromise([element])
+                        .then(() => {
+                            // Thành công
+                        })
+                        .catch((err) => {
+                            console.warn('MathJax render error, retrying...', err);
+                            // Retry sau 200ms
+                            setTimeout(() => {
+                                element.querySelectorAll('mjx-container').forEach(el => el.remove());
+                                MathJax.typesetPromise([element]).catch(e => {
+                                    console.error('MathJax retry failed:', e);
+                                });
+                            }, 200);
+                        });
+                });
+            } else if (window.MathJax.startup && window.MathJax.startup.promise) {
+                // Nếu MathJax chưa khởi động xong, đợi
+                window.MathJax.startup.promise.then(() => {
+                    triggerMathJaxRender(element);
                 });
             }
         }
@@ -1882,10 +1904,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Nội dung đề <span class="required">*</span></div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="questionEditor"></div>
@@ -1905,13 +1923,6 @@
                                 <div class="answer-option-header">
                                     <div class="answer-option-label">Đáp án ${String.fromCharCode(64 + i)}</div>
                                     ${i > 1 ? `<button class="btn-remove-answer" onclick="removeAnswer(${i})">Xóa</button>` : ''}
-                                </div>
-                                <div class="editor-header" style="margin-bottom: 10px;">
-                                    <div style="flex: 1;"></div>
-                                    <div class="editor-lang-toggle">
-                                        <button class="active" onclick="switchEditorMode('answer${i}', 'visual')">LaTeX</button>
-                                        <button onclick="switchEditorMode('answer${i}', 'html')">HTML</button>
-                                    </div>
                                 </div>
                                 <div class="editor-wrapper">
                                     <div id="answerEditor${i}"></div>
@@ -1940,10 +1951,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Lời giải (Tùy chọn)</div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="solutionEditor"></div>
@@ -1972,10 +1979,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Nội dung đề <span class="required">*</span></div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="questionEditor"></div>
@@ -2023,10 +2026,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Lời giải (Tùy chọn)</div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="solutionEditor"></div>
@@ -2055,10 +2054,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Nội dung đề <span class="required">*</span></div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="questionEditor"></div>
@@ -2096,10 +2091,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Lời giải (Tùy chọn)</div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="solutionEditor"></div>
@@ -2170,10 +2161,6 @@
                     <div class="editor-container">
                         <div class="editor-header">
                             <div class="editor-label">Lời giải (Tùy chọn)</div>
-                            <div class="editor-lang-toggle">
-                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
-                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
-                            </div>
                         </div>
                         <div class="editor-wrapper">
                             <div id="solutionEditor"></div>
@@ -2198,9 +2185,12 @@
 
         // Editor management functions
         function initializeEditors(type) {
+            // Lấy mode từ global toggle hoặc mặc định là 'visual'
+            const globalMode = document.querySelector('#globalLanguageToggle .btn-lang-toggle.active')?.getAttribute('data-lang') || 'visual';
+            
             // Initialize question editor
             if (document.getElementById('questionEditor')) {
-                createEditor('questionEditor', 'question', 'visual');
+                createEditor('questionEditor', 'question', globalMode);
             }
 
             // Initialize answer editors based on type
@@ -2212,7 +2202,8 @@
                         const index = option.getAttribute('data-answer-index');
                         const editorId = `answerEditor${index}`;
                         if (document.getElementById(editorId)) {
-                            createEditor(editorId, `answer${index}`, 'visual');
+                            const globalMode = document.querySelector('#globalLanguageToggle .btn-lang-toggle.active')?.getAttribute('data-lang') || 'visual';
+                            createEditor(editorId, `answer${index}`, globalMode);
                         }
                     });
                 }
@@ -2222,12 +2213,13 @@
             if (type === 'ds') {
                 const container = document.getElementById('statementOptionsContainer');
                 if (container) {
+                    const globalMode = document.querySelector('#globalLanguageToggle .btn-lang-toggle.active')?.getAttribute('data-lang') || 'visual';
                     const statements = container.querySelectorAll('[data-statement-index]');
                     statements.forEach(statement => {
                         const index = statement.getAttribute('data-statement-index');
                         const editorId = `statementEditor${index}`;
                         if (document.getElementById(editorId)) {
-                            createEditor(editorId, `statement${index}`, 'visual');
+                            createEditor(editorId, `statement${index}`, globalMode);
                         }
                     });
                 }
@@ -2235,7 +2227,8 @@
 
             // Initialize solution editor
             if (document.getElementById('solutionEditor')) {
-                createEditor('solutionEditor', 'solution', 'visual');
+                const globalMode = document.querySelector('#globalLanguageToggle .btn-lang-toggle.active')?.getAttribute('data-lang') || 'visual';
+                createEditor('solutionEditor', 'solution', globalMode);
             }
         }
 
@@ -2423,6 +2416,8 @@
 
             // 3. Lấy dữ liệu hiện tại trước khi chuyển đổi
             let currentContent = '';
+            const currentMode = editorModes[dataKey] || 'visual';
+            
             if (editorInstances[dataKey]) {
                 currentContent = editorInstances[dataKey].getData();
             } else if (currentTextarea) {
@@ -2430,6 +2425,9 @@
             } else {
                 currentContent = questionData[dataKey] || '';
             }
+            
+            // Nếu đang chuyển từ HTML sang LaTeX (visual), CKEditor sẽ tự parse HTML
+            // Nếu đang chuyển từ LaTeX sang HTML, giữ nguyên content (CKEditor output HTML)
 
             // 4. Cập nhật trạng thái Mode
             editorModes[dataKey] = mode;
@@ -2519,19 +2517,105 @@
                 }
             });
 
-            // Switch all individual editors
-            Object.keys(editorInstances).forEach(key => {
-                switchEditorMode(key, mode);
+            // Lưu mode toàn cục
+            const globalMode = mode;
+            
+            // Tìm tất cả dataKeys từ các editors và textareas hiện có
+            const allDataKeys = new Set();
+            
+            // Thêm question và solution
+            allDataKeys.add('question');
+            allDataKeys.add('solution');
+            
+            // Tìm tất cả answer editors từ container
+            const answerContainer = document.getElementById('answerOptionsContainer');
+            if (answerContainer) {
+                answerContainer.querySelectorAll('[data-answer-index]').forEach(option => {
+                    const index = option.getAttribute('data-answer-index');
+                    if (index) {
+                        allDataKeys.add('answer' + index);
+                    }
+                });
+            }
+            
+            // Tìm tất cả answer editors (cả div và textarea) - fallback
+            document.querySelectorAll('[id^="answerEditor"]').forEach(el => {
+                const match = el.id.match(/answerEditor(\d+)/);
+                if (match) {
+                    allDataKeys.add('answer' + match[1]);
+                }
             });
-
-            // Also switch textarea editors
-            document.querySelectorAll('[id$="_textarea"]').forEach(textarea => {
-                const dataKey = textarea.id.replace('Editor_textarea', '').replace('Editor', '');
-                switchEditorMode(dataKey, mode);
+            
+            // Tìm tất cả answer textareas
+            document.querySelectorAll('[id*="answerEditor"][id$="_textarea"]').forEach(el => {
+                const match = el.id.match(/answerEditor(\d+)_textarea/);
+                if (match) {
+                    allDataKeys.add('answer' + match[1]);
+                }
+            });
+            
+            // Tìm tất cả statement editors
+            document.querySelectorAll('[id^="statementEditor"]').forEach(el => {
+                const match = el.id.match(/statementEditor(\d+)/);
+                if (match) {
+                    allDataKeys.add('statement' + match[1]);
+                }
+            });
+            
+            // Tìm tất cả statement textareas
+            document.querySelectorAll('[id$="statementEditor_textarea"], [id*="statementEditor"][id$="_textarea"]').forEach(el => {
+                const match = el.id.match(/statementEditor(\d+)_textarea/);
+                if (match) {
+                    allDataKeys.add('statement' + match[1]);
+                }
+            });
+            
+            // Tìm question và solution textareas
+            if (document.getElementById('questionEditor_textarea')) {
+                allDataKeys.add('question');
+            }
+            if (document.getElementById('solutionEditor_textarea')) {
+                allDataKeys.add('solution');
+            }
+            
+            // Switch từng editor - dùng Array.from để convert Set to Array
+            // Xử lý tuần tự với delay nhỏ để tránh race condition
+            const dataKeysArray = Array.from(allDataKeys);
+            
+            dataKeysArray.forEach((dataKey, index) => {
+                setTimeout(() => {
+                    // Kiểm tra xem editor có tồn tại không
+                    let editorId = '';
+                    let textareaId = '';
+                    
+                    if (dataKey === 'question') {
+                        editorId = 'questionEditor';
+                        textareaId = 'questionEditor_textarea';
+                    } else if (dataKey.startsWith('answer')) {
+                        const idx = dataKey.replace('answer', '');
+                        editorId = 'answerEditor' + idx;
+                        textareaId = 'answerEditor' + idx + '_textarea';
+                    } else if (dataKey.startsWith('statement')) {
+                        const idx = dataKey.replace('statement', '');
+                        editorId = 'statementEditor' + idx;
+                        textareaId = 'statementEditor' + idx + '_textarea';
+                    } else if (dataKey === 'solution') {
+                        editorId = 'solutionEditor';
+                        textareaId = 'solutionEditor_textarea';
+                    }
+                    
+                    const hasEditor = editorInstances[dataKey] || 
+                                     document.getElementById(editorId) || 
+                                     document.getElementById(textareaId);
+                    
+                    if (hasEditor) {
+                        switchEditorMode(dataKey, globalMode);
+                    }
+                }, index * 50); // Delay 50ms giữa mỗi editor để tránh conflict
             });
         }
 
-        // Hệ thống preview mới - render đúng theo mode
+        // Hệ thống preview mới - render đúng theo mode, ổn định hơn
         function updatePreviewForEditor(dataKey, content) {
             // 1. Xác định ID của khung preview tương ứng
             let previewId = '';
@@ -2556,17 +2640,21 @@
             // 2. Xử lý hiển thị
             if (!rawContent.trim()) {
                 previewDiv.innerHTML = '<em style="color: #999;">Chưa có nội dung</em>';
-            } else {
-                // [QUAN TRỌNG] Sử dụng innerHTML để biên dịch mã HTML
-                previewDiv.innerHTML = rawContent;
+                return;
             }
 
-            // 3. Đảm bảo class xử lý MathJax luôn có
+            // 3. Xóa MathJax cũ trước khi render mới
+            previewDiv.querySelectorAll('mjx-container, .MathJax').forEach(el => el.remove());
+            
+            // 4. [QUAN TRỌNG] Sử dụng innerHTML để biên dịch mã HTML
+            previewDiv.innerHTML = rawContent;
+
+            // 5. Đảm bảo class xử lý MathJax luôn có
             if (!previewDiv.classList.contains('tex2jax_process')) {
                 previewDiv.classList.add('tex2jax_process');
             }
 
-            // 4. Gọi MathJax vẽ lại công thức toán đè lên nội dung HTML
+            // 6. Gọi MathJax vẽ lại công thức toán với retry mechanism
             triggerMathJaxRender(previewDiv);
         }
 
@@ -2606,10 +2694,11 @@
                 correctSelect.appendChild(option);
             }
 
-            // Initialize editor
+            // Initialize editor với mode từ global toggle
             setTimeout(() => {
                 if (document.getElementById(`answerEditor${nextIndex}`)) {
-                    createEditor(`answerEditor${nextIndex}`, `answer${nextIndex}`, editorModes['answer1'] || 'visual');
+                    const globalMode = document.querySelector('#globalLanguageToggle .btn-lang-toggle.active')?.getAttribute('data-lang') || 'visual';
+                    createEditor(`answerEditor${nextIndex}`, `answer${nextIndex}`, globalMode);
                 }
             }, 100);
         }
@@ -2956,7 +3045,7 @@
             try {
                 // Format data để gửi lên server
                 const questionDataForAPI = {
-                    program_type: currentSelections.program[0] || '',
+                    program: currentSelections.program[0] || '',
                     grade: currentSelections.grade[0] || '',
                     subject: currentSelections.subject[0] || '',
                     topic: currentSelections.topic[0] || '',
@@ -2967,6 +3056,7 @@
                     difficulty: parseInt(difficulty),
                     content: questionContent.trim(),
                     answer: JSON.stringify(formattedAnswers),
+                    correct_answer: questionType === 'tn' ? correctAnswer : (questionType === 'ds' ? JSON.stringify(statements.map(s => s.correct)) : null),
                     solution: solution.trim() || null,
                     note: notes || null
                 };
@@ -3094,6 +3184,10 @@
                 listContainer.style.display = 'none';
                 addContainer.style.display = 'flex';
                 
+                // Hiện nút "Quay lại"
+                const btnBack = document.getElementById('btnBackToList');
+                if (btnBack) btnBack.style.display = 'block';
+                
                 // Reset form async - không block UI thread
                 setTimeout(() => {
                     resetForm();
@@ -3111,6 +3205,10 @@
             
             if (listContainer) listContainer.style.display = 'flex';
             if (addContainer) addContainer.style.display = 'none';
+            
+            // Ẩn nút "Quay lại"
+            const btnBack = document.getElementById('btnBackToList');
+            if (btnBack) btnBack.style.display = 'none';
         }
 
         // Mở modal cho bộ lọc

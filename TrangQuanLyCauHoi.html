@@ -1,0 +1,3546 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản Lý Câu Hỏi - TOAN.VN</title>
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    <link rel="preconnect" href="https://cdn.jsdelivr.net">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
+    <noscript><link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet"></noscript>
+    
+    <!-- CKEditor -->
+    <script src="https://cdn.ckeditor.com/ckeditor5/41.0.0/classic/ckeditor.js"></script>
+    
+    <!-- MathJax Configuration - Pre-configured before script loads -->
+    <script>
+        window.MathJax = {
+            tex: {
+                // Cho phép viết công thức trong dấu $...$ hoặc \(...\)
+                inlineMath: [['$', '$'], ['\\(', '\\)']],
+                displayMath: [['$$', '$$'], ['\\[', '\\]']],
+                // Nạp gói amsmath để dùng được \dfrac, \begin{cases}...
+                packages: {'[+]': ['ams', 'amsmath']} 
+            },
+            options: {
+                // Bỏ qua thẻ script, style... chỉ xử lý class tex2jax_process
+                ignoreHtmlClass: 'tex2jax_ignore',
+                processHtmlClass: 'tex2jax_process'
+            },
+            loader: {
+                load: ['[tex]/ams']
+            },
+            startup: {
+                ready: () => {
+                    MathJax.startup.defaultReady();
+                }
+            }
+        };
+    </script>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6" defer></script>
+    <script id="MathJax-script" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js" defer></script>
+    <script src="data_master.js" defer></script>
+    <script src="api.js"></script>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { 
+            font-family: 'Montserrat', sans-serif; 
+            background: #f4f6f8; 
+            margin: 0; 
+            padding: 0; 
+            color: #333; 
+        }
+        
+        .top-bar {
+            background: white; 
+            height: 70px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+            padding: 0 30px; 
+            border-bottom: 2px solid #27ae60;
+            position: sticky; 
+            top: 0; 
+            z-index: 1000; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .page-title { 
+            color: #2c3e50; 
+            font-weight: 800; 
+            font-size: 1.4rem; 
+            text-transform: uppercase; 
+        }
+        .btn-back {
+            padding: 10px 20px; 
+            border: 1px solid #ccc; 
+            background: #fff; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-weight: bold; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            transition: 0.2s;
+        }
+        .btn-back:hover { background: #eee; }
+
+        .container {
+            max-width: 1600px; 
+            margin: 30px auto; 
+            padding: 0 20px;
+            display: flex;
+            gap: 30px;
+            align-items: flex-start;
+        }
+
+        /* LEFT COLUMN - Classification */
+        .left-column {
+            flex: 0 0 400px;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 25px;
+            /* Bỏ sticky để không bị ghim khi scroll */
+        }
+
+        .classification-section {
+            margin-bottom: 25px;
+        }
+
+        .section-label {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-label .required {
+            color: #e74c3c;
+            font-size: 1.1rem;
+        }
+
+        .input-row {
+            display: flex;
+            gap: 10px;
+            align-items: flex-start;
+            margin-bottom: 15px;
+        }
+
+        .tag-input-container {
+            flex: 1;
+            min-height: 40px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 8px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            background: #fafafa;
+            transition: border-color 0.2s;
+        }
+
+        .tag-input-container:focus-within {
+            border-color: #3498db;
+            background: white;
+        }
+
+        .tag {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: default;
+        }
+
+        .tag .remove {
+            cursor: pointer;
+            font-weight: bold;
+            opacity: 0.8;
+        }
+
+        .tag .remove:hover {
+            opacity: 1;
+        }
+
+        .tag-input {
+            border: none;
+            outline: none;
+            flex: 1;
+            min-width: 100px;
+            font-size: 0.9rem;
+            background: transparent;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .suggestions {
+            position: absolute;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+            max-height: 200px;
+            overflow-y: auto;
+            z-index: 100;
+            margin-top: 5px;
+            width: 100%;
+            display: none;
+        }
+
+        .suggestion-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.2s;
+        }
+
+        .suggestion-item:hover {
+            background: #e8f4f8;
+        }
+
+        .suggestion-item:last-child {
+            border-bottom: none;
+        }
+
+        .btn-select {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: transform 0.2s;
+        }
+
+        .btn-select:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        .btn-save {
+            padding: 8px 15px;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            white-space: nowrap;
+            transition: transform 0.2s;
+        }
+
+        .btn-save:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(243, 156, 18, 0.3);
+        }
+
+        .single-select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-family: 'Montserrat', sans-serif;
+            background: #fafafa;
+            cursor: pointer;
+            transition: border-color 0.2s;
+        }
+
+        .single-select:focus {
+            outline: none;
+            border-color: #3498db;
+            background: white;
+        }
+
+        /* RIGHT COLUMN - Content Input */
+        .right-column {
+            flex: 1;
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 30px;
+        }
+
+        .content-section {
+            margin-bottom: 30px;
+        }
+
+        .content-label {
+            font-weight: 700;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 1rem;
+        }
+
+        .content-textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Courier New', monospace;
+            resize: vertical;
+            transition: border-color 0.2s;
+        }
+
+        .content-textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .preview-box {
+            margin-top: 15px;
+            padding: 20px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            border: 1px solid #ddd;
+            min-height: 100px;
+        }
+
+        .btn-submit {
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-submit:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(231, 76, 60, 0.3);
+        }
+
+        /* MODAL */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            padding: 20px 25px;
+            border-bottom: 2px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .modal-title {
+            font-weight: 800;
+            color: #2c3e50;
+            font-size: 1.2rem;
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #999;
+            transition: color 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #e74c3c;
+        }
+
+        .modal-search {
+            padding: 15px 25px;
+            border-bottom: 1px solid #eee;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+
+        .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px 25px;
+        }
+
+        .selection-item {
+            padding: 15px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s;
+        }
+
+        .selection-item:hover {
+            background: #f0f8ff;
+            border-color: #3498db;
+        }
+
+        .selection-item.selected {
+            background: #e8f4f8;
+            border-color: #3498db;
+        }
+
+        .selection-checkbox {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+            accent-color: #3498db;
+        }
+
+        .selection-label {
+            flex: 1;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .modal-footer {
+            padding: 20px 25px;
+            border-top: 2px solid #eee;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
+
+        .btn-modal {
+            padding: 10px 25px;
+            border: none;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+        }
+
+        .btn-modal:hover {
+            transform: translateY(-2px);
+        }
+
+        .btn-done {
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+        }
+
+        .btn-cancel {
+            background: #ecf0f1;
+            color: #2c3e50;
+        }
+
+        .input-row-wrapper {
+            position: relative;
+        }
+
+        /* Language Toggle Buttons */
+        .btn-lang-toggle {
+            padding: 8px 20px;
+            border: 2px solid #3498db;
+            background: white;
+            color: #3498db;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-lang-toggle:hover {
+            background: #e8f4f8;
+        }
+
+        .btn-lang-toggle.active {
+            background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+            color: white;
+        }
+
+        /* Editor Container */
+        .editor-container {
+            margin-bottom: 25px;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .editor-label {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 1rem;
+        }
+
+        .editor-lang-toggle {
+            display: flex;
+            gap: 5px;
+        }
+
+        .editor-lang-toggle button {
+            padding: 5px 12px;
+            border: 1px solid #ddd;
+            background: white;
+            color: #666;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+
+        .editor-lang-toggle button:hover {
+            background: #f0f0f0;
+        }
+
+        .editor-lang-toggle button.active {
+            background: #3498db;
+            color: white;
+            border-color: #3498db;
+        }
+
+        .editor-wrapper {
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .editor-wrapper textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 15px;
+            border: none;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+            resize: vertical;
+        }
+
+        .editor-wrapper .ck-editor {
+            border: none;
+        }
+
+        .preview-box {
+            margin-top: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e0e0e0;
+        }
+
+        /* Answer Options */
+        .answer-option {
+            margin-bottom: 15px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 2px solid #e0e0e0;
+        }
+
+        .answer-option-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .answer-option-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+
+        .btn-remove-answer {
+            padding: 5px 12px;
+            background: #e74c3c;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.85rem;
+        }
+
+        .btn-remove-answer:hover {
+            background: #c0392b;
+        }
+
+        .btn-add-answer {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #27ae60 0%, #229954 100%);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-bottom: 20px;
+        }
+
+        .btn-add-answer:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(39, 174, 96, 0.3);
+        }
+
+        /* Correct Answer Selector */
+        .correct-answer-selector {
+            margin-top: 15px;
+            padding: 15px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            border: 2px solid #4caf50;
+        }
+
+        .correct-answer-selector select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #4caf50;
+            border-radius: 6px;
+            font-weight: 600;
+            background: white;
+        }
+
+        /* True/False Checkboxes */
+        .tf-checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+
+        .tf-checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tf-checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        /* Drag & Drop Drop Zones */
+        .drop-zone {
+            display: inline-block;
+            padding: 3px 8px;
+            background: #fff3cd;
+            border: 2px dashed #ffc107;
+            border-radius: 4px;
+            cursor: pointer;
+            position: relative;
+            margin: 0 2px;
+        }
+
+        .drop-zone:hover {
+            background: #ffe69c;
+            border-color: #ff9800;
+        }
+
+        .drop-zone.selected {
+            background: #c8e6c9;
+            border-color: #4caf50;
+        }
+
+        .drop-zone-number {
+            font-weight: 700;
+            color: #ff9800;
+        }
+
+        .drop-zone-menu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            min-width: 200px;
+            max-height: 300px;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .drop-zone-menu-item {
+            padding: 10px 15px;
+            cursor: pointer;
+            border-bottom: 1px solid #eee;
+        }
+
+        .drop-zone-menu-item:hover {
+            background: #f0f0f0;
+        }
+
+        .drop-zone-menu-item:last-child {
+            border-bottom: none;
+        }
+
+        /* Notes Section */
+        .notes-section {
+            margin-top: 30px;
+            padding: 20px;
+            background: #fff3cd;
+            border-radius: 8px;
+            border: 2px solid #ffc107;
+        }
+
+        .notes-section .content-label {
+            color: #856404;
+        }
+    </style>
+</head>
+<body>
+    <div class="top-bar">
+        <button class="btn-back" onclick="window.location.href='index.html'">
+            <i class="fas fa-arrow-left"></i> Quay lại
+        </button>
+        <h1 class="page-title">Quản Lý Câu Hỏi</h1>
+        <div style="display: flex; gap: 10px;">
+            <button id="btnAddNew" onclick="showAddForm()" class="btn-submit" style="padding: 10px 20px; font-size: 0.9rem; background: #27ae60;">
+                <i class="fas fa-plus"></i> Thêm Mới
+            </button>
+        </div>
+    </div>
+
+    <!-- Giao diện Danh sách với Bộ lọc (Mặc định) -->
+    <div class="container" id="questionListContainer">
+        <!-- LEFT COLUMN: Bộ lọc -->
+        <div class="left-column filter-column">
+            <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                <i class="fas fa-filter"></i> Bộ Lọc
+            </h2>
+            
+            <!-- Dòng 1: Loại Chương trình -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Loại Chương trình
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="filterProgramContainer">
+                            <input type="text" class="tag-input" id="filterProgramInput" placeholder="Chọn chương trình..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="filterProgramSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openFilterModal('program')">Chọn</button>
+                </div>
+            </div>
+
+            <!-- Dòng 2: Lớp/Kỳ thi/Chứng chỉ -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Lớp/Kỳ thi/Chứng chỉ
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="filterGradeContainer">
+                            <input type="text" class="tag-input" id="filterGradeInput" placeholder="Chọn lớp/kỳ thi..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="filterGradeSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openFilterModal('grade')">Chọn</button>
+                </div>
+            </div>
+
+            <!-- Dòng 3: Chủ đề -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Chủ đề
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="filterSubjectContainer">
+                            <input type="text" class="tag-input" id="filterSubjectInput" placeholder="Chọn chủ đề..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="filterSubjectSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openFilterModal('subject')">Chọn</button>
+                </div>
+            </div>
+
+            <!-- Dòng 4: Chuyên đề -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Chuyên đề
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="filterTopicContainer">
+                            <input type="text" class="tag-input" id="filterTopicInput" placeholder="Chọn chuyên đề..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="filterTopicSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openFilterModal('topic')">Chọn</button>
+                </div>
+            </div>
+
+            <!-- Dòng 5: Dạng toán/Skill -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Dạng toán/Skill
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="filterSkillContainer">
+                            <input type="text" class="tag-input" id="filterSkillInput" placeholder="Chọn dạng toán..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="filterSkillSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openFilterModal('skill')">Chọn</button>
+                </div>
+            </div>
+
+            <!-- Dòng 6: Dạng câu hỏi -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Dạng câu hỏi
+                </div>
+                <select class="single-select" id="filterQuestionType">
+                    <option value="">-- Tất cả --</option>
+                    <option value="mc">Trắc nghiệm (TN)</option>
+                    <option value="tf">Đúng/Sai (ĐS)</option>
+                    <option value="short">Trả lời ngắn (TL)</option>
+                    <option value="drag">Kéo/Thả (KT)</option>
+                </select>
+            </div>
+
+            <!-- Dòng 7: Độ khó -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Độ khó
+                </div>
+                <select class="single-select" id="filterDifficulty">
+                    <option value="">-- Tất cả --</option>
+                    <option value="0">0 - Chưa rõ độ khó</option>
+                    <option value="1">1 - Nhận biết (NB)</option>
+                    <option value="2">2 - Thông hiểu (TH)</option>
+                    <option value="3">3 - Vận dụng (VD)</option>
+                    <option value="4">4 - Vận dụng cao (VDC)</option>
+                </select>
+            </div>
+
+            <!-- Dòng 8: Năm -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Năm
+                </div>
+                <div style="display: flex; align-items: center; gap: 10px;">
+                    <input type="range" id="filterYear" min="2020" max="2025" value="2025" style="flex: 1;" oninput="document.getElementById('filterYearValue').textContent = this.value">
+                    <span id="filterYearValue" style="font-weight: bold; color: #3498db; min-width: 50px; text-align: center;">2025</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 0.8rem; color: #999; margin-top: 5px;">
+                    <span>2020</span>
+                    <span>2025</span>
+                </div>
+            </div>
+
+            <!-- Nút hành động -->
+            <div class="classification-section" style="margin-top: 30px;">
+                <button class="btn-submit" onclick="searchQuestions()" style="background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); margin-bottom: 10px;">
+                    <i class="fas fa-search"></i> Tìm Kiếm
+                </button>
+                <button class="btn-submit" onclick="clearFilters()" style="background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);">
+                    <i class="fas fa-times"></i> Xóa Bộ Lọc
+                </button>
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Danh sách câu hỏi -->
+        <div class="right-column" style="flex: 1;">
+            <div style="background: white; border-radius: 12px; padding: 30px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); min-height: 500px;">
+                <h2 style="margin-top: 0; color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 20px;">
+                    <i class="fas fa-list"></i> Danh Sách Câu Hỏi
+                </h2>
+                <div id="questionListContent">
+                    <div style="text-align: center; padding: 60px 20px; color: #7f8c8d;">
+                        <i class="fas fa-filter" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i>
+                        <p style="font-size: 1.1rem; font-weight: 600;">Vui lòng chọn bộ lọc và nhấn nút tìm kiếm</p>
+                    </div>
+                </div>
+                <div id="questionListPagination" style="margin-top: 20px; text-align: center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Giao diện Thêm mới câu hỏi (Ẩn mặc định) -->
+    <div class="container" id="addQuestionContainer" style="display: none;">
+        <!-- LEFT COLUMN: Content Input (Như bản OG) -->
+        <div class="left-column" style="flex: 1;">
+            <!-- Placeholder when no question type selected -->
+            <div id="noQuestionTypeMessage" style="display: flex; align-items: center; justify-content: center; height: 100%; min-height: 400px; color: #999; font-size: 1.2rem; font-weight: 600;">
+                Vui lòng phân loại và chọn dạng câu hỏi trước!
+            </div>
+
+            <!-- Global Language Toggle -->
+            <div id="globalLanguageToggle" style="display: none; margin-bottom: 20px; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 2px solid #ddd;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <strong style="color: #2c3e50;">Chuyển đổi đồng loạt ngôn ngữ nhập:</strong>
+                    <button class="btn-lang-toggle active" data-lang="visual" onclick="switchAllEditors('visual')">Visual</button>
+                    <button class="btn-lang-toggle" data-lang="html" onclick="switchAllEditors('html')">HTML</button>
+                </div>
+            </div>
+
+            <!-- Dynamic Content Area (will be populated based on question type) -->
+            <div id="dynamicContentArea" style="display: none;">
+                <!-- Content will be dynamically generated here -->
+            </div>
+        </div>
+
+        <!-- RIGHT COLUMN: Classification (Các dòng tùy chọn) -->
+        <div class="right-column" id="rightColumn" style="flex: 0 0 400px;">
+            <!-- Dòng 1: Loại Chương trình -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Loại Chương trình <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="programContainer">
+                            <input type="text" class="tag-input" id="programInput" placeholder="Nhập hoặc chọn chương trình..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="programSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openSelectionModal('program')">Chọn</button>
+                    <button class="btn-save" onclick="saveOptions('program')" title="Lưu các lựa chọn">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dòng 2: Lớp/Kỳ thi/Chứng chỉ -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Lớp/Kỳ thi/Chứng chỉ <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="gradeContainer">
+                            <input type="text" class="tag-input" id="gradeInput" placeholder="Nhập hoặc chọn lớp/kỳ thi..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="gradeSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openSelectionModal('grade')">Chọn</button>
+                    <button class="btn-save" onclick="saveOptions('grade')" title="Lưu các lựa chọn">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dòng 3: Chủ đề (MỚI) -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Chủ đề <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="subjectContainer">
+                            <input type="text" class="tag-input" id="subjectInput" placeholder="Nhập hoặc chọn chủ đề..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="subjectSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openSelectionModal('subject')">Chọn</button>
+                    <button class="btn-save" onclick="saveOptions('subject')" title="Lưu các lựa chọn">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dòng 4: Chuyên đề -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Chuyên đề <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="topicContainer">
+                            <input type="text" class="tag-input" id="topicInput" placeholder="Nhập hoặc chọn chuyên đề..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="topicSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openSelectionModal('topic')">Chọn</button>
+                    <button class="btn-save" onclick="saveOptions('topic')" title="Lưu các lựa chọn">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dòng 5: Dạng toán/Skill -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Dạng toán/Skill <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <div class="input-row-wrapper" style="flex: 1;">
+                        <div class="tag-input-container" id="skillContainer">
+                            <input type="text" class="tag-input" id="skillInput" placeholder="Nhập hoặc chọn dạng toán..." autocomplete="off">
+                        </div>
+                        <div class="suggestions" id="skillSuggestions"></div>
+                    </div>
+                    <button class="btn-select" onclick="openSelectionModal('skill')">Chọn</button>
+                    <button class="btn-save" onclick="saveOptions('skill')" title="Lưu các lựa chọn">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Dạng câu hỏi -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Dạng câu hỏi <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <select class="single-select" id="questionType" style="flex: 1;">
+                        <option value="">-- Chọn dạng câu hỏi --</option>
+                        <option value="tn">Trắc nghiệm (TN)</option>
+                        <option value="ds">Đúng/Sai (ĐS)</option>
+                        <option value="tl">Trả lời ngắn (TL)</option>
+                        <option value="kt">Kéo/Thả (KT)</option>
+                    </select>
+                    <button class="btn-save" onclick="saveOptions('questionType')" title="Lưu mặc định">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Độ khó -->
+            <div class="classification-section">
+                <div class="section-label">
+                    Độ khó <span class="required">*</span>
+                </div>
+                <div class="input-row">
+                    <select class="single-select" id="difficulty" style="flex: 1;">
+                        <option value="">-- Chọn độ khó --</option>
+                        <option value="0">0 - Chưa rõ độ khó</option>
+                        <option value="1">1 - Nhận biết (NB)</option>
+                        <option value="2">2 - Thông hiểu (TH)</option>
+                        <option value="3">3 - Vận dụng (VD)</option>
+                        <option value="4">4 - Vận dụng cao (VDC)</option>
+                    </select>
+                    <button class="btn-save" onclick="saveOptions('difficulty')" title="Lưu mặc định">
+                        <i class="fas fa-save"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="selectionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Chọn</div>
+                <button class="modal-close" onclick="closeSelectionModal()">&times;</button>
+            </div>
+            <div class="modal-search">
+                <input type="text" class="search-input" id="modalSearch" placeholder="Tìm kiếm..." autocomplete="off">
+            </div>
+            <div class="modal-body" id="modalBody">
+                <!-- Selection items will be inserted here -->
+            </div>
+            <div class="modal-footer">
+                <button class="btn-modal btn-cancel" onclick="closeSelectionModal()">Hủy</button>
+                <button class="btn-modal btn-done" onclick="confirmSelection()">Xong</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Data structures - Lazy loaded
+        const PROGRAMS = ['Chương trình phổ thông', 'Thi chuyển cấp', 'Kỳ thi riêng', 'Toán Quốc Tế'];
+        
+        const GRADE_MAP = {
+            'Chương trình phổ thông': ['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'],
+            'Thi chuyển cấp': ['Thi vào lớp 6 CLC', 'Thi vào lớp 10', 'Tốt nghiệp THPT & ĐH'],
+            'Kỳ thi riêng': [], // Có thể thêm sau
+            'Toán Quốc Tế': ['SAT']
+        };
+
+        // Chủ đề mapping với tên lớp (bỏ "Phần 1", "Phần 2")
+        const SUBJECT_MAP = {
+            'Lớp 10': ['Đại số & Thống kê 10', 'Hình học & Vectơ 10'],
+            'Lớp 11': ['Đại số & Giải tích 11', 'Hình học 11'],
+            'Lớp 12': ['Giải tích & Thống kê 12', 'Hình học & Vectơ 12'],
+            'SAT': ['ALGEBRA', 'PROBLEM-SOLVING & DATA', 'ADVANCED MATH', 'GEOMETRY & TRIG']
+        };
+
+        // Mapping từ chủ đề (có tên lớp) sang key trong DATA_SOURCE
+        const SUBJECT_TO_DATA_KEY = {
+            'Đại số & Thống kê 10': { 'Lớp 10': 'DaiSo10' },
+            'Hình học & Vectơ 10': { 'Lớp 10': 'HinhHoc10' },
+            'Đại số & Giải tích 11': { 'Lớp 11': 'DaiSo11' },
+            'Hình học 11': { 'Lớp 11': 'HinhHoc11' },
+            'Giải tích & Thống kê 12': { 'Lớp 12': 'DaiSo12' },
+            'Hình học & Vectơ 12': { 'Lớp 12': 'HinhHoc12' },
+            'ALGEBRA': { 'SAT': 'SAT_Data', filter: (t) => t.id.startsWith('SAT_A') },
+            'PROBLEM-SOLVING & DATA': { 'SAT': 'SAT_Data', filter: (t) => t.id.startsWith('SAT_P') },
+            'ADVANCED MATH': { 'SAT': 'SAT_Data', filter: (t) => t.id.startsWith('SAT_M') },
+            'GEOMETRY & TRIG': { 'SAT': 'SAT_Data', filter: (t) => t.id.startsWith('SAT_G') }
+        };
+
+        let currentModalType = null;
+        let currentModalContext = 'filter'; // 'add' hoặc 'filter'
+        let currentSelections = {
+            program: [],
+            grade: [],
+            subject: [],
+            topic: [],
+            skill: []
+        };
+        // Filter selections (cho bộ lọc tìm kiếm)
+        let filterSelections = {
+            program: [],
+            grade: [],
+            subject: [],
+            topic: [],
+            skill: []
+        };
+        let savedOptions = {
+            program: [],
+            grade: [],
+            subject: [],
+            topic: [],
+            skill: []
+        };
+        let modalSelectedItems = new Set();
+        let dataSourceLoaded = false;
+
+        // Editor instances and data
+        let editorInstances = {};
+        let editorModes = {}; // 'visual', 'latex', 'html'
+        let questionData = {
+            type: '',
+            question: '',
+            answers: [],
+            correctAnswer: '',
+            solution: '',
+            notes: '',
+            // For True/False
+            statements: [],
+            // For Drag & Drop
+            dropZones: [],
+            dropZoneAnswers: {}
+        };
+
+        // Initialize - Optimized loading
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup question type change listener
+            const questionTypeSelect = document.getElementById('questionType');
+            if (questionTypeSelect) {
+                questionTypeSelect.addEventListener('change', function() {
+                    const selectedType = this.value;
+                    if (selectedType) {
+                        questionData.type = selectedType;
+                        renderQuestionLayout(selectedType);
+                    } else {
+                        showNoQuestionTypeMessage();
+                    }
+                });
+            }
+
+            // Check if data source is already loaded
+            if (typeof DATA_SOURCE !== 'undefined') {
+                dataSourceLoaded = true;
+                setupInputHandlers();
+                loadSavedOptions();
+            } else {
+                // Wait for deferred script to load
+                const checkDataSource = setInterval(function() {
+                    if (typeof DATA_SOURCE !== 'undefined') {
+                        clearInterval(checkDataSource);
+                        dataSourceLoaded = true;
+                        setupInputHandlers();
+                        loadSavedOptions();
+                    }
+                }, 50);
+                
+                // Fallback: load manually if not loaded after 1 second
+                setTimeout(function() {
+                    if (typeof DATA_SOURCE === 'undefined') {
+                        clearInterval(checkDataSource);
+                        const script = document.createElement('script');
+                        script.src = 'data_master.js';
+                        script.onload = function() {
+                            dataSourceLoaded = true;
+                            setupInputHandlers();
+                            loadSavedOptions();
+                        };
+                        document.head.appendChild(script);
+                    }
+                }, 1000);
+            }
+        });
+
+        function setupInputHandlers() {
+            // Handlers cho form thêm mới
+            ['program', 'grade', 'subject', 'topic', 'skill'].forEach(type => {
+                const input = document.getElementById(type + 'Input');
+                if (input) {
+                    input.addEventListener('input', function(e) {
+                        showSuggestions(type, e.target.value);
+                    });
+                }
+            });
+            
+            // Handlers cho bộ lọc
+            ['program', 'grade', 'subject', 'topic', 'skill'].forEach(type => {
+                const filterInput = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input');
+                if (filterInput) {
+                    filterInput.addEventListener('input', function(e) {
+                        showFilterSuggestions(type, e.target.value);
+                    });
+                }
+            });
+
+            // Handle tag removal
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('remove')) {
+                    const tag = e.target.closest('.tag');
+                    const container = tag.closest('.tag-input-container');
+                    const type = container.id.replace('Container', '');
+                    const value = tag.textContent.trim().replace('×', '').trim();
+                    removeTag(type, value);
+                }
+            });
+        }
+
+        function showSuggestions(type, query) {
+            const suggestionsDiv = document.getElementById(type + 'Suggestions');
+            if (!suggestionsDiv) return;
+            
+            if (!query || query.trim() === '') {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            const filtered = getFilteredOptions(type, query);
+            if (filtered.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            suggestionsDiv.innerHTML = filtered.map(item => 
+                `<div class="suggestion-item" onclick="addTagFromSuggestion('${type}', '${item.id}', '${item.name.replace(/'/g, "\\'")}')">${item.name}</div>`
+            ).join('');
+            suggestionsDiv.style.display = 'block';
+        }
+
+        function getFilteredOptions(type, query) {
+            const lowerQuery = query.toLowerCase();
+            let options = [];
+
+            switch(type) {
+                case 'program':
+                    options = PROGRAMS.map(p => ({ id: p, name: p }));
+                    break;
+                case 'grade':
+                    options = getFilteredGradeOptions();
+                    break;
+                case 'subject':
+                    options = getFilteredSubjectOptions();
+                    break;
+                case 'topic':
+                    options = getFilteredTopics();
+                    break;
+                case 'skill':
+                    options = getFilteredSkills();
+                    break;
+            }
+
+            return options.filter(opt => 
+                opt.name.toLowerCase().includes(lowerQuery) &&
+                !currentSelections[type].includes(opt.id)
+            );
+        }
+
+        function getFilteredGradeOptions() {
+            const selectedPrograms = currentSelections.program;
+            if (selectedPrograms.length === 0) return [];
+            
+            const allGrades = new Set();
+            selectedPrograms.forEach(prog => {
+                if (GRADE_MAP[prog]) {
+                    GRADE_MAP[prog].forEach(g => allGrades.add(g));
+                }
+            });
+            return Array.from(allGrades).map(g => ({ id: g, name: g }));
+        }
+
+        function getFilteredSubjectOptions() {
+            const selectedGrades = currentSelections.grade;
+            if (selectedGrades.length === 0) return [];
+            
+            const allSubjects = new Set();
+            selectedGrades.forEach(grade => {
+                if (SUBJECT_MAP[grade]) {
+                    SUBJECT_MAP[grade].forEach(s => allSubjects.add(s));
+                }
+            });
+            return Array.from(allSubjects).map(s => ({ id: s, name: s }));
+        }
+
+        // Format functions
+        function formatTopicName(ten, grade) {
+            // Extract number from "Chuyên đề X. ..." or "CĐ X. ..."
+            const match = ten.match(/(?:Chuyên đề|CĐ)\s*(\d+)\.\s*(.+)/);
+            if (match) {
+                const topicNum = match[1];
+                const topicName = match[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            // If no match, try to extract number from beginning
+            const match2 = ten.match(/(\d+)\.\s*(.+)/);
+            if (match2) {
+                const topicNum = match2[1];
+                const topicName = match2[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            return ten; // Fallback
+        }
+
+        function formatSkillName(txt, grade, topicIndex, skillIndex) {
+            return `${grade}.${topicIndex}.${skillIndex}. ${txt}`;
+        }
+
+        function getFilteredTopics() {
+            if (!dataSourceLoaded || typeof DATA_SOURCE === 'undefined') return [];
+            
+            const selectedGrades = currentSelections.grade;
+            const selectedSubjects = currentSelections.subject;
+            
+            if (selectedGrades.length === 0 || selectedSubjects.length === 0) {
+                return [];
+            }
+
+            let topics = [];
+            
+            selectedGrades.forEach(grade => {
+                // Extract grade number (e.g., "Lớp 10" -> "10")
+                const gradeNum = grade.match(/\d+/)?.[0] || grade.replace(/[^0-9]/g, '') || '';
+                
+                selectedSubjects.forEach(subject => {
+                    const mapping = SUBJECT_TO_DATA_KEY[subject];
+                    if (mapping && mapping[grade]) {
+                        const dataKey = mapping[grade];
+                        const filter = mapping.filter;
+                        
+                        if (DATA_SOURCE[dataKey]) {
+                            DATA_SOURCE[dataKey].forEach((topic, topicIdx) => {
+                                if (!filter || filter(topic)) {
+                                    if (!topics.find(t => t.id === topic.id)) {
+                                        const formattedName = formatTopicName(topic.ten, gradeNum || grade);
+                                        topics.push({ id: topic.id, name: formattedName, originalName: topic.ten, topicIndex: topicIdx + 1 });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            return topics;
+        }
+
+        function getFilteredSkills() {
+            if (!dataSourceLoaded || typeof DATA_SOURCE === 'undefined') return [];
+            
+            const selectedTopics = currentSelections.topic;
+            if (selectedTopics.length === 0) return [];
+
+            let skills = [];
+            const selectedGrades = currentSelections.grade;
+            const selectedSubjects = currentSelections.subject;
+
+            selectedGrades.forEach(grade => {
+                // Extract grade number
+                const gradeNum = grade.match(/\d+/)?.[0] || grade.replace(/[^0-9]/g, '') || '';
+                
+                selectedSubjects.forEach(subject => {
+                    const mapping = SUBJECT_TO_DATA_KEY[subject];
+                    if (mapping && mapping[grade]) {
+                        const dataKey = mapping[grade];
+                        const filter = mapping.filter;
+                        
+                        if (DATA_SOURCE[dataKey]) {
+                            DATA_SOURCE[dataKey].forEach((topic, topicIdx) => {
+                                if (selectedTopics.includes(topic.id) && topic.dang) {
+                                    if (!filter || filter(topic)) {
+                                        topic.dang.forEach((skill, skillIdx) => {
+                                            if (!skills.find(s => s.id === skill.id)) {
+                                                const formattedName = formatSkillName(skill.txt, gradeNum || grade, topicIdx + 1, skillIdx + 1);
+                                                skills.push({ id: skill.id, name: formattedName });
+                                            }
+                                        });
+                                    }
+                                }
+                            });
+                        }
+                    }
+                });
+            });
+
+            return skills;
+        }
+
+        function addTagFromSuggestion(type, id, name) {
+            if (!currentSelections[type].includes(id)) {
+                currentSelections[type].push(id);
+                renderTags(type);
+                const input = document.getElementById(type + 'Input');
+                if (input) {
+                    input.value = '';
+                }
+                const suggestions = document.getElementById(type + 'Suggestions');
+                if (suggestions) {
+                    suggestions.style.display = 'none';
+                }
+                // Clear dependent fields
+                clearDependentFields(type);
+            }
+        }
+
+        function clearDependentFields(type) {
+            const dependencies = {
+                'program': ['grade', 'subject', 'topic', 'skill'],
+                'grade': ['subject', 'topic', 'skill'],
+                'subject': ['topic', 'skill'],
+                'topic': ['skill']
+            };
+            
+            if (dependencies[type]) {
+                dependencies[type].forEach(dep => {
+                    currentSelections[dep] = [];
+                    renderTags(dep);
+                });
+            }
+        }
+
+        function addTag(type, id, name) {
+            if (!currentSelections[type].includes(id)) {
+                currentSelections[type].push(id);
+                renderTags(type);
+                clearDependentFields(type);
+            }
+        }
+
+        function removeTag(type, value) {
+            const index = currentSelections[type].indexOf(value);
+            if (index > -1) {
+                currentSelections[type].splice(index, 1);
+                renderTags(type);
+                clearDependentFields(type);
+            }
+        }
+
+        function renderTags(type) {
+            const container = document.getElementById(type + 'Container');
+            if (!container) return;
+            
+            const tags = currentSelections[type].map(id => {
+                const name = getNameById(type, id);
+                return `<span class="tag">${name} <span class="remove">×</span></span>`;
+            }).join('');
+            container.innerHTML = tags + `<input type="text" class="tag-input" id="${type}Input" placeholder="${getPlaceholder(type)}..." autocomplete="off">`;
+            
+            const newInput = document.getElementById(type + 'Input');
+            if (newInput) {
+                newInput.addEventListener('input', function(e) {
+                    showSuggestions(type, e.target.value);
+                });
+            }
+        }
+
+        function getNameById(type, id) {
+            switch(type) {
+                case 'program':
+                case 'grade':
+                case 'subject':
+                    return id;
+                case 'topic':
+                    return getTopicName(id);
+                case 'skill':
+                    return getSkillName(id);
+            }
+            return id;
+        }
+
+        function getTopicName(id) {
+            if (!dataSourceLoaded || typeof DATA_SOURCE === 'undefined') return id;
+            for (let key in DATA_SOURCE) {
+                const topics = DATA_SOURCE[key];
+                const topic = topics.find(t => t.id === id);
+                if (topic) return topic.ten;
+            }
+            return id;
+        }
+
+        function getSkillName(id) {
+            if (!dataSourceLoaded || typeof DATA_SOURCE === 'undefined') return id;
+            for (let key in DATA_SOURCE) {
+                const topics = DATA_SOURCE[key];
+                for (let topic of topics) {
+                    if (topic.dang) {
+                        const skill = topic.dang.find(s => s.id === id);
+                        if (skill) return skill.txt;
+                    }
+                }
+            }
+            return id;
+        }
+
+        function getPlaceholder(type) {
+            const placeholders = {
+                program: 'Nhập hoặc chọn chương trình',
+                grade: 'Nhập hoặc chọn lớp/kỳ thi',
+                subject: 'Nhập hoặc chọn chủ đề',
+                topic: 'Nhập hoặc chọn chuyên đề',
+                skill: 'Nhập hoặc chọn dạng toán'
+            };
+            return placeholders[type] || '';
+        }
+
+        // Modal functions
+        function openSelectionModal(type) {
+            // Kiểm tra đang ở form thêm mới hay bộ lọc
+            const isAddForm = document.getElementById('addQuestionContainer').style.display !== 'none';
+            currentModalContext = isAddForm ? 'add' : 'filter';
+            
+            currentModalType = type;
+            modalSelectedItems.clear();
+            
+            if (isAddForm) {
+                // Form thêm mới - dùng currentSelections
+                currentSelections[type].forEach(id => {
+                    modalSelectedItems.add(id);
+                });
+            } else {
+                // Bộ lọc - dùng filterSelections
+                filterSelections[type].forEach(id => {
+                    modalSelectedItems.add(id);
+                });
+            }
+
+            const title = {
+                program: 'Chọn Loại Chương trình',
+                grade: 'Chọn Lớp/Kỳ thi/Chứng chỉ',
+                subject: 'Chọn Chủ đề',
+                topic: 'Chọn Chuyên đề',
+                skill: 'Chọn Dạng toán/Skill'
+            };
+
+            document.getElementById('modalTitle').textContent = title[type] || 'Chọn';
+            renderModalContent(type);
+            document.getElementById('selectionModal').style.display = 'flex';
+
+            const searchInput = document.getElementById('modalSearch');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.oninput = function(e) {
+                    renderModalContent(type, e.target.value);
+                };
+            }
+        }
+
+        function renderModalContent(type, searchQuery = '') {
+            const modalBody = document.getElementById('modalBody');
+            if (!modalBody) return;
+            
+            // Sử dụng currentModalContext để biết đang ở form thêm mới hay bộ lọc
+            const selections = currentModalContext === 'add' ? currentSelections : filterSelections;
+            
+            let options = [];
+
+            switch(type) {
+                case 'program':
+                    options = PROGRAMS.map(p => ({ id: p, name: p }));
+                    break;
+                case 'grade':
+                    // Tạm thời dùng selections để filter
+                    const tempSelections = currentSelections;
+                    currentSelections = selections;
+                    options = getFilteredGradeOptions();
+                    currentSelections = tempSelections;
+                    break;
+                case 'subject':
+                    const tempSelections2 = currentSelections;
+                    currentSelections = selections;
+                    options = getFilteredSubjectOptions();
+                    currentSelections = tempSelections2;
+                    break;
+                case 'topic':
+                    const tempSelections3 = currentSelections;
+                    currentSelections = selections;
+                    options = getFilteredTopics();
+                    currentSelections = tempSelections3;
+                    break;
+                case 'skill':
+                    const tempSelections4 = currentSelections;
+                    currentSelections = selections;
+                    options = getFilteredSkills();
+                    currentSelections = tempSelections4;
+                    break;
+            }
+
+            if (searchQuery) {
+                const lowerQuery = searchQuery.toLowerCase();
+                options = options.filter(opt => opt.name.toLowerCase().includes(lowerQuery));
+            }
+
+            modalBody.innerHTML = options.map(opt => {
+                const isSelected = modalSelectedItems.has(opt.id);
+                const safeName = opt.name.replace(/'/g, "\\'").replace(/"/g, '&quot;');
+                return '<div class="selection-item ' + (isSelected ? 'selected' : '') + '" onclick="toggleModalSelection(\'' + opt.id + '\')"><input type="checkbox" class="selection-checkbox" ' + (isSelected ? 'checked' : '') + ' onclick="event.stopPropagation(); toggleModalSelection(\'' + opt.id + '\')"><div class="selection-label">' + safeName + '</div></div>';
+            }).join('');
+
+            if (options.length === 0) {
+                modalBody.innerHTML = '<div style="text-align: center; padding: 40px; color: #999;">Không có lựa chọn nào phù hợp</div>';
+            }
+        }
+
+        function toggleModalSelection(id) {
+            if (modalSelectedItems.has(id)) {
+                modalSelectedItems.delete(id);
+            } else {
+                modalSelectedItems.add(id);
+            }
+            const searchInput = document.getElementById('modalSearch');
+            renderModalContent(currentModalType, searchInput ? searchInput.value : '');
+        }
+
+        function confirmSelection() {
+            if (currentModalContext === 'add') {
+                // Đang ở form thêm mới
+                currentSelections[currentModalType] = Array.from(modalSelectedItems);
+                renderTags(currentModalType);
+                clearDependentFields(currentModalType);
+            } else {
+                // Đang ở bộ lọc
+                confirmFilterSelection();
+                return;
+            }
+            closeSelectionModal();
+        }
+
+        function closeSelectionModal() {
+            document.getElementById('selectionModal').style.display = 'none';
+            modalSelectedItems.clear();
+        }
+
+        // Save/Load options
+        function saveOptions(type) {
+            console.log('saveOptions called with type:', type);
+            
+            let value;
+            const typeNames = {
+                'program': 'Chương trình',
+                'grade': 'Lớp',
+                'subject': 'Môn học',
+                'topic': 'Chuyên đề',
+                'skill': 'Dạng bài',
+                'questionType': 'Dạng câu hỏi',
+                'difficulty': 'Độ khó'
+            };
+            
+            if (type === 'questionType' || type === 'difficulty') {
+                const el = document.getElementById(type);
+                console.log('Element found:', el, 'Value:', el ? el.value : 'N/A');
+                
+                if (!el) {
+                    alert('Không tìm thấy trường ' + (typeNames[type] || type));
+                    return;
+                }
+                if (!el.value || el.value === '') {
+                    alert('Vui lòng chọn ' + (typeNames[type] || type) + ' trước khi lưu!');
+                    return;
+                }
+                value = [el.value];
+            } else {
+                if (!currentSelections[type] || currentSelections[type].length === 0) {
+                    alert('Vui lòng chọn ít nhất một ' + (typeNames[type] || type) + ' trước khi lưu!');
+                    return;
+                }
+                value = [...currentSelections[type]];
+            }
+            
+            try {
+                localStorage.setItem('savedOptions_' + type, JSON.stringify(value));
+                console.log('Saved to localStorage:', 'savedOptions_' + type, value);
+                alert('Đã lưu ' + (typeNames[type] || type) + ' mặc định: ' + value.join(', '));
+            } catch (e) {
+                console.error('Error saving:', e);
+                alert('Lỗi khi lưu: ' + e.message);
+            }
+        }
+
+        // Cache để tránh render lại không cần thiết
+        let tagsRendered = false;
+        let savedOptionsLoaded = false;
+        
+        function loadSavedOptions() {
+            // Chỉ load một lần khi trang load, không load lại mỗi lần showAddForm
+            if (savedOptionsLoaded) {
+                return; // Đã load rồi
+            }
+            
+            // Danh sách các mục cần load - load questionType và difficulty sau cùng
+            const types = ['program', 'grade', 'subject', 'topic', 'skill'];
+            
+            types.forEach(type => {
+                const saved = localStorage.getItem('savedOptions_' + type);
+                if (saved) {
+                    try {
+                        const data = JSON.parse(saved);
+                        savedOptions[type] = data;
+                        currentSelections[type] = [...data];
+                        renderTags(type);
+                    } catch (e) { 
+                        console.error('Error loading saved options for', type, e); 
+                    }
+                }
+            });
+            
+            // Load questionType và difficulty với delay để đảm bảo DOM đã sẵn sàng
+            setTimeout(() => {
+                // Load questionType
+                const savedQuestionType = localStorage.getItem('savedOptions_questionType');
+                if (savedQuestionType) {
+                    try {
+                        const data = JSON.parse(savedQuestionType);
+                        const el = document.getElementById('questionType');
+                        if (el && data.length > 0 && data[0]) {
+                            el.value = data[0];
+                            el.dispatchEvent(new Event('change'));
+                        }
+                    } catch (e) { 
+                        console.error('Error loading questionType', e); 
+                    }
+                }
+                
+                // Load difficulty
+                const savedDifficulty = localStorage.getItem('savedOptions_difficulty');
+                if (savedDifficulty) {
+                    try {
+                        const data = JSON.parse(savedDifficulty);
+                        const el = document.getElementById('difficulty');
+                        if (el && data.length > 0 && data[0]) {
+                            el.value = data[0];
+                        }
+                    } catch (e) { 
+                        console.error('Error loading difficulty', e); 
+                    }
+                }
+            }, 200);
+            
+            savedOptionsLoaded = true;
+        }
+
+        // Preview handlers
+        function setupPreviewHandlers() {
+            ['questionContent', 'answerContent', 'solutionContent'].forEach(id => {
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('input', function() {
+                        updatePreview(id.replace('Content', 'PreviewContent'), this.value);
+                    });
+                }
+            });
+        }
+
+        function updatePreview(elementId, content) {
+            const previewDiv = document.getElementById(elementId);
+            if (!previewDiv) return;
+            
+            if (content.trim() === '') {
+                previewDiv.innerHTML = '<em style="color: #999;">Chưa có nội dung</em>';
+                return;
+            }
+
+            // Add tex2jax_process class for MathJax to process
+            previewDiv.className = 'tex2jax_process';
+            // Set content directly (allows HTML and LaTeX)
+            previewDiv.innerHTML = content;
+            
+            // Render MathJax
+            triggerMathJaxRender(previewDiv);
+        }
+
+        function triggerMathJaxRender(element) {
+            if (!element) return;
+            
+            // Đảm bảo có class để MathJax nhận diện (nếu config yêu cầu)
+            element.classList.add('tex2jax_process');
+            
+            if (window.MathJax && window.MathJax.typesetPromise) {
+                // Xóa các element MathJax cũ (nếu có) để tránh hiển thị trùng lặp
+                // MathJax 3 thông minh hơn nhưng đôi khi cần clear thủ công nếu DOM update nhanh
+                element.querySelectorAll('mjx-container').forEach(el => el.remove());
+
+                // Yêu cầu MathJax vẽ lại
+                MathJax.typesetPromise([element]).catch((err) => {
+                    console.error('MathJax error:', err);
+                    // Fallback: Clear nội dung và vẽ lại nếu lỗi
+                    element.innerHTML = element.innerHTML;
+                    MathJax.typesetPromise([element]);
+                });
+            }
+        }
+
+        // Generate unique ID
+        function generateQuestionId() {
+            const timestamp = Date.now();
+            const random = Math.floor(Math.random() * 10000);
+            return `Q_${timestamp}_${random}`;
+        }
+
+        // Layout rendering functions
+        function showNoQuestionTypeMessage() {
+            document.getElementById('noQuestionTypeMessage').style.display = 'flex';
+            document.getElementById('globalLanguageToggle').style.display = 'none';
+            document.getElementById('dynamicContentArea').style.display = 'none';
+        }
+
+        function renderQuestionLayout(type) {
+            document.getElementById('noQuestionTypeMessage').style.display = 'none';
+            document.getElementById('globalLanguageToggle').style.display = 'block';
+            document.getElementById('dynamicContentArea').style.display = 'block';
+
+            const area = document.getElementById('dynamicContentArea');
+            
+            // Clear existing editors
+            Object.keys(editorInstances).forEach(key => {
+                if (editorInstances[key] && editorInstances[key].destroy) {
+                    editorInstances[key].destroy();
+                }
+            });
+            editorInstances = {};
+            editorModes = {};
+
+            switch(type) {
+                case 'tn':
+                    area.innerHTML = renderTNLayout();
+                    break;
+                case 'ds':
+                    area.innerHTML = renderDSLayout();
+                    break;
+                case 'tl':
+                    area.innerHTML = renderTLLayout();
+                    break;
+                case 'kt':
+                    area.innerHTML = renderKTLayout();
+                    break;
+            }
+
+            // Initialize editors ngay lập tức - không delay
+            // Sử dụng requestAnimationFrame để đảm bảo DOM ready nhưng không block
+            requestAnimationFrame(() => {
+                initializeEditors(type);
+            });
+        }
+
+        function renderTNLayout() {
+            return `
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Nội dung đề <span class="required">*</span></div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="questionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="questionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-label" style="margin-bottom: 15px;">Các đáp án <span class="required">*</span></div>
+                    <div id="answerOptionsContainer">
+                        ${[1,2,3,4].map(i => `
+                            <div class="answer-option" data-answer-index="${i}">
+                                <div class="answer-option-header">
+                                    <div class="answer-option-label">Đáp án ${String.fromCharCode(64 + i)}</div>
+                                    ${i > 1 ? `<button class="btn-remove-answer" onclick="removeAnswer(${i})">Xóa</button>` : ''}
+                                </div>
+                                <div class="editor-header" style="margin-bottom: 10px;">
+                                    <div style="flex: 1;"></div>
+                                    <div class="editor-lang-toggle">
+                                        <button class="active" onclick="switchEditorMode('answer${i}', 'visual')">LaTeX</button>
+                                        <button onclick="switchEditorMode('answer${i}', 'html')">HTML</button>
+                                    </div>
+                                </div>
+                                <div class="editor-wrapper">
+                                    <div id="answerEditor${i}"></div>
+                                </div>
+                                <div class="preview-box">
+                                    <strong>Xem trước:</strong>
+                                    <div id="answerPreviewContent${i}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-add-answer" onclick="addAnswer()">+ Thêm đáp án</button>
+                    <div class="correct-answer-selector">
+                        <strong>Đáp án đúng:</strong>
+                        <select id="correctAnswerSelect" onchange="questionData.correctAnswer = this.value">
+                            <option value="">-- Chọn đáp án đúng --</option>
+                            <option value="A">A</option>
+                            <option value="B">B</option>
+                            <option value="C">C</option>
+                            <option value="D">D</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Lời giải (Tùy chọn)</div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="solutionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="solutionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes-section">
+                    <div class="content-label">Ghi chú (Chỉ GV xem)</div>
+                    <textarea id="notesInput" class="content-textarea" placeholder="Nhập ghi chú cho câu hỏi này..." style="min-height: 100px;"></textarea>
+                </div>
+
+                <button class="btn-submit" onclick="saveQuestion()">
+                    <i class="fas fa-save"></i> Lưu Câu Hỏi
+                </button>
+            `;
+        }
+
+        function renderDSLayout() {
+            return `
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Nội dung đề <span class="required">*</span></div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="questionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="questionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-label" style="margin-bottom: 15px;">Các mệnh đề <span class="required">*</span></div>
+                    <div id="statementOptionsContainer">
+                        ${[1,2,3,4].map(i => `
+                            <div class="answer-option" data-statement-index="${i}">
+                                <div class="answer-option-header">
+                                    <div class="answer-option-label">Mệnh đề ${i}</div>
+                                    ${i > 1 ? `<button class="btn-remove-answer" onclick="removeStatement(${i})">Xóa</button>` : ''}
+                                </div>
+                                <div class="editor-wrapper">
+                                    <div id="statementEditor${i}"></div>
+                                </div>
+                                <div class="preview-box">
+                                    <strong>Xem trước:</strong>
+                                    <div id="statementPreviewContent${i}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                                </div>
+                                <div class="tf-checkbox-group">
+                                    <div class="tf-checkbox-item">
+                                        <input type="checkbox" id="tfCorrect${i}" onchange="updateTFAnswer(${i}, 'correct')">
+                                        <label for="tfCorrect${i}">Đúng</label>
+                                    </div>
+                                    <div class="tf-checkbox-item">
+                                        <input type="checkbox" id="tfWrong${i}" onchange="updateTFAnswer(${i}, 'wrong')">
+                                        <label for="tfWrong${i}">Sai</label>
+                                    </div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-add-answer" onclick="addStatement()">+ Thêm mệnh đề</button>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Lời giải (Tùy chọn)</div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="solutionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="solutionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes-section">
+                    <div class="content-label">Ghi chú (Chỉ GV xem)</div>
+                    <textarea id="notesInput" class="content-textarea" placeholder="Nhập ghi chú cho câu hỏi này..." style="min-height: 100px;"></textarea>
+                </div>
+
+                <button class="btn-submit" onclick="saveQuestion()">
+                    <i class="fas fa-save"></i> Lưu Câu Hỏi
+                </button>
+            `;
+        }
+
+        function renderTLLayout() {
+            return `
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Nội dung đề <span class="required">*</span></div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="questionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="questionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-label" style="margin-bottom: 15px;">Các đáp án chấp nhận <span class="required">*</span></div>
+                    <div id="answerOptionsContainer">
+                        ${[1,2,3].map(i => `
+                            <div class="answer-option" data-answer-index="${i}">
+                                <div class="answer-option-header">
+                                    <div class="answer-option-label">Đáp án ${i}</div>
+                                    ${i > 1 ? `<button class="btn-remove-answer" onclick="removeAnswer(${i})">Xóa</button>` : ''}
+                                </div>
+                                <div class="editor-wrapper">
+                                    <div id="answerEditor${i}"></div>
+                                </div>
+                                <div class="preview-box">
+                                    <strong>Xem trước:</strong>
+                                    <div id="answerPreviewContent${i}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-add-answer" onclick="addAnswer()">+ Thêm đáp án</button>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Lời giải (Tùy chọn)</div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="solutionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="solutionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes-section">
+                    <div class="content-label">Ghi chú (Chỉ GV xem)</div>
+                    <textarea id="notesInput" class="content-textarea" placeholder="Nhập ghi chú cho câu hỏi này..." style="min-height: 100px;"></textarea>
+                </div>
+
+                <button class="btn-submit" onclick="saveQuestion()">
+                    <i class="fas fa-save"></i> Lưu Câu Hỏi
+                </button>
+            `;
+        }
+
+        function renderKTLayout() {
+            return `
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Nội dung đề <span class="required">*</span></div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('question', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('question', 'html')">HTML</button>
+                                <button onclick="addDropZone()" style="background: #ff9800; color: white; margin-left: 10px;">+ Thêm vị trí thả</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="questionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="questionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-label" style="margin-bottom: 15px;">Các đáp án <span class="required">*</span></div>
+                    <div id="answerOptionsContainer">
+                        ${[1,2,3,4].map(i => `
+                            <div class="answer-option" data-answer-index="${i}">
+                                <div class="answer-option-header">
+                                    <div class="answer-option-label">Đáp án ${i}</div>
+                                    ${i > 1 ? `<button class="btn-remove-answer" onclick="removeAnswer(${i})">Xóa</button>` : ''}
+                                </div>
+                                <div class="editor-wrapper">
+                                    <div id="answerEditor${i}"></div>
+                                </div>
+                                <div class="preview-box">
+                                    <strong>Xem trước:</strong>
+                                    <div id="answerPreviewContent${i}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                    <button class="btn-add-answer" onclick="addAnswer()">+ Thêm đáp án</button>
+                </div>
+
+                <div class="content-section">
+                    <div class="editor-container">
+                        <div class="editor-header">
+                            <div class="editor-label">Lời giải (Tùy chọn)</div>
+                            <div class="editor-lang-toggle">
+                                <button class="active" onclick="switchEditorMode('solution', 'visual')">LaTeX</button>
+                                <button onclick="switchEditorMode('solution', 'html')">HTML</button>
+                            </div>
+                        </div>
+                        <div class="editor-wrapper">
+                            <div id="solutionEditor"></div>
+                        </div>
+                        <div class="preview-box">
+                            <strong>Xem trước:</strong>
+                            <div id="solutionPreviewContent" class="tex2jax_process" style="margin-top: 10px;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="notes-section">
+                    <div class="content-label">Ghi chú (Chỉ GV xem)</div>
+                    <textarea id="notesInput" class="content-textarea" placeholder="Nhập ghi chú cho câu hỏi này..." style="min-height: 100px;"></textarea>
+                </div>
+
+                <button class="btn-submit" onclick="saveQuestion()">
+                    <i class="fas fa-save"></i> Lưu Câu Hỏi
+                </button>
+            `;
+        }
+
+        // Editor management functions
+        function initializeEditors(type) {
+            // Initialize question editor
+            if (document.getElementById('questionEditor')) {
+                createEditor('questionEditor', 'question', 'visual');
+            }
+
+            // Initialize answer editors based on type
+            if (type === 'tn' || type === 'tl' || type === 'kt') {
+                const container = document.getElementById('answerOptionsContainer');
+                if (container) {
+                    const answerOptions = container.querySelectorAll('[data-answer-index]');
+                    answerOptions.forEach(option => {
+                        const index = option.getAttribute('data-answer-index');
+                        const editorId = `answerEditor${index}`;
+                        if (document.getElementById(editorId)) {
+                            createEditor(editorId, `answer${index}`, 'visual');
+                        }
+                    });
+                }
+            }
+
+            // Initialize statement editors for True/False
+            if (type === 'ds') {
+                const container = document.getElementById('statementOptionsContainer');
+                if (container) {
+                    const statements = container.querySelectorAll('[data-statement-index]');
+                    statements.forEach(statement => {
+                        const index = statement.getAttribute('data-statement-index');
+                        const editorId = `statementEditor${index}`;
+                        if (document.getElementById(editorId)) {
+                            createEditor(editorId, `statement${index}`, 'visual');
+                        }
+                    });
+                }
+            }
+
+            // Initialize solution editor
+            if (document.getElementById('solutionEditor')) {
+                createEditor('solutionEditor', 'solution', 'visual');
+            }
+        }
+
+        function createEditor(elementId, dataKey, mode) {
+            const element = document.getElementById(elementId);
+            if (!element) {
+                console.error('Element not found:', elementId);
+                return;
+            }
+
+            // Nếu CKEditor chưa load, dùng textarea ngay
+            if (!window.ClassicEditor) {
+                console.warn('CKEditor not loaded, using textarea fallback');
+                const textarea = document.createElement('textarea');
+                textarea.id = elementId + '_textarea';
+                textarea.className = 'content-textarea';
+                textarea.style.minHeight = '150px';
+                textarea.style.width = '100%';
+                textarea.style.padding = '15px';
+                textarea.style.border = 'none';
+                textarea.style.fontFamily = 'inherit';
+                textarea.style.fontSize = '0.9rem';
+                textarea.placeholder = mode === 'latex' ? 'Nhập LaTeX...' : mode === 'html' ? 'Nhập HTML...' : 'Nhập nội dung...';
+                element.parentElement.replaceChild(textarea, element);
+                editorModes[dataKey] = mode;
+                setupTextareaEditor(textarea.id, dataKey, mode);
+                return;
+            }
+
+            const editorConfig = {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', '|',
+                        'numberedList', 'bulletedList', '|',
+                        'outdent', 'indent', '|',
+                        'blockQuote', 'insertTable', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'vi'
+            };
+
+            ClassicEditor
+                .create(document.getElementById(elementId), editorConfig)
+                .then(editor => {
+                    editorInstances[dataKey] = editor;
+                    editorModes[dataKey] = mode;
+
+                    editor.model.document.on('change:data', () => {
+                        updatePreviewForEditor(dataKey, editor.getData());
+                    });
+
+                    // Thêm keyboard shortcuts: Ctrl+B (bold), Ctrl+I (italic), Ctrl+U (underline)
+                    editor.keystrokes.set('Ctrl+B', (data, cancel) => {
+                        editor.execute('bold');
+                        cancel();
+                    });
+                    editor.keystrokes.set('Ctrl+I', (data, cancel) => {
+                        editor.execute('italic');
+                        cancel();
+                    });
+                    editor.keystrokes.set('Ctrl+U', (data, cancel) => {
+                        editor.execute('underline');
+                        cancel();
+                    });
+                    // Thêm Ctrl+E cho center alignment
+                    editor.keystrokes.set('Ctrl+E', (data, cancel) => {
+                        editor.execute('alignment', { value: 'center' });
+                        cancel();
+                    });
+
+                    // Store initial content
+                    if (questionData[dataKey]) {
+                        editor.setData(questionData[dataKey]);
+                    }
+                })
+                .catch(error => {
+                    console.error('CKEditor initialization error:', error);
+                    // Fallback to textarea
+                    const element = document.getElementById(elementId);
+                    if (element && element.parentElement) {
+                        const textarea = document.createElement('textarea');
+                        textarea.id = elementId + '_textarea';
+                        textarea.className = 'content-textarea';
+                        textarea.style.minHeight = '150px';
+                        element.parentElement.replaceChild(textarea, element);
+                        editorModes[dataKey] = mode;
+                        setupTextareaEditor(textarea.id, dataKey, mode);
+                    }
+                });
+        }
+
+        function setupTextareaEditor(textareaId, dataKey, mode) {
+            const textarea = document.getElementById(textareaId);
+            if (!textarea) return;
+
+            editorModes[dataKey] = mode;
+            
+            textarea.addEventListener('input', function() {
+                updatePreviewForEditor(dataKey, this.value);
+            });
+            
+            // Thêm keyboard shortcuts cho textarea (chỉ khi ở visual mode, vì LaTeX/HTML cần giữ nguyên)
+            if (mode === 'visual') {
+                textarea.addEventListener('keydown', function(e) {
+                    // Ctrl+B: Bold (wrap với <strong>)
+                    if (e.ctrlKey && e.key === 'b') {
+                        e.preventDefault();
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
+                        const selectedText = this.value.substring(start, end);
+                        if (selectedText) {
+                            this.value = this.value.substring(0, start) + '<strong>' + selectedText + '</strong>' + this.value.substring(end);
+                            this.selectionStart = start + 8;
+                            this.selectionEnd = end + 8;
+                            updatePreviewForEditor(dataKey, this.value);
+                        }
+                    }
+                    // Ctrl+I: Italic (wrap với <em>)
+                    else if (e.ctrlKey && e.key === 'i') {
+                        e.preventDefault();
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
+                        const selectedText = this.value.substring(start, end);
+                        if (selectedText) {
+                            this.value = this.value.substring(0, start) + '<em>' + selectedText + '</em>' + this.value.substring(end);
+                            this.selectionStart = start + 4;
+                            this.selectionEnd = end + 4;
+                            updatePreviewForEditor(dataKey, this.value);
+                        }
+                    }
+                    // Ctrl+U: Underline (wrap với <u>)
+                    else if (e.ctrlKey && e.key === 'u') {
+                        e.preventDefault();
+                        const start = this.selectionStart;
+                        const end = this.selectionEnd;
+                        const selectedText = this.value.substring(start, end);
+                        if (selectedText) {
+                            this.value = this.value.substring(0, start) + '<u>' + selectedText + '</u>' + this.value.substring(end);
+                            this.selectionStart = start + 3;
+                            this.selectionEnd = end + 3;
+                            updatePreviewForEditor(dataKey, this.value);
+                        }
+                    }
+                });
+            }
+        }
+
+        function switchEditorMode(dataKey, mode) {
+            // 1. Xác định ID của editor dựa trên dataKey
+            let editorId = '';
+            let textareaId = '';
+            
+            if (dataKey === 'question') {
+                editorId = 'questionEditor';
+                textareaId = 'questionEditor_textarea';
+            } else if (dataKey.startsWith('answer')) {
+                const index = dataKey.replace('answer', '');
+                editorId = 'answerEditor' + index;
+                textareaId = 'answerEditor' + index + '_textarea';
+            } else if (dataKey.startsWith('statement')) {
+                const index = dataKey.replace('statement', '');
+                editorId = 'statementEditor' + index;
+                textareaId = 'statementEditor' + index + '_textarea';
+            } else if (dataKey === 'solution') {
+                editorId = 'solutionEditor';
+                textareaId = 'solutionEditor_textarea';
+            } else {
+                editorId = dataKey + 'Editor';
+                textareaId = dataKey + 'Editor_textarea';
+            }
+            
+            // 2. Tìm element hiện tại
+            const currentDiv = document.getElementById(editorId);
+            const currentTextarea = document.getElementById(textareaId);
+            
+            // Wrapper là cha của thẻ đang tồn tại
+            const wrapper = currentDiv ? currentDiv.parentElement : (currentTextarea ? currentTextarea.parentElement : null);
+            
+            if (!wrapper) {
+                console.error("Không tìm thấy khung nhập liệu cho:", dataKey, "editorId:", editorId);
+                return; 
+            }
+
+            // 3. Lấy dữ liệu hiện tại trước khi chuyển đổi
+            let currentContent = '';
+            if (editorInstances[dataKey]) {
+                currentContent = editorInstances[dataKey].getData();
+            } else if (currentTextarea) {
+                currentContent = currentTextarea.value;
+            } else {
+                currentContent = questionData[dataKey] || '';
+            }
+
+            // 4. Cập nhật trạng thái Mode
+            editorModes[dataKey] = mode;
+
+            // 5. Cập nhật giao diện nút bấm (Đổi màu nút Active)
+            const btnContainer = wrapper.closest('.editor-container') || wrapper.closest('.answer-option') || wrapper.closest('.content-section');
+            if (btnContainer) {
+                const buttons = btnContainer.querySelectorAll(`.editor-lang-toggle button`);
+                buttons.forEach(btn => {
+                    btn.classList.remove('active');
+                    if (btn.getAttribute('onclick') && btn.getAttribute('onclick').includes(`'${mode}'`)) {
+                        btn.classList.add('active');
+                    }
+                });
+            }
+
+            // 6. Hàm tạo editor mới
+            function createNewEditor() {
+                // Xóa nội dung cũ trong wrapper
+                wrapper.innerHTML = '';
+
+                if (mode === 'visual') {
+                    // --- CHẾ ĐỘ LATEX/VISUAL ---
+                    const newDiv = document.createElement('div');
+                    newDiv.id = editorId;
+                    wrapper.appendChild(newDiv);
+
+                    // Khởi tạo CKEditor
+                    createEditor(newDiv.id, dataKey, 'visual');
+                    
+                    // Đổ dữ liệu lại và cập nhật preview
+                    setTimeout(() => {
+                        if (editorInstances[dataKey]) {
+                            editorInstances[dataKey].setData(currentContent);
+                            // Cập nhật preview sau khi setData
+                            updatePreviewForEditor(dataKey, currentContent);
+                        }
+                    }, 100);
+
+                } else {
+                    // --- CHẾ ĐỘ HTML ---
+                    const newTextarea = document.createElement('textarea');
+                    newTextarea.id = textareaId;
+                    newTextarea.className = 'content-textarea';
+                    newTextarea.style.width = '100%';
+                    newTextarea.style.minHeight = '150px';
+                    newTextarea.style.fontFamily = 'monospace';
+                    newTextarea.style.padding = '10px';
+                    newTextarea.style.border = '1px solid #ddd';
+                    newTextarea.style.borderRadius = '4px';
+                    newTextarea.value = currentContent;
+                    
+                    wrapper.appendChild(newTextarea);
+
+                    // Gán sự kiện nhập liệu để cập nhật Preview real-time
+                    newTextarea.oninput = function() {
+                        updatePreviewForEditor(dataKey, this.value);
+                    };
+
+                    // Cập nhật Preview ngay lập tức
+                    updatePreviewForEditor(dataKey, currentContent);
+                }
+            }
+
+            // 7. Dọn dẹp editor cũ nếu có, rồi tạo mới
+            if (editorInstances[dataKey]) {
+                editorInstances[dataKey].destroy()
+                    .then(() => { 
+                        delete editorInstances[dataKey];
+                        createNewEditor();
+                    })
+                    .catch(() => {
+                        delete editorInstances[dataKey];
+                        createNewEditor();
+                    });
+            } else {
+                createNewEditor();
+            }
+        }
+
+        function switchAllEditors(mode) {
+            // Update global toggle buttons
+            document.querySelectorAll('#globalLanguageToggle .btn-lang-toggle').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.getAttribute('data-lang') === mode) {
+                    btn.classList.add('active');
+                }
+            });
+
+            // Switch all individual editors
+            Object.keys(editorInstances).forEach(key => {
+                switchEditorMode(key, mode);
+            });
+
+            // Also switch textarea editors
+            document.querySelectorAll('[id$="_textarea"]').forEach(textarea => {
+                const dataKey = textarea.id.replace('Editor_textarea', '').replace('Editor', '');
+                switchEditorMode(dataKey, mode);
+            });
+        }
+
+        // Hệ thống preview mới - render đúng theo mode
+        function updatePreviewForEditor(dataKey, content) {
+            // 1. Xác định ID của khung preview tương ứng
+            let previewId = '';
+            
+            if (dataKey === 'question') {
+                previewId = 'questionPreviewContent';
+            } else if (dataKey.startsWith('answer')) {
+                const index = dataKey.replace('answer', ''); 
+                previewId = 'answerPreviewContent' + index;
+            } else if (dataKey.startsWith('statement')) {
+                const index = dataKey.replace('statement', '');
+                previewId = 'statementPreviewContent' + index;
+            } else if (dataKey === 'solution') {
+                previewId = 'solutionPreviewContent';
+            }
+
+            const previewDiv = document.getElementById(previewId);
+            if (!previewDiv) return;
+
+            const rawContent = content || '';
+            
+            // 2. Xử lý hiển thị
+            if (!rawContent.trim()) {
+                previewDiv.innerHTML = '<em style="color: #999;">Chưa có nội dung</em>';
+            } else {
+                // [QUAN TRỌNG] Sử dụng innerHTML để biên dịch mã HTML
+                previewDiv.innerHTML = rawContent;
+            }
+
+            // 3. Đảm bảo class xử lý MathJax luôn có
+            if (!previewDiv.classList.contains('tex2jax_process')) {
+                previewDiv.classList.add('tex2jax_process');
+            }
+
+            // 4. Gọi MathJax vẽ lại công thức toán đè lên nội dung HTML
+            triggerMathJaxRender(previewDiv);
+        }
+
+        // Answer management functions
+        function addAnswer() {
+            const container = document.getElementById('answerOptionsContainer');
+            if (!container) return;
+
+            const currentAnswers = container.querySelectorAll('[data-answer-index]');
+            const nextIndex = currentAnswers.length + 1;
+            const letter = String.fromCharCode(64 + nextIndex);
+
+            const answerHTML = `
+                <div class="answer-option" data-answer-index="${nextIndex}">
+                    <div class="answer-option-header">
+                        <div class="answer-option-label">Đáp án ${letter}</div>
+                        <button class="btn-remove-answer" onclick="removeAnswer(${nextIndex})">Xóa</button>
+                    </div>
+                    <div class="editor-wrapper">
+                        <div id="answerEditor${nextIndex}"></div>
+                    </div>
+                    <div class="preview-box">
+                        <strong>Xem trước:</strong>
+                        <div id="answerPreviewContent${nextIndex}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', answerHTML);
+            
+            // Update correct answer selector if exists
+            const correctSelect = document.getElementById('correctAnswerSelect');
+            if (correctSelect) {
+                const option = document.createElement('option');
+                option.value = letter;
+                option.textContent = letter;
+                correctSelect.appendChild(option);
+            }
+
+            // Initialize editor
+            setTimeout(() => {
+                if (document.getElementById(`answerEditor${nextIndex}`)) {
+                    createEditor(`answerEditor${nextIndex}`, `answer${nextIndex}`, editorModes['answer1'] || 'visual');
+                }
+            }, 100);
+        }
+
+        function removeAnswer(index) {
+            const container = document.getElementById('answerOptionsContainer');
+            if (!container) return;
+
+            const answerOption = container.querySelector(`[data-answer-index="${index}"]`);
+            if (!answerOption) return;
+
+            // Destroy editor if exists
+            const dataKey = `answer${index}`;
+            if (editorInstances[dataKey]) {
+                editorInstances[dataKey].destroy();
+                delete editorInstances[dataKey];
+            }
+
+            answerOption.remove();
+
+            // Update correct answer selector
+            const correctSelect = document.getElementById('correctAnswerSelect');
+            if (correctSelect) {
+                const letter = String.fromCharCode(64 + index);
+                const option = correctSelect.querySelector(`option[value="${letter}"]`);
+                if (option) option.remove();
+            }
+        }
+
+        function addStatement() {
+            const container = document.getElementById('statementOptionsContainer');
+            if (!container) return;
+
+            const currentStatements = container.querySelectorAll('[data-statement-index]');
+            const nextIndex = currentStatements.length + 1;
+
+            const statementHTML = `
+                <div class="answer-option" data-statement-index="${nextIndex}">
+                    <div class="answer-option-header">
+                        <div class="answer-option-label">Mệnh đề ${nextIndex}</div>
+                        <button class="btn-remove-answer" onclick="removeStatement(${nextIndex})">Xóa</button>
+                    </div>
+                    <div class="editor-wrapper">
+                        <div id="statementEditor${nextIndex}"></div>
+                    </div>
+                    <div class="preview-box">
+                        <strong>Xem trước:</strong>
+                        <div id="statementPreviewContent${nextIndex}" class="tex2jax_process" style="margin-top: 10px;"></div>
+                    </div>
+                    <div class="tf-checkbox-group">
+                        <div class="tf-checkbox-item">
+                            <input type="checkbox" id="tfCorrect${nextIndex}" onchange="updateTFAnswer(${nextIndex}, 'correct')">
+                            <label for="tfCorrect${nextIndex}">Đúng</label>
+                        </div>
+                        <div class="tf-checkbox-item">
+                            <input type="checkbox" id="tfWrong${nextIndex}" onchange="updateTFAnswer(${nextIndex}, 'wrong')">
+                            <label for="tfWrong${nextIndex}">Sai</label>
+                        </div>
+                    </div>
+                </div>
+            `;
+
+            container.insertAdjacentHTML('beforeend', statementHTML);
+
+            // Initialize editor
+            setTimeout(() => {
+                if (document.getElementById(`statementEditor${nextIndex}`)) {
+                    createEditor(`statementEditor${nextIndex}`, `statement${nextIndex}`, editorModes['statement1'] || 'visual');
+                }
+            }, 100);
+        }
+
+        function removeStatement(index) {
+            const container = document.getElementById('statementOptionsContainer');
+            if (!container) return;
+
+            const statementOption = container.querySelector(`[data-statement-index="${index}"]`);
+            if (!statementOption) return;
+
+            // Destroy editor if exists
+            const dataKey = `statement${index}`;
+            if (editorInstances[dataKey]) {
+                editorInstances[dataKey].destroy();
+                delete editorInstances[dataKey];
+            }
+
+            statementOption.remove();
+        }
+
+        function updateTFAnswer(index, type) {
+            const correctBox = document.getElementById(`tfCorrect${index}`);
+            const wrongBox = document.getElementById(`tfWrong${index}`);
+            
+            if (type === 'correct') {
+                if (correctBox.checked) {
+                    wrongBox.checked = false;
+                }
+            } else {
+                if (wrongBox.checked) {
+                    correctBox.checked = false;
+                }
+            }
+        }
+
+        // Drag & Drop functions
+        function addDropZone() {
+            if (!editorInstances['question']) {
+                alert('Vui lòng nhập nội dung đề trước!');
+                return;
+            }
+
+            const editor = editorInstances['question'];
+            const model = editor.model;
+            const selection = model.document.selection;
+            const range = selection.getFirstRange();
+
+            model.change(writer => {
+                const dropZoneNumber = (questionData.dropZones.length || 0) + 1;
+                const dropZoneId = `dropzone_${dropZoneNumber}`;
+                
+                const dropZoneElement = writer.createElement('htmlSpan', {
+                    class: 'drop-zone',
+                    'data-dropzone-id': dropZoneId,
+                    'data-dropzone-number': dropZoneNumber
+                });
+                
+                writer.insertText(`[Vị trí thả ${dropZoneNumber}]`, dropZoneElement, 0);
+                writer.insert(dropZoneElement, range.start);
+
+                questionData.dropZones.push({
+                    id: dropZoneId,
+                    number: dropZoneNumber
+                });
+            });
+
+            // Update preview
+            updatePreviewForEditor('question', editor.getData());
+        }
+
+        // Save question
+        async function saveQuestion() {
+            // Validate classification
+            if (currentSelections.program.length === 0) {
+                alert('Vui lòng chọn ít nhất một Loại Chương trình!');
+                return;
+            }
+            if (currentSelections.grade.length === 0) {
+                alert('Vui lòng chọn ít nhất một Lớp/Kỳ thi/Chứng chỉ!');
+                return;
+            }
+            if (currentSelections.subject.length === 0) {
+                alert('Vui lòng chọn ít nhất một Chủ đề!');
+                return;
+            }
+            if (currentSelections.topic.length === 0) {
+                alert('Vui lòng chọn ít nhất một Chuyên đề!');
+                return;
+            }
+            if (currentSelections.skill.length === 0) {
+                alert('Vui lòng chọn ít nhất một Dạng toán/Skill!');
+                return;
+            }
+            const questionType = document.getElementById('questionType').value;
+            if (!questionType) {
+                alert('Vui lòng chọn Dạng câu hỏi!');
+                return;
+            }
+            const difficulty = document.getElementById('difficulty').value;
+            if (difficulty === '') {
+                alert('Vui lòng chọn Độ khó!');
+                return;
+            }
+
+            // Get question content
+            let questionContent = '';
+            if (editorInstances['question']) {
+                questionContent = editorInstances['question'].getData();
+            } else {
+                const textarea = document.getElementById('questionEditor_textarea');
+                questionContent = textarea ? textarea.value : '';
+            }
+            if (!questionContent || questionContent.trim() === '') {
+                alert('Vui lòng nhập nội dung câu hỏi!');
+                return;
+            }
+
+            // Get answers based on question type
+            let answers = [];
+            let correctAnswer = '';
+            let statements = [];
+
+            if (questionType === 'tn') {
+                // Multiple choice
+                const container = document.getElementById('answerOptionsContainer');
+                if (container) {
+                    const answerOptions = container.querySelectorAll('[data-answer-index]');
+                    answerOptions.forEach(option => {
+                        const index = option.getAttribute('data-answer-index');
+                        const dataKey = `answer${index}`;
+                        let answerText = '';
+                        if (editorInstances[dataKey]) {
+                            answerText = editorInstances[dataKey].getData();
+                        } else {
+                            const textarea = document.getElementById(`answerEditor${index}_textarea`);
+                            answerText = textarea ? textarea.value : '';
+                        }
+                        if (answerText && answerText.trim()) {
+                            const letter = String.fromCharCode(64 + parseInt(index));
+                            answers.push({
+                                letter: letter,
+                                text: answerText.trim()
+                            });
+                        }
+                    });
+                }
+                const correctSelect = document.getElementById('correctAnswerSelect');
+                correctAnswer = correctSelect ? correctSelect.value : '';
+                if (!correctAnswer) {
+                    alert('Vui lòng chọn đáp án đúng!');
+                    return;
+                }
+            } else if (questionType === 'ds') {
+                // True/False
+                const container = document.getElementById('statementOptionsContainer');
+                if (container) {
+                    const statementOptions = container.querySelectorAll('[data-statement-index]');
+                    statementOptions.forEach(option => {
+                        const index = option.getAttribute('data-statement-index');
+                        const dataKey = `statement${index}`;
+                        let statementText = '';
+                        if (editorInstances[dataKey]) {
+                            statementText = editorInstances[dataKey].getData();
+                        } else {
+                            const textarea = document.getElementById(`statementEditor${index}_textarea`);
+                            statementText = textarea ? textarea.value : '';
+                        }
+                        const correctBox = document.getElementById(`tfCorrect${index}`);
+                        const wrongBox = document.getElementById(`tfWrong${index}`);
+                        const isCorrect = correctBox && correctBox.checked;
+                        const isWrong = wrongBox && wrongBox.checked;
+                        
+                        if (statementText && statementText.trim() && (isCorrect || isWrong)) {
+                            statements.push({
+                                text: statementText.trim(),
+                                correct: isCorrect
+                            });
+                        }
+                    });
+                }
+                if (statements.length === 0) {
+                    alert('Vui lòng nhập ít nhất một mệnh đề và chọn Đúng/Sai!');
+                    return;
+                }
+            } else if (questionType === 'tl') {
+                // Short answer
+                const container = document.getElementById('answerOptionsContainer');
+                if (container) {
+                    const answerOptions = container.querySelectorAll('[data-answer-index]');
+                    answerOptions.forEach(option => {
+                        const index = option.getAttribute('data-answer-index');
+                        const dataKey = `answer${index}`;
+                        let answerText = '';
+                        if (editorInstances[dataKey]) {
+                            answerText = editorInstances[dataKey].getData();
+                        } else {
+                            const textarea = document.getElementById(`answerEditor${index}_textarea`);
+                            answerText = textarea ? textarea.value : '';
+                        }
+                        if (answerText && answerText.trim()) {
+                            answers.push(answerText.trim());
+                        }
+                    });
+                }
+                if (answers.length === 0) {
+                    alert('Vui lòng nhập ít nhất một đáp án!');
+                    return;
+                }
+            } else if (questionType === 'kt') {
+                // Drag & Drop
+                const container = document.getElementById('answerOptionsContainer');
+                if (container) {
+                    const answerOptions = container.querySelectorAll('[data-answer-index]');
+                    answerOptions.forEach(option => {
+                        const index = option.getAttribute('data-answer-index');
+                        const dataKey = `answer${index}`;
+                        let answerText = '';
+                        if (editorInstances[dataKey]) {
+                            answerText = editorInstances[dataKey].getData();
+                        } else {
+                            const textarea = document.getElementById(`answerEditor${index}_textarea`);
+                            answerText = textarea ? textarea.value : '';
+                        }
+                        if (answerText && answerText.trim()) {
+                            answers.push({
+                                id: index,
+                                text: answerText.trim()
+                            });
+                        }
+                    });
+                }
+                // Validate drop zones
+                if (questionData.dropZones.length === 0) {
+                    alert('Vui lòng thêm ít nhất một vị trí thả!');
+                    return;
+                }
+                // Check for duplicate answers in drop zones
+                const dropZoneAnswers = Object.values(questionData.dropZoneAnswers);
+                const uniqueAnswers = [...new Set(dropZoneAnswers)];
+                if (dropZoneAnswers.length !== uniqueAnswers.length) {
+                    alert('Cảnh báo: Có 2 vị trí thả có cùng đáp án!');
+                }
+            }
+
+            // Get solution
+            let solution = '';
+            if (editorInstances['solution']) {
+                solution = editorInstances['solution'].getData();
+            } else {
+                const textarea = document.getElementById('solutionEditor_textarea');
+                solution = textarea ? textarea.value : '';
+            }
+
+            // Get notes
+            const notesInput = document.getElementById('notesInput');
+            const notes = notesInput ? notesInput.value.trim() : '';
+
+            // Format answers for API based on question type
+            let formattedAnswers = [];
+            if (questionType === 'tn') {
+                // Multiple choice: array of answer texts
+                formattedAnswers = answers.map(a => a.text);
+            } else if (questionType === 'ds') {
+                // True/False: array of statement objects
+                formattedAnswers = statements;
+            } else if (questionType === 'tl') {
+                // Short answer: array of answer strings
+                formattedAnswers = answers;
+            } else if (questionType === 'kt') {
+                // Drag & Drop: array of option texts
+                formattedAnswers = answers.map(a => a.text || a);
+            }
+
+            // Gọi API để lưu câu hỏi
+            try {
+                // Format data để gửi lên server
+                const questionDataForAPI = {
+                    program_type: currentSelections.program[0] || '',
+                    grade: currentSelections.grade[0] || '',
+                    subject: currentSelections.subject[0] || '',
+                    topic: currentSelections.topic[0] || '',
+                    skill: currentSelections.skill[0] || '',
+                    question_type: questionType === 'tn' ? 'mc' : 
+                                  questionType === 'ds' ? 'tf' : 
+                                  questionType === 'tl' ? 'short' : 'drag',
+                    difficulty: parseInt(difficulty),
+                    content: questionContent.trim(),
+                    answer: JSON.stringify(formattedAnswers),
+                    solution: solution.trim() || null,
+                    note: notes || null
+                };
+
+                const result = await API.saveQuestion(questionDataForAPI);
+                
+                if (result.success) {
+                    // Thay vì alert, ta gọi hàm preview
+                    showSavedPreview(questionDataForAPI);
+                    
+                    resetForm(); // Reset form nhập liệu bên dưới
+                }
+            } catch (error) {
+                console.error('Error saving question:', error);
+                alert('Lỗi khi lưu câu hỏi: ' + (error.message || 'Vui lòng kiểm tra lại server và thử lại'));
+            }
+        }
+
+        function resetForm() {
+            // KHÔNG reset currentSelections - giữ nguyên các dòng đã chọn
+            // Chỉ reset các editor và input fields cho câu hỏi mới
+            
+            // Reset question type and difficulty
+            const questionTypeEl = document.getElementById('questionType');
+            if (questionTypeEl) questionTypeEl.value = '';
+            const difficultyEl = document.getElementById('difficulty');
+            if (difficultyEl) difficultyEl.value = '';
+            
+            // Reset editors
+            if (editorInstances['question']) {
+                editorInstances['question'].setData('');
+            } else {
+                const questionTextarea = document.getElementById('questionEditor_textarea');
+                if (questionTextarea) questionTextarea.value = '';
+            }
+            
+            if (editorInstances['solution']) {
+                editorInstances['solution'].setData('');
+            } else {
+                const solutionTextarea = document.getElementById('solutionEditor_textarea');
+                if (solutionTextarea) solutionTextarea.value = '';
+            }
+            
+            // Reset answer options based on question type
+            const questionType = questionTypeEl ? questionTypeEl.value : '';
+            if (questionType === 'tn' || questionType === 'tl' || questionType === 'kt') {
+                const container = document.getElementById('answerOptionsContainer');
+                if (container) {
+                    container.querySelectorAll('[data-answer-index]').forEach(option => {
+                        const index = option.getAttribute('data-answer-index');
+                        const dataKey = `answer${index}`;
+                        if (editorInstances[dataKey]) {
+                            editorInstances[dataKey].setData('');
+                        } else {
+                            const textarea = document.getElementById(`answerEditor${index}_textarea`);
+                            if (textarea) textarea.value = '';
+                        }
+                    });
+                }
+            } else if (questionType === 'ds') {
+                const container = document.getElementById('statementOptionsContainer');
+                if (container) {
+                    container.querySelectorAll('[data-statement-index]').forEach(option => {
+                        const index = option.getAttribute('data-statement-index');
+                        const dataKey = `statement${index}`;
+                        if (editorInstances[dataKey]) {
+                            editorInstances[dataKey].setData('');
+                        } else {
+                            const textarea = document.getElementById(`statementEditor${index}_textarea`);
+                            if (textarea) textarea.value = '';
+                        }
+                        const correctBox = document.getElementById(`tfCorrect${index}`);
+                        const wrongBox = document.getElementById(`tfWrong${index}`);
+                        if (correctBox) correctBox.checked = false;
+                        if (wrongBox) wrongBox.checked = false;
+                    });
+                }
+            }
+            
+            // Reset notes
+            const notesInput = document.getElementById('notesInput');
+            if (notesInput) notesInput.value = '';
+            
+            // Reset previews
+            ['questionPreviewContent', 'answerPreviewContent', 'solutionPreviewContent'].forEach(id => {
+                const previewEl = document.getElementById(id);
+                if (previewEl) {
+                    updatePreview(id, '');
+                }
+            });
+            
+            // Reset correct answer select
+            const correctSelect = document.getElementById('correctAnswerSelect');
+            if (correctSelect) correctSelect.value = '';
+            
+            // Reset question data for drag & drop
+            if (typeof questionData !== 'undefined') {
+                questionData.dropZones = [];
+                questionData.dropZoneAnswers = {};
+            }
+        }
+
+        // Close suggestions when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!e.target.closest('.input-row-wrapper')) {
+                document.querySelectorAll('.suggestions').forEach(s => {
+                    s.style.display = 'none';
+                });
+            }
+        });
+
+        // Hiển thị form thêm mới - tối ưu tốc độ
+        function showAddForm() {
+            try {
+                const listContainer = document.getElementById('questionListContainer');
+                const addContainer = document.getElementById('addQuestionContainer');
+                
+                if (!listContainer || !addContainer) {
+                    console.error('Containers not found');
+                    alert('Lỗi: Không tìm thấy container. Vui lòng refresh trang (F5).');
+                    return;
+                }
+                
+                // Ẩn danh sách, hiện form thêm mới ngay lập tức (không chờ)
+                listContainer.style.display = 'none';
+                addContainer.style.display = 'flex';
+                
+                // Reset form async - không block UI thread
+                setTimeout(() => {
+                    resetForm();
+                }, 0);
+            } catch (error) {
+                console.error('Error in showAddForm:', error);
+                alert('Lỗi khi hiển thị form: ' + error.message);
+            }
+        }
+
+        // Quay lại danh sách
+        function showQuestionList() {
+            const listContainer = document.getElementById('questionListContainer');
+            const addContainer = document.getElementById('addQuestionContainer');
+            
+            if (listContainer) listContainer.style.display = 'flex';
+            if (addContainer) addContainer.style.display = 'none';
+        }
+
+        // Mở modal cho bộ lọc
+        function openFilterModal(type) {
+            currentModalContext = 'filter'; // Đánh dấu đang ở bộ lọc
+            currentModalType = type;
+            modalSelectedItems.clear();
+            
+            // Sử dụng filterSelections thay vì currentSelections
+            filterSelections[type].forEach(id => {
+                modalSelectedItems.add(id);
+            });
+
+            const title = {
+                program: 'Chọn Loại Chương trình',
+                grade: 'Chọn Lớp/Kỳ thi/Chứng chỉ',
+                subject: 'Chọn Chủ đề',
+                topic: 'Chọn Chuyên đề',
+                skill: 'Chọn Dạng toán/Skill'
+            };
+
+            document.getElementById('modalTitle').textContent = title[type] || 'Chọn';
+            renderModalContent(type);
+            document.getElementById('selectionModal').style.display = 'flex';
+
+            const searchInput = document.getElementById('modalSearch');
+            if (searchInput) {
+                searchInput.value = '';
+                searchInput.oninput = function(e) {
+                    renderModalContent(type, e.target.value);
+                };
+            }
+        }
+
+        // Xác nhận lựa chọn bộ lọc
+        function confirmFilterSelection() {
+            filterSelections[currentModalType] = Array.from(modalSelectedItems);
+            renderFilterTags(currentModalType);
+            clearDependentFilterFields(currentModalType);
+            closeSelectionModal();
+        }
+
+        // Render tags cho bộ lọc
+        function renderFilterTags(type) {
+            const container = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Container');
+            if (!container) return;
+            
+            const tags = filterSelections[type].map(id => {
+                const name = getNameById(type, id);
+                return '<span class="tag">' + name + ' <span class="remove" onclick="removeFilterTag(\'' + type + '\', \'' + id + '\')">×</span></span>';
+            }).join('');
+            container.innerHTML = tags + '<input type="text" class="tag-input" id="filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input" placeholder="Chọn ' + getPlaceholder(type) + '..." autocomplete="off">';
+            
+            const newInput = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input');
+            if (newInput) {
+                newInput.addEventListener('input', function(e) {
+                    showFilterSuggestions(type, e.target.value);
+                });
+            }
+        }
+
+        // Xóa tag bộ lọc
+        function removeFilterTag(type, id) {
+            const index = filterSelections[type].indexOf(id);
+            if (index > -1) {
+                filterSelections[type].splice(index, 1);
+                renderFilterTags(type);
+                clearDependentFilterFields(type);
+            }
+        }
+
+        // Xóa các trường phụ thuộc trong bộ lọc
+        function clearDependentFilterFields(type) {
+            const dependencies = {
+                'program': ['grade', 'subject', 'topic', 'skill'],
+                'grade': ['subject', 'topic', 'skill'],
+                'subject': ['topic', 'skill'],
+                'topic': ['skill']
+            };
+            
+            if (dependencies[type]) {
+                dependencies[type].forEach(dep => {
+                    filterSelections[dep] = [];
+                    renderFilterTags(dep);
+                });
+            }
+        }
+
+        // Hiển thị suggestions cho bộ lọc
+        function showFilterSuggestions(type, query) {
+            const suggestionsDiv = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Suggestions');
+            if (!suggestionsDiv) return;
+            
+            if (!query || query.trim() === '') {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            // Tạm thời dùng currentSelections để lấy filtered options
+            const tempSelections = currentSelections;
+            currentSelections = filterSelections;
+            const filtered = getFilteredOptions(type, query);
+            currentSelections = tempSelections;
+
+            if (filtered.length === 0) {
+                suggestionsDiv.style.display = 'none';
+                return;
+            }
+
+            suggestionsDiv.innerHTML = filtered.map(item => 
+                '<div class="suggestion-item" onclick="addFilterTagFromSuggestion(\'' + type + '\', \'' + item.id + '\', \'' + item.name.replace(/'/g, "\\'") + '\')">' + item.name + '</div>'
+            ).join('');
+            suggestionsDiv.style.display = 'block';
+        }
+
+        // Thêm tag từ suggestion cho bộ lọc
+        function addFilterTagFromSuggestion(type, id, name) {
+            if (!filterSelections[type].includes(id)) {
+                filterSelections[type].push(id);
+                renderFilterTags(type);
+                const input = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Input');
+                if (input) {
+                    input.value = '';
+                }
+                const suggestions = document.getElementById('filter' + type.charAt(0).toUpperCase() + type.slice(1) + 'Suggestions');
+                if (suggestions) {
+                    suggestions.style.display = 'none';
+                }
+                clearDependentFilterFields(type);
+            }
+        }
+
+        // Xóa bộ lọc
+        function clearFilters() {
+            filterSelections = {
+                program: [],
+                grade: [],
+                subject: [],
+                topic: [],
+                skill: []
+            };
+            ['program', 'grade', 'subject', 'topic', 'skill'].forEach(type => {
+                renderFilterTags(type);
+            });
+            document.getElementById('filterQuestionType').value = '';
+            document.getElementById('filterDifficulty').value = '';
+            document.getElementById('filterYear').value = '2025';
+            document.getElementById('filterYearValue').textContent = '2025';
+            
+            // Reset danh sách
+            const contentDiv = document.getElementById('questionListContent');
+            contentDiv.innerHTML = '<div style="text-align: center; padding: 60px 20px; color: #7f8c8d;"><i class="fas fa-filter" style="font-size: 3rem; margin-bottom: 15px; opacity: 0.5;"></i><p style="font-size: 1.1rem; font-weight: 600;">Vui lòng chọn bộ lọc và nhấn nút tìm kiếm</p></div>';
+            document.getElementById('questionListPagination').innerHTML = '';
+            hasSearched = false;
+        }
+
+        // Tìm kiếm câu hỏi
+        let currentPage = 1;
+        async function searchQuestions(page = 1) {
+            currentPage = page;
+            hasSearched = true;
+            const contentDiv = document.getElementById('questionListContent');
+            const paginationDiv = document.getElementById('questionListPagination');
+            
+            contentDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;"><i class="fas fa-spinner fa-spin" style="font-size: 2rem;"></i><p>Đang tìm kiếm...</p></div>';
+            
+            try {
+                const yearValue = document.getElementById('filterYear').value;
+                // Gửi mảng để hỗ trợ tìm kiếm bao hàm (chọn nhiều giá trị)
+                const searchParams = {
+                    program: filterSelections.program.length > 0 ? filterSelections.program : null,
+                    grade: filterSelections.grade.length > 0 ? filterSelections.grade : null,
+                    subject: filterSelections.subject.length > 0 ? filterSelections.subject : null,
+                    topic: filterSelections.topic.length > 0 ? filterSelections.topic : null,
+                    skill: filterSelections.skill.length > 0 ? filterSelections.skill : null,
+                    question_type: document.getElementById('filterQuestionType').value || null,
+                    difficulty: document.getElementById('filterDifficulty').value ? parseInt(document.getElementById('filterDifficulty').value) : null,
+                    year: yearValue || null,
+                    limit: 20,
+                    page: page,
+                    random: false
+                };
+
+                const result = await API.searchQuestions(searchParams);
+                
+                if (result.success && result.data && result.data.length > 0) {
+                    displayQuestionResults(result.data, contentDiv, paginationDiv, result.total, result.page);
+                } else {
+                    contentDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #7f8c8d;"><i class="fas fa-inbox" style="font-size: 3rem; margin-bottom: 15px;"></i><p>Không tìm thấy câu hỏi nào phù hợp với bộ lọc.</p></div>';
+                    paginationDiv.innerHTML = '';
+                }
+            } catch (error) {
+                console.error('Error searching questions:', error);
+                contentDiv.innerHTML = '<div style="text-align: center; padding: 40px; color: #e74c3c;"><i class="fas fa-exclamation-triangle" style="font-size: 2rem;"></i><p>Lỗi khi tìm kiếm: ' + error.message + '</p></div>';
+                paginationDiv.innerHTML = '';
+            }
+        }
+
+        // Hiển thị kết quả câu hỏi
+        function displayQuestionResults(questions, contentDiv, paginationDiv, total, page) {
+            let html = '<table style="width: 100%; border-collapse: collapse;">';
+            html += '<thead><tr style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">';
+            html += '<th style="padding: 12px; text-align: left; width: 60px;">ID</th>';
+            html += '<th style="padding: 12px; text-align: left;">Nội dung</th>';
+            html += '<th style="padding: 12px; text-align: left; width: 120px;">Loại</th>';
+            html += '<th style="padding: 12px; text-align: left; width: 100px;">Lớp</th>';
+            html += '<th style="padding: 12px; text-align: left; width: 80px;">Độ khó</th>';
+            html += '<th style="padding: 12px; text-align: center; width: 120px;">Thao tác</th>';
+            html += '</tr></thead><tbody>';
+            
+            questions.forEach(q => {
+                const difficultyLabel = q.difficulty === 1 ? 'NB' : 
+                                        q.difficulty === 2 ? 'TH' : 
+                                        q.difficulty === 3 ? 'VD' : 
+                                        q.difficulty === 4 ? 'VDC' : 'Chưa rõ';
+                const typeLabel = q.question_type === 'mc' ? 'TN' : 
+                                 q.question_type === 'tf' ? 'ĐS' : 
+                                 q.question_type === 'short' ? 'TL' : 'KT';
+                
+                let contentPreview = q.content || '';
+                if (contentPreview.length > 100) {
+                    contentPreview = contentPreview.substring(0, 100) + '...';
+                }
+                contentPreview = contentPreview.replace(/<[^>]*>/g, '');
+                
+                const safeContent = contentPreview.replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+                const safeGrade = (q.grade || '-').replace(/"/g, '&quot;');
+                
+                html += '<tr style="border-bottom: 1px solid #dee2e6;">';
+                html += '<td style="padding: 12px; font-weight: bold; color: #3498db;">' + q.id + '</td>';
+                html += '<td style="padding: 12px;">' + safeContent + '</td>';
+                html += '<td style="padding: 12px;"><span style="background: #3498db; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">' + typeLabel + '</span></td>';
+                html += '<td style="padding: 12px;">' + safeGrade + '</td>';
+                html += '<td style="padding: 12px;"><span style="background: #e74c3c; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.85rem;">' + difficultyLabel + '</span></td>';
+                html += '<td style="padding: 12px; text-align: center;">';
+                html += '<button onclick="viewQuestion(' + q.id + ')" style="background: #3498db; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; margin-right: 5px;" title="Xem chi tiết"><i class="fas fa-eye"></i></button>';
+                html += '<button onclick="deleteQuestion(' + q.id + ')" style="background: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer;" title="Xóa"><i class="fas fa-trash"></i></button>';
+                html += '</td>';
+                html += '</tr>';
+            });
+            
+            html += '</tbody></table>';
+            contentDiv.innerHTML = html;
+            
+            // Pagination đơn giản
+            const totalPages = Math.ceil(total / 20);
+            if (totalPages > 1) {
+                let paginationHtml = '<div style="display: flex; justify-content: center; gap: 10px; align-items: center;">';
+                if (page > 1) {
+                    paginationHtml += '<button onclick="searchQuestions(' + (page - 1) + ')" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;"><i class="fas fa-chevron-left"></i> Trước</button>';
+                }
+                paginationHtml += '<span style="padding: 8px 15px;">Trang ' + page + ' / ' + totalPages + ' (Tổng: ' + total + ' câu hỏi)</span>';
+                if (page < totalPages) {
+                    paginationHtml += '<button onclick="searchQuestions(' + (page + 1) + ')" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer;">Sau <i class="fas fa-chevron-right"></i></button>';
+                }
+                paginationHtml += '</div>';
+                paginationDiv.innerHTML = paginationHtml;
+            } else {
+                paginationDiv.innerHTML = '<div style="text-align: center; color: #7f8c8d;">Tổng: ' + total + ' câu hỏi</div>';
+            }
+        }
+
+
+        // Xem chi tiết câu hỏi
+        async function viewQuestion(id) {
+            try {
+                const result = await API.getQuestionById(id);
+                if (result.success) {
+                    const q = result.question;
+                    let answerText = '';
+                    try {
+                        const answerData = JSON.parse(q.answer);
+                        if (Array.isArray(answerData)) {
+                            answerText = answerData.join(', ');
+                        } else {
+                            answerText = q.answer;
+                        }
+                    } catch (e) {
+                        answerText = q.answer;
+                    }
+                    
+                    let html = '<div style="max-width: 800px; margin: 0 auto; background: white; padding: 30px; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">';
+                    html += '<h2 style="color: #2c3e50; border-bottom: 2px solid #3498db; padding-bottom: 10px;">Chi tiết câu hỏi #' + q.id + '</h2>';
+                    html += '<div style="margin-top: 20px;">';
+                    html += '<p><strong>Loại chương trình:</strong> ' + (q.program_type || '-') + '</p>';
+                    html += '<p><strong>Lớp:</strong> ' + (q.grade || '-') + '</p>';
+                    html += '<p><strong>Chủ đề:</strong> ' + (q.subject || '-') + '</p>';
+                    html += '<p><strong>Chuyên đề:</strong> ' + (q.topic || '-') + '</p>';
+                    html += '<p><strong>Dạng toán:</strong> ' + (q.skill || '-') + '</p>';
+                    html += '<p><strong>Loại câu hỏi:</strong> ' + (q.question_type === 'mc' ? 'Trắc nghiệm' : q.question_type === 'tf' ? 'Đúng/Sai' : q.question_type === 'short' ? 'Trả lời ngắn' : 'Kéo thả') + '</p>';
+                    html += '<p><strong>Độ khó:</strong> ' + (q.difficulty === 1 ? 'NB' : q.difficulty === 2 ? 'TH' : q.difficulty === 3 ? 'VD' : q.difficulty === 4 ? 'VDC' : 'Chưa rõ') + '</p>';
+                    html += '<div style="margin-top: 20px; padding: 15px; background: #f8f9fa; border-radius: 5px;"><strong>Nội dung:</strong><div style="margin-top: 10px;">' + (q.content || '-') + '</div></div>';
+                    html += '<div style="margin-top: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px;"><strong>Đáp án:</strong><div style="margin-top: 10px;">' + (answerText || '-') + '</div></div>';
+                    if (q.solution) {
+                        html += '<div style="margin-top: 15px; padding: 15px; background: #e8f5e9; border-radius: 5px;"><strong>Lời giải:</strong><div style="margin-top: 10px;">' + q.solution + '</div></div>';
+                    }
+                    if (q.note) {
+                        html += '<div style="margin-top: 15px; padding: 15px; background: #fff3e0; border-radius: 5px;"><strong>Ghi chú:</strong><div style="margin-top: 10px;">' + q.note + '</div></div>';
+                    }
+                    html += '<div style="margin-top: 20px; text-align: center;">';
+                    html += '<button onclick="document.getElementById(\'questionDetailModal\').remove()" style="padding: 10px 30px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Đóng</button>';
+                    html += '</div>';
+                    html += '</div></div>';
+                    
+                    const modal = document.createElement('div');
+                    modal.id = 'questionDetailModal';
+                    modal.style.cssText = 'position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px;';
+                    modal.innerHTML = html;
+                    modal.onclick = function(e) {
+                        if (e.target === modal) {
+                            modal.remove();
+                        }
+                    };
+                    document.body.appendChild(modal);
+                }
+            } catch (error) {
+                alert('Lỗi khi tải chi tiết câu hỏi: ' + error.message);
+            }
+        }
+
+        // Xóa câu hỏi
+        async function deleteQuestion(id) {
+            if (!confirm('Bạn có chắc chắn muốn xóa câu hỏi #' + id + '?')) {
+                return;
+            }
+            
+            try {
+                const response = await fetch(`${window.location.origin}/api/questions/${id}`, {
+                    method: 'DELETE'
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    alert('Đã xóa câu hỏi thành công!');
+                    if (hasSearched) {
+                        searchQuestions(currentPage);
+                    }
+                } else {
+                    alert('Lỗi khi xóa câu hỏi: ' + (result.error || 'Unknown error'));
+                }
+            } catch (error) {
+                alert('Lỗi khi xóa câu hỏi: ' + error.message);
+            }
+        }
+    </script>
+
+    <!-- Modal Preview sau khi lưu -->
+    <div class="modal-overlay" id="previewModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.7); z-index: 9999; align-items: center; justify-content: center; padding: 20px;">
+        <div class="modal-content" style="max-width: 900px; width: 100%; height: 85vh; background: white; border-radius: 10px; box-shadow: 0 4px 20px rgba(0,0,0,0.3); display: flex; flex-direction: column;">
+            <div class="modal-header" style="background: #27ae60; color: white; padding: 20px; border-radius: 10px 10px 0 0; display: flex; justify-content: space-between; align-items: center;">
+                <div class="modal-title" style="font-size: 1.2rem; font-weight: bold;"><i class="fas fa-check"></i> Lưu thành công! Xem trước câu hỏi</div>
+                <button class="modal-close" onclick="closePreviewModal()" style="background: none; border: none; color: white; font-size: 2rem; cursor: pointer; padding: 0; width: 30px; height: 30px; display: flex; align-items: center; justify-content: center;">&times;</button>
+            </div>
+            <div class="modal-body" style="background: #f5f6fa; padding: 30px; flex: 1; overflow-y: auto;">
+                <div id="examSimulation" style="background: white; padding: 40px; border-radius: 8px; box-shadow: 0 2px 15px rgba(0,0,0,0.05); font-family: 'Times New Roman', serif; font-size: 1.15rem; line-height: 1.6;">
+                </div>
+            </div>
+            <div class="modal-footer" style="padding: 20px; border-top: 2px solid #e0e0e0; display: flex; justify-content: flex-end; gap: 10px;">
+                <button class="btn-modal btn-cancel" onclick="closePreviewModal()" style="padding: 12px 30px; background: #95a5a6; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Đóng & Nhập tiếp</button>
+                <button class="btn-modal btn-done" onclick="window.location.reload()" style="padding: 12px 30px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; font-size: 1rem;">Làm mới trang</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function showSavedPreview(data) {
+            const container = document.getElementById('examSimulation');
+            let html = '';
+            
+            // 1. Render Nội dung câu hỏi
+            html += '<div style="margin-bottom: 25px;">';
+            html += '<span style="font-weight: bold; color: #27ae60; user-select: none;">Câu hỏi:</span> ';
+            html += '<div class="tex2jax_process" style="margin-top: 5px;">' + data.content + '</div>';
+            html += '</div>';
+            
+            // 2. Render Đáp án
+            const answers = JSON.parse(data.answer);
+            html += '<div style="margin-top: 15px;">';
+            
+            if (data.question_type === 'mc') { // Trắc nghiệm
+                html += '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">';
+                answers.forEach((ans, idx) => {
+                    const label = String.fromCharCode(64 + idx + 1); // A, B, C...
+                    // Format giống thi thật: Label đậm, nội dung bên cạnh
+                    html += '<div style="display: flex; gap: 10px;">';
+                    html += '<strong style="color: #2980b9; min-width: 25px;">' + label + '.</strong>';
+                    html += '<div class="tex2jax_process">' + ans + '</div>';
+                    html += '</div>';
+                });
+                html += '</div>';
+            } 
+            else if (data.question_type === 'tf') { // Đúng/Sai
+                html += '<table style="width: 100%; border-collapse: collapse; border: 1px solid #ddd;">';
+                html += '<tr style="background: #f1f2f6;">';
+                html += '<th style="border: 1px solid #ddd; padding: 8px;">Mệnh đề</th>';
+                html += '<th style="border: 1px solid #ddd; padding: 8px; width: 50px; text-align: center;">Đ</th>';
+                html += '<th style="border: 1px solid #ddd; padding: 8px; width: 50px; text-align: center;">S</th>';
+                html += '</tr>';
+                answers.forEach(item => {
+                    html += '<tr>';
+                    html += '<td style="border: 1px solid #ddd; padding: 8px;" class="tex2jax_process">' + (item.text || item) + '</td>';
+                    html += '<td style="border: 1px solid #ddd; text-align: center;"><input type="radio" disabled ' + (item.correct ? 'checked' : '') + '></td>';
+                    html += '<td style="border: 1px solid #ddd; text-align: center;"><input type="radio" disabled ' + (!item.correct ? 'checked' : '') + '></td>';
+                    html += '</tr>';
+                });
+                html += '</table>';
+            }
+            
+            html += '</div>'; // End answers
+            
+            // 3. Render Lời giải (Ẩn đi, click để xem hoặc hiện luôn tùy bạn, ở đây hiện luôn để check)
+            if (data.solution) {
+                html += '<div style="margin-top: 30px; padding-top: 20px; border-top: 1px dashed #ccc;">';
+                html += '<strong style="color: #d35400;">Lời giải chi tiết:</strong>';
+                html += '<div class="tex2jax_process" style="margin-top: 10px;">' + data.solution + '</div>';
+                html += '</div>';
+            }
+            
+            container.innerHTML = html;
+            document.getElementById('previewModal').style.display = 'flex';
+            
+            // Render MathJax cho Modal
+            setTimeout(() => {
+                triggerMathJaxRender(container);
+            }, 100);
+        }
+        
+        function closePreviewModal() {
+            document.getElementById('previewModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

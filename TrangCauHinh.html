@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cấu Hình Ma Trận Đề - TOAN.VN</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; padding-bottom: 120px;}
+        
+        .top-bar {
+            background: white; height: 70px; display: flex; align-items: center; 
+            justify-content: space-between; padding: 0 30px; border-bottom: 1px solid #ddd;
+            position: sticky; top: 0; z-index: 1000; box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+        .page-title { color: #2c3e50; font-weight: 800; font-size: 1.2rem; text-transform: uppercase; }
+        .btn-back {
+            padding: 8px 15px; border: 1px solid #ccc; background: #fff; border-radius: 5px; 
+            cursor: pointer; font-weight: bold; display: flex; align-items: center; gap: 5px; transition: 0.2s;
+        }
+        .btn-back:hover { background: #eee; }
+
+        .container { max-width: 1400px; margin: 30px auto; padding: 0 20px; }
+
+        /* Card Config */
+        .type-config-card {
+            background: white; border-radius: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+            margin-bottom: 40px; overflow: hidden; border: 1px solid #e0e0e0;
+        }
+        .card-header {
+            background: #f9f9f9; padding: 15px 20px; border-bottom: 1px solid #eee;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .type-name { font-weight: 800; color: #d35400; font-size: 1.1rem; max-width: 60%; }
+        
+        /* Inputs & Buttons */
+        .global-random-box { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+        }
+        .local-random-box { 
+            display: flex; 
+            align-items: center; 
+            gap: 5px; 
+            justify-content: center;
+            width: 100%;
+        }
+        .global-random-box { background: #fff; padding: 5px 10px; border: 1px solid #27ae60; border-radius: 5px; }
+        
+        .global-input {
+            width: 60px; text-align: center; border: 1px solid #ccc; 
+            padding: 6px; border-radius: 4px; font-weight: bold; color: #27ae60; outline: none;
+        }
+        .btn-global-random {
+            background: #27ae60; color: white; border: none; padding: 6px 15px;
+            border-radius: 4px; cursor: pointer; font-weight: bold; font-size: 0.85rem;
+        }
+        
+        .local-input {
+            width: 40px; text-align: center; border: 1px solid #ccc; 
+            padding: 3px; border-radius: 3px; font-size: 0.8rem; color: #2980b9; outline: none;
+        }
+        .btn-local-random {
+            background: #3498db; color: white; border: none; padding: 4px 8px;
+            border-radius: 3px; cursor: pointer; font-size: 0.75rem; font-weight: 600;
+        }
+
+        /* Table */
+        .config-table, .summary-table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        .config-table th, .config-table td, .summary-table th, .summary-table td { border: 1px solid #ddd; text-align: center; padding: 8px 4px; }
+        
+        .row-type th { background: #ecf0f1; color: #2c3e50; font-weight: 700; height: 40px;}
+        .row-level th { background: #f4f6f8; font-size: 0.8rem; color: #555; }
+        .row-sum td { background: #fff8e1; font-weight: bold; color: #d35400; } 
+
+        .cell-input { 
+            width: 100%; border: none; text-align: center; outline: none; 
+            font-weight: bold; color: #333; font-size: 1rem; background: transparent;
+        }
+        .cell-input:focus { background: #e8f8f5; }
+        .cell-input::-webkit-outer-spin-button, .cell-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        
+        .time-input {
+            width: 100%; border: none; text-align: center; outline: none; 
+            font-weight: bold; color: #27ae60; font-size: 0.9rem; background: transparent;
+        }
+        .time-input:focus { background: #e8f8f5; }
+
+        /* Colors */
+        .col-group-tn { border-left: 2px solid #3498db; background-color: rgba(52, 152, 219, 0.02); }
+        .col-group-ds { border-left: 2px solid #e67e22; background-color: rgba(230, 126, 34, 0.02); }
+        .col-group-tl { border-left: 2px solid #9b59b6; background-color: rgba(155, 89, 182, 0.02); }
+        .col-group-kt { border-left: 2px solid #2ecc71; background-color: rgba(46, 204, 113, 0.02); }
+
+        /* SUMMARY TABLE SECTION */
+        .summary-section { margin-top: 50px; background: white; border-radius: 10px; padding: 20px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .summary-title { font-size: 1.2rem; font-weight: 800; color: #2c3e50; margin-bottom: 15px; text-transform: uppercase; border-left: 5px solid #27ae60; padding-left: 10px; }
+        
+        .summary-table th { background: #2c3e50; color: white; }
+        .summary-table .sum-row-total { background: #fbeee6; font-weight: bold; }
+
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px; border-top: 3px solid #3498db;
+            text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.15);
+            display: flex; justify-content: center; gap: 40px; align-items: center; z-index: 999;
+        }
+        .btn-finish {
+            background: #3498db; color: white; border: none; padding: 12px 50px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(52, 152, 219, 0.4); transition: 0.2s;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn-finish:hover { background: #2980b9; transform: scale(1.05); }
+    </style>
+</head>
+<body>
+
+    <div class="top-bar">
+        <div class="page-title"><i class="fas fa-cogs"></i> Cấu hình chi tiết</div>
+        <button class="btn-back" onclick="goBack()">
+            <i class="fas fa-arrow-left"></i> Quay lại chọn dạng
+        </button>
+    </div>
+
+    <div class="container" id="config-container">
+        </div>
+
+    <div class="container summary-section">
+        <div class="summary-title">Bảng Tổng Hợp Ma Trận Đề</div>
+        <table class="summary-table" id="summary-table">
+            </table>
+        <div style="margin-top: 20px; padding: 15px; background: #e8f8f5; border-radius: 8px; text-align: center;">
+            <strong style="color: #27ae60; font-size: 1.1rem;">
+                TỔNG THỜI GIAN: <span id="total-time" style="color: #2c3e50; font-size: 1.3rem;">0</span> phút
+            </strong>
+        </div>
+    </div>
+
+    <div class="bottom-bar">
+        <div style="font-weight: bold; color: #555; font-size: 1.1rem;">
+            TỔNG CỘNG: <span id="grand-total" style="color: #e74c3c; font-size: 1.5rem; margin: 0 5px;">0</span> CÂU
+        </div>
+        <button class="btn-finish" onclick="exportExam()">
+            <i class="fas fa-file-export"></i> XUẤT ĐỀ THI
+        </button>
+    </div>
+
+
+    <script src="data_master.js"></script>
+
+   <script>
+        // Công thức tính thời gian (phút/câu)
+        const TIME_FORMULA = {
+            tn: { nb: 1, th: 2, vd: 4, vdc: 6 },
+            ds: 9, // Đúng/Sai: 9 phút/câu (gồm 4 ý: NB 0.5 + TH 1.5 + VD 2.5 + VDC 4.5)
+            tl: { nb: 1.5, th: 3, vd: 5, vdc: 8 },
+            kt: { nb: 1, th: 2, vd: 4, vdc: 7 }
+        };
+
+        // HÀM TRA CỨU TÊN
+        function findNameById(id) {
+            if (DATA_SOURCE.DaiSo10) for (let c of DATA_SOURCE.DaiSo10) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.HinhHoc10) for (let c of DATA_SOURCE.HinhHoc10) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.DaiSo11) for (let c of DATA_SOURCE.DaiSo11) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.HinhHoc11) for (let c of DATA_SOURCE.HinhHoc11) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.DaiSo12) for (let c of DATA_SOURCE.DaiSo12) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.HinhHoc12) for (let c of DATA_SOURCE.HinhHoc12) { let f = c.dang.find(d => d.id === id); if (f) return f.txt; }
+            if (DATA_SOURCE.SAT_Data) {
+                for (let c of DATA_SOURCE.SAT_Data) {
+                    let f = c.dang.find(d => d.id === id);
+                    if (f) return f.txt;
+                }
+            }
+            return "Dạng toán " + id;
+        }
+
+        // Hàm quay lại
+        function goBack() {
+            const grade = localStorage.getItem('currentGrade') || 'Lop10';
+            if (grade === 'Lop10') window.location.href = 'lop10_tutao.html';
+            else if (grade === 'Lop11') window.location.href = 'lop11_tutao.html';
+            else if (grade === 'Lop12') window.location.href = 'lop12_tutao.html';
+            else if (grade === 'SAT') window.location.href = 'sat_tutao.html';
+            else window.location.href = 'lop10_tutao.html';
+        }
+
+        // Tính thời gian tự động
+        function calculateTime(cardId, type, level, count) {
+            if (!count || count <= 0) return 0;
+            // Đúng/Sai: mỗi câu = 9 phút (gồm 4 ý)
+            if (type === 'ds') {
+                return count * TIME_FORMULA.ds;
+            }
+            // Các loại khác: tính theo mức độ
+            const timePerQuestion = TIME_FORMULA[type][level];
+            if (!timePerQuestion) return 0;
+            return count * timePerQuestion;
+        }
+
+        // Cập nhật thời gian cho một card
+        function updateCardTime(cardId) {
+            const timeInput = document.getElementById(`time-${cardId}`);
+            if (!timeInput) return;
+            
+            // Tính tự động dựa trên số câu và công thức
+            // Công thức: Tổng (số câu * trọng số thời gian tương ứng)
+            let totalTime = 0;
+            const types = ['tn', 'ds', 'tl', 'kt'];
+            const levels = ['nb', 'th', 'vd', 'vdc'];
+            
+            types.forEach(type => {
+                if (type === 'ds') {
+                    // Đúng/Sai: chỉ có 1 input .c-all, mỗi câu = 9 phút
+                    const dsInput = document.querySelector(`.c-${cardId}-ds.c-all`);
+                    if (dsInput) {
+                        const dsCount = parseInt(dsInput.value) || 0;
+                        if (dsCount > 0) {
+                            totalTime += dsCount * TIME_FORMULA.ds;
+                        }
+                    }
+                } else {
+                    // Các loại khác: tính theo từng mức độ
+                    levels.forEach(level => {
+                        const input = document.querySelector(`.c-${cardId}-${type}.c-${level}`);
+                        if (input) {
+                            const count = parseInt(input.value) || 0;
+                            if (count > 0) {
+                                const timePerQuestion = TIME_FORMULA[type][level];
+                                totalTime += count * timePerQuestion;
+                            }
+                        }
+                    });
+                }
+            });
+            
+            // Chỉ cập nhật nếu người dùng chưa nhập thủ công hoặc đang focus vào ô số câu
+            // Nếu có giá trị thủ công, giữ nguyên (người dùng có thể override)
+            if (!timeInput.dataset.manual || timeInput.dataset.manual === 'false') {
+                timeInput.value = totalTime > 0 ? Math.round(totalTime * 10) / 10 : '';
+            }
+            updateTotalTime();
+        }
+
+        // Cập nhật tổng thời gian
+        function updateTotalTime() {
+            const totalTimeEl = document.getElementById('total-time');
+            if (!totalTimeEl) return; // Nếu phần tử chưa tồn tại, thoát sớm
+            
+            let grandTotal = 0;
+            selectedIds.forEach(id => {
+                const timeInput = document.getElementById(`time-${id}`);
+                if (timeInput && timeInput.value && timeInput.value.trim() !== '') {
+                    grandTotal += parseFloat(timeInput.value) || 0;
+                } else {
+                    // Nếu không có giá trị nhập tay, tính tự động
+                    const types = ['tn', 'ds', 'tl', 'kt'];
+                    const levels = ['nb', 'th', 'vd', 'vdc'];
+                    
+                    types.forEach(type => {
+                        if (type === 'ds') {
+                            // Đúng/Sai: chỉ có 1 input .c-all
+                            const dsInput = document.querySelector(`.c-${id}-ds.c-all`);
+                            if (dsInput) {
+                                const count = parseInt(dsInput.value) || 0;
+                                if (count > 0) {
+                                    grandTotal += count * TIME_FORMULA.ds;
+                                }
+                            }
+                        } else {
+                            // Các loại khác: tính theo từng mức độ
+                            levels.forEach(level => {
+                                const input = document.querySelector(`.c-${id}-${type}.c-${level}`);
+                                if (input) {
+                                    const count = parseInt(input.value) || 0;
+                                    if (count > 0) {
+                                        grandTotal += count * TIME_FORMULA[type][level];
+                                    }
+                                }
+                            });
+                        }
+                    });
+                }
+            });
+            totalTimeEl.innerText = Math.round(grandTotal * 10) / 10;
+        }
+
+        let selectedIds = [];
+        window.onload = function() {
+            try {
+                const storedIds = localStorage.getItem('selectedMathTypes');
+                if (!storedIds) {
+                    alert('Chưa có dữ liệu dạng toán được chọn!');
+                    goBack();
+                    return;
+                }
+                selectedIds = JSON.parse(storedIds);
+                const container = document.getElementById('config-container');
+                
+                if (!container) {
+                    console.error('Không tìm thấy config-container!');
+                    return;
+                }
+
+                // Kiểm tra DATA_SOURCE đã load chưa
+                if (typeof DATA_SOURCE === 'undefined') {
+                    console.error('DATA_SOURCE chưa được load!');
+                    setTimeout(window.onload, 100); // Thử lại sau 100ms
+                    return;
+                }
+
+                selectedIds.forEach(id => {
+                    try {
+                        const name = findNameById(id);
+                        const card = createConfigCard(id, name);
+                        if (card) {
+                            container.appendChild(card);
+                        }
+                    } catch (error) {
+                        console.error('Lỗi khi tạo card cho id:', id, error);
+                    }
+                });
+                
+                updateSummaryTable();
+                updateTotalTime();
+            } catch (error) {
+                console.error('Lỗi trong window.onload:', error);
+                alert('Có lỗi xảy ra khi tải trang. Vui lòng thử lại.');
+            }
+        };
+
+        function createConfigCard(id, name) {
+            const div = document.createElement('div');
+            div.className = 'type-config-card';
+            div.id = `card-${id}`;
+            div.dataset.name = name; 
+            div.innerHTML = `
+                <div class="card-header">
+                    <div class="type-name">${name}</div>
+                    <div class="global-random-box">
+                        <input type="number" class="global-input" id="g-inp-${id}" placeholder="..." oninput="validateInput(this)">
+                        <button class="btn-global-random" onclick="randomGlobal('${id}')">
+                            <i class="fas fa-bolt"></i> Tạo ngẫu nhiên
+                        </button>
+                    </div>
+                </div>
+                <table class="config-table" id="tbl-${id}">
+                    <tr class="row-type">
+                        <th style="width: 120px;">Dạng toán</th>
+                        <th colspan="4" class="col-group-tn">Trắc nghiệm</th>
+                        <th class="col-group-ds">Đúng/Sai<br><span style="font-size:0.7rem; font-weight:normal;">(1 câu = 4 ý)</span></th>
+                        <th colspan="4" class="col-group-tl">Trả lời ngắn</th>
+                        <th colspan="4" class="col-group-kt">Kéo/Thả</th>
+                    </tr>
+                    <tr class="row-random">
+                        <td>Tự động</td>
+                        <td colspan="4" class="col-group-tn">
+                            <div class="local-random-box">
+                                <input type="number" class="local-input sub-inp-${id}-tn" placeholder="..." oninput="validateInput(this)">
+                                <button class="btn-local-random" onclick="randomSub('${id}', 'tn')"><i class="fas fa-bolt"></i></button>
+                            </div>
+                        </td>
+                        <td class="col-group-ds">
+                            <div class="local-random-box">
+                                <input type="number" class="local-input sub-inp-${id}-ds" placeholder="..." oninput="validateInput(this)">
+                                <button class="btn-local-random" onclick="randomSubDS('${id}')"><i class="fas fa-bolt"></i></button>
+                            </div>
+                        </td>
+                        <td colspan="4" class="col-group-tl">
+                            <div class="local-random-box">
+                                <input type="number" class="local-input sub-inp-${id}-tl" placeholder="..." oninput="validateInput(this)">
+                                <button class="btn-local-random" onclick="randomSub('${id}', 'tl')"><i class="fas fa-bolt"></i></button>
+                            </div>
+                        </td>
+                        <td colspan="4" class="col-group-kt">
+                            <div class="local-random-box">
+                                <input type="number" class="local-input sub-inp-${id}-kt" placeholder="..." oninput="validateInput(this)">
+                                <button class="btn-local-random" onclick="randomSub('${id}', 'kt')"><i class="fas fa-bolt"></i></button>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr class="row-level">
+                        <td>Mức độ</td>
+                        <th class="col-group-tn">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                        <th class="col-group-ds" style="font-size:0.75rem; font-weight:normal; color:#666;">Số câu<br>(gồm 4 ý)</th>
+                        <th class="col-group-tl">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                        <th class="col-group-kt">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                    </tr>
+                    <tr>
+                        <td style="font-weight:bold;">Số câu</td>
+                        <td class="col-group-tn"><input type="number" class="cell-input c-${id}-tn c-nb" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tn c-th" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tn c-vd" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tn c-vdc" oninput="reCalc('${id}')"></td>
+                        <td class="col-group-ds"><input type="number" class="cell-input c-${id}-ds c-all" oninput="reCalc('${id}')" placeholder="Số câu"></td>
+                        <td class="col-group-tl"><input type="number" class="cell-input c-${id}-tl c-nb" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tl c-th" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tl c-vd" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-tl c-vdc" oninput="reCalc('${id}')"></td>
+                        <td class="col-group-kt"><input type="number" class="cell-input c-${id}-kt c-nb" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-kt c-th" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-kt c-vd" oninput="reCalc('${id}')"></td>
+                        <td><input type="number" class="cell-input c-${id}-kt c-vdc" oninput="reCalc('${id}')"></td>
+                    </tr>
+                    <tr class="row-sum">
+                        <td>Tổng số câu</td>
+                        <td colspan="4" class="col-group-tn" id="sum-${id}-tn">0</td>
+                        <td class="col-group-ds" id="sum-${id}-ds">0</td>
+                        <td colspan="4" class="col-group-tl" id="sum-${id}-tl">0</td>
+                        <td colspan="4" class="col-group-kt" id="sum-${id}-kt">0</td>
+                    </tr>
+                    <tr style="background: #fdfefe;">
+                        <td style="font-size: 0.8rem;">Thời gian (phút)</td>
+                        <td colspan="13"><input type="number" id="time-${id}" class="time-input" placeholder="Tự động tính toán..." oninput="this.dataset.manual='true'; updateTotalTime()" onfocus="this.dataset.manual='true'" onblur="if(!this.value || this.value.trim()==='') { this.dataset.manual='false'; updateCardTime('${id}'); } else { updateTotalTime(); }" step="0.1"></td>
+                    </tr>
+                </table>
+            `;
+            return div;
+        }
+
+        function distributeRandomly(total, slots) {
+            let result = new Array(slots).fill(0);
+            for(let i = 0; i < total; i++) {
+                const randomIndex = Math.floor(Math.random() * slots);
+                result[randomIndex]++;
+            }
+            return result;
+        }
+
+        function validateInput(input) {
+            if(input.value > 100) input.value = 100;
+            if(input.value < 0) input.value = 1;
+        }
+
+        function randomSub(cardId, type) {
+            const input = document.querySelector(`.sub-inp-${cardId}-${type}`);
+            let val = input.value;
+            let total = parseInt(val);
+
+            if (val === "" || isNaN(total)) { 
+                total = Math.floor(Math.random() * 5) + 1; 
+                input.value = total;
+            }
+
+            if (total <= 0) {
+                const cells = document.querySelectorAll(`.c-${cardId}-${type}`);
+                cells.forEach(cell => cell.value = "");
+                reCalc(cardId);
+                return;
+            }
+
+            const parts = distributeRandomly(total, 4);
+            const cells = document.querySelectorAll(`.c-${cardId}-${type}`);
+            cells.forEach((cell, idx) => {
+                cell.value = parts[idx] > 0 ? parts[idx] : ''; 
+            });
+
+            reCalc(cardId);
+        }
+
+        function randomGlobal(cardId) {
+            const input = document.getElementById(`g-inp-${cardId}`);
+            // Luôn random lại mỗi lần click, không phụ thuộc vào giá trị hiện tại
+            const total = Math.floor(Math.random() * 15) + 5; 
+            input.value = total;
+
+            // Tỉ lệ phân bổ: TN 12/22, DS 4/22, TL 6/22, KT 0
+            const totalRatio = 22;
+            const tnCount = Math.round(total * 12 / totalRatio);
+            const dsCount = Math.round(total * 4 / totalRatio);
+            const tlCount = Math.round(total * 6 / totalRatio);
+            const ktCount = 0; // Tạm thời = 0
+
+            // Phân bổ Trắc nghiệm: chỉ NB và TH (không có VD, VDC)
+            // NB 60%, TH 40%
+            const tnDifficultyRatios = { nb: 0.6, th: 0.4 };
+            const tnInputs = {
+                nb: document.querySelector(`.c-${cardId}-tn.c-nb`),
+                th: document.querySelector(`.c-${cardId}-tn.c-th`),
+                vd: document.querySelector(`.c-${cardId}-tn.c-vd`),
+                vdc: document.querySelector(`.c-${cardId}-tn.c-vdc`)
+            };
+            // Chỉ set NB và TH
+            if (tnInputs.nb) tnInputs.nb.value = Math.round(tnCount * tnDifficultyRatios.nb) || '';
+            if (tnInputs.th) tnInputs.th.value = Math.round(tnCount * tnDifficultyRatios.th) || '';
+            // Xóa VD và VDC
+            if (tnInputs.vd) tnInputs.vd.value = '';
+            if (tnInputs.vdc) tnInputs.vdc.value = '';
+
+            // Đúng/Sai: không phân mức độ
+            const dsInput = document.querySelector(`.c-${cardId}-ds.c-all`);
+            if (dsInput) dsInput.value = dsCount || '';
+
+            // Phân bổ Trả lời ngắn: chỉ TH, VD, VDC (không có NB)
+            // TH 40%, VD 35%, VDC 25%
+            const tlDifficultyRatios = { th: 0.4, vd: 0.35, vdc: 0.25 };
+            const tlInputs = {
+                nb: document.querySelector(`.c-${cardId}-tl.c-nb`),
+                th: document.querySelector(`.c-${cardId}-tl.c-th`),
+                vd: document.querySelector(`.c-${cardId}-tl.c-vd`),
+                vdc: document.querySelector(`.c-${cardId}-tl.c-vdc`)
+            };
+            // Xóa NB
+            if (tlInputs.nb) tlInputs.nb.value = '';
+            // Chỉ set TH, VD, VDC
+            if (tlInputs.th) tlInputs.th.value = Math.round(tlCount * tlDifficultyRatios.th) || '';
+            if (tlInputs.vd) tlInputs.vd.value = Math.round(tlCount * tlDifficultyRatios.vd) || '';
+            if (tlInputs.vdc) tlInputs.vdc.value = Math.round(tlCount * tlDifficultyRatios.vdc) || '';
+
+            // Kéo/Thả: tạm thời = 0
+            const ktInputs = {
+                nb: document.querySelector(`.c-${cardId}-kt.c-nb`),
+                th: document.querySelector(`.c-${cardId}-kt.c-th`),
+                vd: document.querySelector(`.c-${cardId}-kt.c-vd`),
+                vdc: document.querySelector(`.c-${cardId}-kt.c-vdc`)
+            };
+            Object.keys(ktInputs).forEach(level => {
+                if (ktInputs[level]) ktInputs[level].value = '';
+            });
+
+            // Cập nhật các giá trị tự động
+            const tnSubInput = document.querySelector(`.sub-inp-${cardId}-tn`);
+            if (tnSubInput) tnSubInput.value = tnCount || '';
+            const dsSubInput = document.querySelector(`.sub-inp-${cardId}-ds`);
+            if (dsSubInput) dsSubInput.value = dsCount || '';
+            const tlSubInput = document.querySelector(`.sub-inp-${cardId}-tl`);
+            if (tlSubInput) tlSubInput.value = tlCount || '';
+            const ktSubInput = document.querySelector(`.sub-inp-${cardId}-kt`);
+            if (ktSubInput) ktSubInput.value = ktCount || '';
+
+            reCalc(cardId);
+        }
+
+        function reCalc(cardId) {
+            const types = ['tn', 'ds', 'tl', 'kt'];
+            types.forEach(type => {
+                if (type === 'ds') {
+                    // Đúng/Sai: chỉ có 1 input
+                    const input = document.querySelector(`.c-${cardId}-ds.c-all`);
+                    const sum = parseInt(input?.value) || 0;
+                    document.getElementById(`sum-${cardId}-ds`).innerText = sum;
+                } else {
+                    // Các loại khác: tính tổng từ các mức độ
+                    const cells = document.querySelectorAll(`.c-${cardId}-${type}:not(.c-all)`);
+                    let subSum = 0;
+                    cells.forEach(c => subSum += (parseInt(c.value) || 0));
+                    document.getElementById(`sum-${cardId}-${type}`).innerText = subSum;
+                }
+            });
+
+            const allInputs = document.querySelectorAll('.cell-input');
+            let grandTotal = 0;
+            allInputs.forEach(inp => grandTotal += (parseInt(inp.value) || 0));
+            document.getElementById('grand-total').innerText = grandTotal;
+            updateSummaryTable();
+            updateCardTime(cardId);
+        }
+        
+        // Hàm random cho Đúng/Sai (không phân mức độ)
+        function randomSubDS(cardId) {
+            const input = document.querySelector(`.sub-inp-${cardId}-ds`);
+            let val = input.value;
+            let total = parseInt(val);
+
+            if (val === "" || isNaN(total)) { 
+                total = Math.floor(Math.random() * 5) + 1; 
+                input.value = total;
+            }
+
+            if (total <= 0) {
+                const dsInput = document.querySelector(`.c-${cardId}-ds.c-all`);
+                if (dsInput) dsInput.value = "";
+                reCalc(cardId);
+                return;
+            }
+
+            // Đặt trực tiếp vào ô Đúng/Sai (không phân mức độ)
+            const dsInput = document.querySelector(`.c-${cardId}-ds.c-all`);
+            if (dsInput) dsInput.value = total;
+            reCalc(cardId);
+        }
+
+        function updateSummaryTable() {
+            const table = document.getElementById('summary-table');
+            if (!table) return; // Nếu phần tử chưa tồn tại, thoát sớm
+            if (!selectedIds || selectedIds.length === 0) {
+                table.innerHTML = '<tr><td colspan="14" style="text-align:center; padding:20px; color:#999;">Chưa có dữ liệu</td></tr>';
+                return;
+            }
+            table.innerHTML = ""; 
+
+            let thead = `
+                <tr>
+                    <th rowspan="2" style="width: 200px;">Dạng toán</th>
+                    <th colspan="4" class="col-group-tn">TN</th>
+                    <th class="col-group-ds">DS<br><span style="font-size:0.7rem; font-weight:normal;">(1 câu = 4 ý)</span></th>
+                    <th colspan="4" class="col-group-tl">TL</th>
+                    <th colspan="4" class="col-group-kt">KT</th>
+                    <th rowspan="2" style="background:#e74c3c;">Tổng</th>
+                </tr>
+                <tr>
+                    <th class="col-group-tn">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                    <th class="col-group-ds" style="font-size:0.75rem; font-weight:normal; color:#666;">Số câu</th>
+                    <th class="col-group-tl">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                    <th class="col-group-kt">NB</th><th>TH</th><th>VD</th><th>VDC</th>
+                </tr>
+            `;
+            table.innerHTML += thead;
+
+            // Tổng số cột: TN(4) + DS(1) + TL(4) + KT(4) = 13
+            let colTotals = new Array(13).fill(0);
+            let finalSum = 0;
+
+            selectedIds.forEach(id => {
+                const card = document.getElementById(`card-${id}`);
+                const name = card.dataset.name;
+                
+                let rowHtml = `<tr><td style="text-align:left; font-weight:bold;">${name}</td>`;
+                let rowSum = 0;
+                let colIdx = 0;
+
+                // Trắc nghiệm (4 cột)
+                ['nb', 'th', 'vd', 'vdc'].forEach(level => {
+                    const input = document.querySelector(`.c-${id}-tn.c-${level}`);
+                    const val = parseInt(input?.value) || 0;
+                    rowHtml += `<td>${val > 0 ? val : '-'}</td>`;
+                    rowSum += val;
+                    colTotals[colIdx++] += val;
+                });
+
+                // Đúng/Sai (1 cột)
+                const dsInput = document.querySelector(`.c-${id}-ds.c-all`);
+                const dsVal = parseInt(dsInput?.value) || 0;
+                rowHtml += `<td>${dsVal > 0 ? dsVal : '-'}</td>`;
+                rowSum += dsVal;
+                colTotals[colIdx++] += dsVal;
+
+                // Trả lời ngắn (4 cột)
+                ['nb', 'th', 'vd', 'vdc'].forEach(level => {
+                    const input = document.querySelector(`.c-${id}-tl.c-${level}`);
+                    const val = parseInt(input?.value) || 0;
+                    rowHtml += `<td>${val > 0 ? val : '-'}</td>`;
+                    rowSum += val;
+                    colTotals[colIdx++] += val;
+                });
+
+                // Kéo/Thả (4 cột)
+                ['nb', 'th', 'vd', 'vdc'].forEach(level => {
+                    const input = document.querySelector(`.c-${id}-kt.c-${level}`);
+                    const val = parseInt(input?.value) || 0;
+                    rowHtml += `<td>${val > 0 ? val : '-'}</td>`;
+                    rowSum += val;
+                    colTotals[colIdx++] += val;
+                });
+
+                rowHtml += `<td style="font-weight:bold; color:#e74c3c;">${rowSum}</td></tr>`;
+                table.innerHTML += rowHtml;
+                finalSum += rowSum;
+            });
+
+            let footerHtml = `<tr class="sum-row-total"><td>TỔNG CỘNG</td>`;
+            colTotals.forEach(val => {
+                footerHtml += `<td>${val > 0 ? val : '-'}</td>`;
+            });
+            footerHtml += `<td style="color:#e74c3c; font-size:1.1rem;">${finalSum}</td></tr>`;
+            table.innerHTML += footerHtml;
+        }
+
+        // Hàm xuất đề thi
+        function exportExam() {
+            const examData = {
+                grade: localStorage.getItem('currentGrade') || 'Lop10',
+                selectedTypes: selectedIds,
+                config: [],
+                totalQuestions: parseInt(document.getElementById('grand-total').innerText) || 0,
+                totalTime: parseFloat(document.getElementById('total-time').innerText) || 0
+            };
+
+            selectedIds.forEach(id => {
+                const card = document.getElementById(`card-${id}`);
+                const typeName = card.dataset.name;
+                const timeInput = document.getElementById(`time-${id}`);
+                const cardTime = parseFloat(timeInput?.value) || 0;
+
+                const types = ['tn', 'ds', 'tl', 'kt'];
+                const levels = ['nb', 'th', 'vd', 'vdc'];
+                
+                types.forEach(type => {
+                    if (type === 'ds') {
+                        // Đúng/Sai: chỉ có 1 input .c-all
+                        const input = document.querySelector(`.c-${id}-ds.c-all`);
+                        const count = parseInt(input?.value) || 0;
+                        if (count > 0) {
+                            examData.config.push({
+                                typeId: id,
+                                typeName: typeName,
+                                questionType: type,
+                                level: 'all', // Gồm cả 4 mức độ
+                                count: count,
+                                time: count * TIME_FORMULA.ds
+                            });
+                        }
+                    } else {
+                        // Các loại khác: tính theo từng mức độ
+                        levels.forEach(level => {
+                            const input = document.querySelector(`.c-${id}-${type}.c-${level}`);
+                            const count = parseInt(input?.value) || 0;
+                            if (count > 0) {
+                                examData.config.push({
+                                    typeId: id,
+                                    typeName: typeName,
+                                    questionType: type,
+                                    level: level,
+                                    count: count,
+                                    time: count * TIME_FORMULA[type][level]
+                                });
+                            }
+                        });
+                    }
+                });
+            });
+
+            if (examData.totalQuestions === 0) {
+                alert('Vui lòng nhập ít nhất một câu hỏi!');
+                return;
+            }
+
+            localStorage.setItem('examConfig', JSON.stringify(examData));
+            window.location.href = 'exam_interface.html';
+        }
+    </script>
+</body>
+</html>
+

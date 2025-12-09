@@ -1,0 +1,393 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Đề Tự Tạo - Toán 11</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; }
+        
+        .brand-logo {
+            position: fixed; top: 15px; left: 20px; z-index: 1100;
+            background: white; padding: 6px 15px; border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #27ae60;
+            display: flex; align-items: center; cursor: pointer; width: fit-content;
+        }
+        .brand-logo h2 { margin: 0; color: #27ae60; font-size: 1.1rem; }
+        .brand-logo span { font-size: 0.8rem; margin-left: 5px; color: #555; }
+
+        .top-bar {
+            background: white; height: 80px; 
+            display: flex; align-items: center; justify-content: flex-end; 
+            padding: 0 30px; border-bottom: 1px solid #ddd;
+            position: relative; z-index: 1000;
+        }
+
+        .page-title { 
+            position: absolute; left: 50%; transform: translateX(-50%);
+            margin: 0; color: #d35400; font-size: 1.4rem; 
+            text-transform: uppercase; font-weight: 800; white-space: nowrap;
+        }
+
+        .btn-back {
+            padding: 10px 20px; border: 1px solid #ccc; background: #fff;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; z-index: 1001;
+        }
+        .btn-back:hover { background: #eee; color: #333; }
+
+        .main-container {
+            display: flex; gap: 30px; padding: 30px;
+            max-width: 1400px; margin: 0 auto; align-items: flex-start;
+        }
+
+        .column {
+            flex: 1; background: white; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: visible; position: relative;
+        }
+
+        .col-header {
+            padding: 15px; text-align: center; color: white; font-weight: 800;
+            text-transform: uppercase; border-radius: 12px 12px 0 0; font-size: 1.1rem;
+        }
+        .bg-dai { background: #8e44ad; } /* Màu tím cho lớp 11 */
+        .bg-hinh { background: #2980b9; }
+
+        .chapter-list { padding: 15px; }
+
+        .chapter-item {
+            position: relative; padding: 15px 20px; margin-bottom: 10px;
+            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
+            cursor: pointer; font-weight: 600; color: #444; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chapter-item:hover {
+            background: #f4ecf7; color: #8e44ad; border-color: #8e44ad; z-index: 20;
+        }
+        
+        /* --- POPOVER --- */
+        .popover {
+            display: none; position: absolute; top: -10px; width: 380px;
+            background: white; border: 1px solid #bbb;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2); border-radius: 8px;
+            z-index: 100; padding: 0; cursor: default;
+        }
+        .chapter-item:hover .popover { display: block; }
+
+        .popover::after {
+            content: ""; position: absolute; top: -20px; bottom: -20px;
+            width: 60px; background: transparent; 
+        }
+
+        /* Cột Trái: Hiện sang Phải */
+        .column:first-child .popover { left: 100%; margin-left: 10px; }
+        .column:first-child .popover::after { right: 100%; }
+        .column:first-child .popover::before {
+            content: ""; position: absolute; top: 22px; right: 100%;
+            border-width: 10px 10px 10px 0; border-style: solid;
+            border-color: transparent #fff transparent transparent;
+            filter: drop-shadow(-1px 0 0 #bbb);
+        }
+
+        /* Cột Phải: Hiện sang Trái */
+        .column:last-child .popover { right: 100%; left: auto; margin-right: 2px; }
+        .column:last-child .popover::after { left: 100%; }
+        .column:last-child .popover::before {
+            content: ""; position: absolute; top: 22px; left: 100%;
+            border-width: 10px 0 10px 10px; border-style: solid;
+            border-color: transparent transparent transparent #fff;
+            filter: drop-shadow(1px 0 0 #bbb);
+        }
+
+        .popover-header {
+            padding: 12px 15px; background: #f1f1f1; border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0; font-weight: bold; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 10px; color: #27ae60;
+        }
+        .popover-header input { transform: scale(1.3); cursor: pointer; }
+        .popover-body { max-height: 400px; overflow-y: auto; padding: 10px; }
+        
+        .type-item {
+            display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px;
+            border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.1s;
+        }
+        .type-item:hover { background: #f0f8ff; }
+        .type-item input { margin-top: 4px; transform: scale(1.2); cursor: pointer; }
+        .type-item span { font-size: 0.9rem; line-height: 1.4; color: #555; }
+
+        /* --- MENU HIỆN NGƯỢC LÊN (4 item cuối) --- */
+        .chapter-item:nth-last-child(-n+4) .popover { top: auto; bottom: 0; }
+        .chapter-item:nth-last-child(-n+4) .popover::before { top: auto; bottom: 15px; }
+        .chapter-item:nth-last-child(-n+4) .popover::after { top: auto; bottom: 0; height: 60px; }
+
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px; border-top: 2px solid #8e44ad;
+            text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; gap: 20px; align-items: center; z-index: 999;
+        }
+        .btn-create {
+            background: #e74c3c; color: white; border: none; padding: 12px 40px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); transition: 0.2s;
+        }
+        .btn-create:hover { background: #c0392b; transform: scale(1.05); }
+
+        .btn-reset {
+            background: #95a5a6; color: white; border: none; padding: 12px 30px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.4); transition: 0.2s;
+        }
+        .btn-reset:hover { background: #7f8c8d; transform: scale(1.05); }
+        
+        .stats { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2><span>Self-Learning</span>
+    </div>
+
+    <div class="top-bar">
+        <h1 class="page-title"><i class="fas fa-edit"></i> Lựa chọn chuyên đề - Toán 11</h1>
+        <button class="btn-back" onclick="window.location.href='menu.html'">
+            <i class="fas fa-arrow-left"></i> Quay lại Danh mục
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="column">
+            <div class="col-header bg-dai">ĐẠI SỐ & GIẢI TÍCH 11</div>
+            <div class="chapter-list" id="col-daiso"></div>
+        </div>
+        <div class="column">
+            <div class="col-header bg-hinh">HÌNH HỌC 11</div>
+            <div class="chapter-list" id="col-hinhhoc"></div>
+        </div>
+    </div>
+
+    <div style="height: 100px;"></div>
+    
+    <div class="bottom-bar">
+        <button class="btn-reset" onclick="resetSelection()">
+            <i class="fas fa-trash-alt"></i> XÓA CHỌN
+        </button>
+        <div class="stats">Đã chọn: <span id="count-display" style="color: #e74c3c; font-size: 1.2rem;">0</span> dạng toán</div>
+        <button class="btn-create" onclick="hoanThanhChon()">
+            <i class="fas fa-play-circle"></i> TIẾP TỤC
+        </button>
+    </div>
+
+    <script>
+        const DATA = {
+            DaiSo: [
+                { id: "DS11_1", ten: "Chuyên đề 1. Góc lượng giác", dang: [{id: "1D1-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1D1-1-2", txt: "Chuyển đổi đơn vị độ và radian"}, {id: "1D1-1-3", txt: "Số đo của một góc lượng giác"}, {id: "1D1-1-4", txt: "Độ dài của một cung tròn"}, {id: "1D1-1-5", txt: "Đường tròn lượng giác và ứng dụng"}, {id: "1D1-1-6", txt: "Toán thực tế áp dụng góc lượng giác"}] },
+                { id: "DS11_2", ten: "Chuyên đề 2. Giá trị lượng giác", dang: [{id: "1D1-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1D1-2-2", txt: "Xét dấu, tính giá trị lượng giác"}, {id: "1D1-2-3", txt: "Biến đổi, rút gọn biểu thức LG"}, {id: "1D1-2-4", txt: "Các góc lượng giác có liên quan đặc biệt"}, {id: "1D1-2-5", txt: "Toán thực tế áp dụng giá trị LG"}] },
+                { id: "DS11_3", ten: "Chuyên đề 3. Các công thức lượng giác", dang: [{id: "1D1-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1D1-3-2", txt: "Áp dụng công thức cộng"}, {id: "1D1-3-3", txt: "Áp dụng công thức nhân đôi - hạ bậc"}, {id: "1D1-3-4", txt: "Áp dụng công thức biến đổi tích - tổng"}, {id: "1D1-3-5", txt: "Kết hợp nhiều công thức lượng giác"}, {id: "1D1-3-6", txt: "Nhận dạng tam giác"}, {id: "1D1-3-7", txt: "Toán thực tế áp dụng công thức LG"}] },
+                { id: "DS11_4", ten: "Chuyên đề 4. Hàm số lượng giác và đồ thị", dang: [{id: "1D1-4-1", txt: "Câu hỏi lý thuyết"}, {id: "1D1-4-2", txt: "Tìm tập xác định"}, {id: "1D1-4-3", txt: "Xét tính đơn điệu"}, {id: "1D1-4-4", txt: "Xét tính chẵn, lẻ"}, {id: "1D1-4-5", txt: "Xét tính tuần hoàn, tìm chu kỳ"}, {id: "1D1-4-6", txt: "Tìm tập giá trị và min, max"}, {id: "1D1-4-7", txt: "Bảng biến thiên và đồ thị"}, {id: "1D1-4-8", txt: "Toán thực tế áp dụng hàm số LG"}] },
+                { id: "DS11_5", ten: "Chuyên đề 5. Phương trình lượng giác cơ bản", dang: [{id: "1D1-5-1", txt: "Lý thuyết, PT tương đương"}, {id: "1D1-5-2", txt: "Điều kiện có nghiệm"}, {id: "1D1-5-3", txt: "Phương trình cơ bản dùng Radian"}, {id: "1D1-5-4", txt: "Phương trình cơ bản dùng Độ"}, {id: "1D1-5-5", txt: "Phương trình đưa về dạng cơ bản"}, {id: "1D1-5-6", txt: "Toán thực tế áp dụng PT LG"}] },
+                { id: "DS11_6", ten: "Chuyên đề 6. PT lượng giác thường gặp", dang: [{id: "1D1-6-1", txt: "PT bậc n theo một hàm số LG"}, {id: "1D1-6-2", txt: "PT đẳng cấp bậc n đối với sin, cos"}, {id: "1D1-6-3", txt: "PT bậc nhất đối với sin và cos"}, {id: "1D1-6-4", txt: "PT đối xứng, phản đối xứng"}, {id: "1D1-6-5", txt: "PT lượng giác không mẫu mực"}, {id: "1D1-6-6", txt: "PT LG có chứa ẩn ở mẫu số"}, {id: "1D1-6-7", txt: "PT LG có chứa tham số"}, {id: "1D1-6-8", txt: "Toán thực tế áp dụng PT LG thường gặp"}] },
+                { id: "DS11_7", ten: "Chuyên đề 7. Dãy số", dang: [{id: "1D2-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1D2-1-2", txt: "Số hạng tổng quát, biểu diễn dãy số"}, {id: "1D2-1-3", txt: "Tìm số hạng cụ thể của dãy số"}, {id: "1D2-1-4", txt: "Dãy số tăng, dãy số giảm"}, {id: "1D2-1-5", txt: "Dãy số bị chặn"}, {id: "1D2-1-6", txt: "Toán thực tế áp dụng dãy số"}] },
+                { id: "DS11_8", ten: "Chuyên đề 8. Cấp số cộng", dang: [{id: "1D2-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1D2-2-2", txt: "Nhận diện CSC, công sai d"}, {id: "1D2-2-3", txt: "Số hạng tổng quát của CSC"}, {id: "1D2-2-4", txt: "Tìm số hạng cụ thể trong CSC"}, {id: "1D2-2-5", txt: "Điều kiện để dãy số là CSC"}, {id: "1D2-2-6", txt: "Tính tổng của cấp số cộng"}, {id: "1D2-2-7", txt: "Toán thực tế áp dụng CSC"}] },
+                { id: "DS11_9", ten: "Chuyên đề 9. Cấp số nhân", dang: [{id: "1D2-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1D2-3-2", txt: "Nhận diện CSN, công bội q"}, {id: "1D2-3-3", txt: "Số hạng tổng quát của CSN"}, {id: "1D2-3-4", txt: "Tìm số hạng cụ thể trong CSN"}, {id: "1D2-3-5", txt: "Điều kiện để dãy số là CSN"}, {id: "1D2-3-6", txt: "Tính tổng của CSN"}, {id: "1D2-3-7", txt: "Kết hợp cấp số nhân và cấp số cộng"}, {id: "1D2-3-8", txt: "Toán thực tế áp dụng CSN"}] },
+                { id: "DS11_10", ten: "Chuyên đề 10. Giới hạn của dãy số", dang: [{id: "1D3-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1D3-1-2", txt: "PP đặt thừa số chung (lim hữu hạn)"}, {id: "1D3-1-3", txt: "PP lượng liên hợp (lim hữu hạn)"}, {id: "1D3-1-4", txt: "Giới hạn vô cực"}, {id: "1D3-1-5", txt: "Cấp số nhân lùi vô hạn"}, {id: "1D3-1-6", txt: "Toán thực tế áp dụng giới hạn dãy số"}] },
+                { id: "DS11_11", ten: "Chuyên đề 11. Giới hạn của hàm số", dang: [{id: "1D3-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1D3-2-2", txt: "Thay số trực tiếp"}, {id: "1D3-2-3", txt: "PP đặt thừa số chung, hữu hạn"}, {id: "1D3-2-4", txt: "PP đặt thừa số chung, vô cực"}, {id: "1D3-2-5", txt: "PP lượng liên hợp, hữu hạn"}, {id: "1D3-2-6", txt: "PP lượng liên hợp, vô cực"}, {id: "1D3-2-7", txt: "Giới hạn một bên"}, {id: "1D3-2-8", txt: "Toán thực tế áp dụng GH hàm số"}] },
+                { id: "DS11_12", ten: "Chuyên đề 12. Hàm số liên tục", dang: [{id: "1D3-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1D3-3-2", txt: "Tính liên tục qua đồ thị"}, {id: "1D3-3-3", txt: "Hàm số liên tục tại một điểm"}, {id: "1D3-3-4", txt: "Hàm số liên tục trên khoảng/đoạn"}, {id: "1D3-3-5", txt: "Bài toán phương trình có nghiệm"}, {id: "1D3-3-6", txt: "Toán thực tế áp dụng HS liên tục"}] },
+                { id: "DS11_13", ten: "Chuyên đề 13. Số trung bình và mốt (ghép nhóm)", dang: [{id: "1D5-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1D5-1-2", txt: "Mẫu số liệu ghép nhóm"}, {id: "1D5-1-3", txt: "Số trung bình"}, {id: "1D5-1-4", txt: "Mốt"}] },
+                { id: "DS11_14", ten: "Chuyên đề 14. Trung vị và tứ phân vị (ghép nhóm)", dang: [{id: "1D5-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1D5-2-2", txt: "Trung vị"}, {id: "1D5-2-3", txt: "Tứ phân vị"}] },
+                { id: "DS11_15", ten: "Chuyên đề 15. Phép tính lũy thừa", dang: [{id: "1D6-1-1", txt: "Tính giá trị biểu thức lũy thừa"}, {id: "1D6-1-2", txt: "Biến đổi, rút gọn biểu thức"}, {id: "1D6-1-3", txt: "Điều kiện cho lũy thừa, căn thức"}, {id: "1D6-1-4", txt: "So sánh các lũy thừa"}] },
+                { id: "DS11_16", ten: "Chuyên đề 16. Phép tính lôgarit", dang: [{id: "1D6-2-1", txt: "Tính giá trị biểu thức lôgarit"}, {id: "1D6-2-2", txt: "Biến đổi, biểu diễn biểu thức"}, {id: "1D6-2-3", txt: "Rút gọn, chứng minh đẳng thức"}, {id: "1D6-2-4", txt: "Số e và bài toán lãi kép"}, {id: "1D6-2-5", txt: "Toán thực tế áp dụng lôgarit"}] },
+                { id: "DS11_17", ten: "Chuyên đề 17. Hàm số mũ. Hàm số lôgarit", dang: [{id: "1D6-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1D6-3-2", txt: "Tập xác định của hàm số"}, {id: "1D6-3-3", txt: "Sự biến thiên và đồ thị"}, {id: "1D6-3-4", txt: "So sánh các lũy thừa và lôgarit"}, {id: "1D6-3-5", txt: "Toán thực tế áp dụng hàm mũ, log"}] },
+                { id: "DS11_18", ten: "Chuyên đề 18. PT, BPT mũ và lôgarit", dang: [{id: "1D6-4-1", txt: "Điều kiện có nghiệm"}, {id: "1D6-4-2", txt: "Phương trình mũ, lôgarit cơ bản"}, {id: "1D6-4-3", txt: "Bất phương trình mũ, log cơ bản"}, {id: "1D6-4-4", txt: "PT mũ, log đưa về cùng cơ số"}, {id: "1D6-4-5", txt: "BPT mũ, log đưa về cùng cơ số"}, {id: "1D6-4-6", txt: "Toán thực tế áp dụng PT mũ, log"}] },
+                { id: "DS11_19", ten: "Chuyên đề 19. Các PP giải được giảm tải", dang: [{id: "1D6-5-1", txt: "PP đặt ẩn phụ cho PT mũ, log"}, {id: "1D6-5-2", txt: "PP logarit hóa, mũ hóa"}, {id: "1D6-5-3", txt: "PP hàm số, đánh giá"}, {id: "1D6-5-4", txt: "Hệ PT mũ, lôgarit"}, {id: "1D6-5-5", txt: "Toán thực tế áp dụng PT mũ, log"}] },
+                { id: "DS11_20", ten: "Chuyên đề 20. Đạo hàm", dang: [{id: "1D7-1-1", txt: "Tính đạo hàm bằng định nghĩa"}, {id: "1D7-1-2", txt: "Số gia hàm số, số gia biến số"}, {id: "1D7-1-3", txt: "Ý nghĩa Hình học của đạo hàm"}, {id: "1D7-1-4", txt: "Ý nghĩa Vật lý của đạo hàm"}, {id: "1D7-1-5", txt: "Toán thực tế áp dụng định nghĩa"}] },
+                { id: "DS11_21", ten: "Chuyên đề 21. Các quy tắc đạo hàm", dang: [{id: "1D7-2-1", txt: "Tính đạo hàm"}, {id: "1D7-2-2", txt: "Đẳng thức có y và y'"}, {id: "1D7-2-3", txt: "Tiếp tuyến tại một điểm"}, {id: "1D7-2-4", txt: "Tiếp tuyến biết trước hệ số góc"}, {id: "1D7-2-5", txt: "Tiếp tuyến chưa biết tiếp điểm"}, {id: "1D7-2-6", txt: "Giới hạn hàm lượng giác, mũ, log"}, {id: "1D7-2-7", txt: "Dùng đạo hàm cho nhị thức Newton"}, {id: "1D7-2-8", txt: "Toán thực tế áp dụng quy tắc đạo hàm"}] },
+                { id: "DS11_22", ten: "Chuyên đề 22. Đạo hàm cấp hai", dang: [{id: "1D7-3-1", txt: "Tính đạo hàm cấp hai"}, {id: "1D7-3-2", txt: "Đẳng thức có y và (y', y'')"}, {id: "1D7-3-3", txt: "Toán thực tế và Vật lý đạo hàm cấp 2"}] }
+            ],
+            HinhHoc: [
+                { id: "HH11_1", ten: "Chuyên đề 1. Phép biến hình, phép dời hình", dang: [{id: "1C1-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-1-2", txt: "Xác định phép dời hình"}, {id: "1C1-1-3", txt: "Xác định ảnh qua phép dời hình"}] },
+                { id: "HH11_2", ten: "Chuyên đề 2. Phép tịnh tiến", dang: [{id: "1C1-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-2-2", txt: "Tìm ảnh/tạo ảnh qua phép tịnh tiến"}, {id: "1C1-2-3", txt: "Ứng dụng phép tịnh tiến"}] },
+                { id: "HH11_3", ten: "Chuyên đề 3. Phép đối xứng trục", dang: [{id: "1C1-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-3-2", txt: "Tìm ảnh/tạo ảnh qua ĐX trục"}, {id: "1C1-3-3", txt: "Xác định trục đối xứng"}, {id: "1C1-3-4", txt: "Ứng dụng phép đối xứng trục"}] },
+                { id: "HH11_4", ten: "Chuyên đề 4. Phép đối xứng tâm", dang: [{id: "1C1-4-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-4-2", txt: "Tìm ảnh/tạo ảnh qua ĐX tâm"}, {id: "1C1-4-3", txt: "Xác định tâm đối xứng"}, {id: "1C1-4-4", txt: "Ứng dụng phép đối xứng tâm"}] },
+                { id: "HH11_5", ten: "Chuyên đề 5. Phép quay", dang: [{id: "1C1-5-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-5-2", txt: "Xác định vị trí ảnh của điểm, hình"}, {id: "1C1-5-3", txt: "Tìm tọa độ ảnh, phương trình đường thẳng"}, {id: "1C1-5-4", txt: "Ứng dụng phép quay"}] },
+                { id: "HH11_6", ten: "Chuyên đề 6. Phép vị tự", dang: [{id: "1C1-6-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-6-2", txt: "Xác định ảnh, tạo ảnh qua vị tự"}, {id: "1C1-6-3", txt: "Tìm tâm vị tự của hai đường tròn"}, {id: "1C1-6-4", txt: "Ứng dụng phép vị tự"}] },
+                { id: "HH11_7", ten: "Chuyên đề 7. Phép đồng dạng", dang: [{id: "1C1-7-1", txt: "Câu hỏi lý thuyết"}, {id: "1C1-7-2", txt: "Xác định ảnh, tạo ảnh qua đồng dạng"}] },
+                { id: "HH11_8", ten: "Chuyên đề 8. Đồ thị (Lý thuyết đồ thị)", dang: [{id: "1C2-1-1", txt: "Câu hỏi về đỉnh, cạnh của đồ thị"}, {id: "1C2-1-2", txt: "Câu hỏi về bậc của đồ thị"}, {id: "1C2-1-3", txt: "Câu hỏi tổng hợp"}] },
+                { id: "HH11_9", ten: "Chuyên đề 9. Đường đi Euler và Hamilton", dang: [{id: "1C2-2-1", txt: "Đường đi Euler"}, {id: "1C2-2-2", txt: "Đường đi Hamilton"}, {id: "1C2-2-3", txt: "Câu hỏi tổng hợp"}] },
+                { id: "HH11_10", ten: "Chuyên đề 10. Bài toán tìm đường đi ngắn nhất", dang: [{id: "1C2-3-1", txt: "Bài toán tìm đường đi ngắn nhất"}, {id: "1C2-3-2", txt: "Tổng hợp"}] },
+                { id: "HH11_11", ten: "Chuyên đề 11. Hình biểu diễn của một hình, khối", dang: [{id: "1C3-1-1", txt: "Lý thuyết phép chiếu song song"}, {id: "1C3-1-2", txt: "Lý thuyết phép chiếu vuông góc"}, {id: "1C3-1-3", txt: "Lý thuyết phép chiếu trục đo"}, {id: "1C3-1-4", txt: "Tổng hợp"}] },
+                { id: "HH11_12", ten: "Chuyên đề 12. Bản vẽ kỹ thuật", dang: [{id: "1C3-2-1", txt: "Lý thuyết cơ bản bản vẽ kỹ thuật"}, {id: "1C3-2-2", txt: "Phương pháp biểu diễn bản vẽ"}, {id: "1C3-2-3", txt: "Tổng hợp"}] },
+                { id: "HH11_13", ten: "Chuyên đề 13. Điểm, đường thẳng và mặt phẳng", dang: [{id: "1H4-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-1-2", txt: "Hình biểu diễn của hình không gian"}, {id: "1H4-1-3", txt: "Tìm giao tuyến của hai mặt phẳng"}, {id: "1H4-1-4", txt: "Tìm giao điểm đường thẳng và mặt phẳng"}, {id: "1H4-1-5", txt: "Xác định thiết diện"}, {id: "1H4-1-6", txt: "Ba điểm thẳng hàng, ba đường đồng quy"}, {id: "1H4-1-7", txt: "Toán thực tế áp dụng điểm, đường, mặt"}] },
+                { id: "HH11_14", ten: "Chuyên đề 14. Hai đường thẳng song song", dang: [{id: "1H4-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-2-2", txt: "Hai đường thẳng song song"}, {id: "1H4-2-3", txt: "Tìm giao tuyến bằng cách kẻ song song"}, {id: "1H4-2-4", txt: "Tìm giao điểm của đường và mặt"}, {id: "1H4-2-5", txt: "Xác định thiết diện (kẻ song song)"}, {id: "1H4-2-6", txt: "Ba điểm thẳng hàng"}, {id: "1H4-2-7", txt: "Bài toán quỹ tích và điểm cố định"}, {id: "1H4-2-8", txt: "Toán thực tế áp dụng hai đường song song"}] },
+                { id: "HH11_15", ten: "Chuyên đề 15. Đường thẳng và mặt phẳng song song", dang: [{id: "1H4-3-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-3-2", txt: "Đường thẳng song song với mặt phẳng"}, {id: "1H4-3-3", txt: "Tìm giao tuyến bằng cách kẻ song song"}, {id: "1H4-3-4", txt: "Tìm giao điểm đường và mặt"}, {id: "1H4-3-5", txt: "Xác định thiết diện (kẻ song song)"}, {id: "1H4-3-6", txt: "Ba điểm thẳng hàng"}, {id: "1H4-3-7", txt: "Bài toán quỹ tích và điểm cố định"}, {id: "1H4-3-8", txt: "Toán thực tế đường song song mặt"}] },
+                { id: "HH11_16", ten: "Chuyên đề 16. Hai mặt phẳng song song", dang: [{id: "1H4-4-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-4-2", txt: "Hai mặt phẳng song song"}, {id: "1H4-4-3", txt: "Chứng minh đường song song mặt"}, {id: "1H4-4-4", txt: "Xác định MP qua 1 điểm song song 1 MP"}, {id: "1H4-4-5", txt: "Xác định MP chứa đường song song MP"}, {id: "1H4-4-6", txt: "Bài toán tổng hợp"}, {id: "1H4-4-7", txt: "Toán thực tế hai mặt phẳng song song"}] },
+                { id: "HH11_17", ten: "Chuyên đề 17. Hình lăng trụ và hình hộp (xiên)", dang: [{id: "1H4-5-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-5-2", txt: "Bài toán về hình lăng trụ (xiên)"}, {id: "1H4-5-3", txt: "Bài toán về hình hộp (xiên)"}, {id: "1H4-5-4", txt: "Toán thực tế áp dụng lăng trụ, hình hộp"}] },
+                { id: "HH11_18", ten: "Chuyên đề 18. Phép chiếu song song", dang: [{id: "1H4-6-1", txt: "Câu hỏi lý thuyết"}, {id: "1H4-6-2", txt: "Hình biểu diễn của một hình không gian"}, {id: "1H4-6-3", txt: "Xác định yếu tố song song"}, {id: "1H4-6-4", txt: "Xác định phương chiếu"}, {id: "1H4-6-5", txt: "Tính tỉ số đoạn thẳng, diện tích"}] },
+                { id: "HH11_19", ten: "Chuyên đề 19. Hai đường thẳng vuông góc", dang: [{id: "1H8-1-1", txt: "Câu hỏi lý thuyết"}, {id: "1H8-1-2", txt: "Xác định hai đường thẳng vuông góc"}, {id: "1H8-1-3", txt: "Tìm góc giữa hai đường thẳng"}, {id: "1H8-1-4", txt: "Toán thực tế hai đường thẳng vuông góc"}] },
+                { id: "HH11_20", ten: "Chuyên đề 20. Đường thẳng vuông góc với mặt phẳng", dang: [{id: "1H8-2-1", txt: "Câu hỏi lý thuyết"}, {id: "1H8-2-2", txt: "CM đường thẳng vuông góc mặt phẳng"}, {id: "1H8-2-3", txt: "CM hai đường thẳng vuông góc"}, {id: "1H8-2-4", txt: "Dựng mặt phẳng, tìm thiết diện"}, {id: "1H8-2-5", txt: "Hình chiếu vuông góc của một hình"}, {id: "1H8-2-6", txt: "Toán thực tế đường vuông góc mặt"}] },
+                { id: "HH11_21", ten: "Chuyên đề 21. Phép chiếu vuông góc", dang: [{id: "1H8-3-1", txt: "Lý thuyết phép chiếu vuông góc"}, {id: "1H8-3-2", txt: "Hình chiếu vuông góc đa giác trên MP"}, {id: "1H8-3-3", txt: "Toán thực tế áp dụng phép chiếu VG"}] },
+                { id: "HH11_22", ten: "Chuyên đề 22. Hai mặt phẳng vuông góc", dang: [{id: "1H8-4-1", txt: "Câu hỏi lý thuyết"}, {id: "1H8-4-2", txt: "CM đường vuông góc mặt, mặt VG mặt"}, {id: "1H8-4-3", txt: "Xác định góc giữa hai mặt phẳng"}, {id: "1H8-4-4", txt: "Dựng mặt phẳng, thiết diện"}, {id: "1H8-4-5", txt: "Nhận dạng và tính toán hình thông dụng"}, {id: "1H8-4-6", txt: "Bài toán cho trước góc giữa d và (P)"}, {id: "1H8-4-7", txt: "Toán thực tế hai mặt phẳng vuông góc"}] },
+                { id: "HH11_23", ten: "Chuyên đề 23. Khoảng cách", dang: [{id: "1H8-5-1", txt: "Câu hỏi lý thuyết"}, {id: "1H8-5-2", txt: "KC giữa 2 điểm, điểm đến đường thẳng"}, {id: "1H8-5-3", txt: "KC từ một điểm đến một mặt phẳng"}, {id: "1H8-5-4", txt: "KC giữa hai đường thẳng chéo nhau"}, {id: "1H8-5-5", txt: "Đường vuông góc chung"}, {id: "1H8-5-6", txt: "Toán thực tế áp dụng khoảng cách"}] },
+                { id: "HH11_24", ten: "Chuyên đề 24. Góc giữa đường và mặt. Góc nhị diện", dang: [{id: "1H8-6-1", txt: "Góc giữa đường thẳng và mặt phẳng"}, {id: "1H8-6-2", txt: "Góc nhị diện, góc phẳng nhị diện"}, {id: "1H8-6-3", txt: "Góc giữa 2 MP, biết trước góc (d,P)"}, {id: "1H8-6-4", txt: "KC giữa điểm, đường, biết góc (d,P)"}, {id: "1H8-6-5", txt: "KC giữa điểm - mặt, biết góc (d,P)"}, {id: "1H8-6-6", txt: "KC giữa 2 đường chéo nhau, biết góc"}, {id: "1H8-6-7", txt: "Thực tế về góc đường, mặt, nhị diện"}] },
+                { id: "HH11_25", ten: "Chuyên đề 25. Hình lăng trụ đứng. Hình chóp đều", dang: [{id: "1H8-7-1", txt: "Lý thuyết, công thức thể tích"}, {id: "1H8-7-2", txt: "Thể tích khối chóp tam giác"}, {id: "1H8-7-3", txt: "Thể tích khối chóp tứ giác"}, {id: "1H8-7-4", txt: "Thể tích khối lăng trụ tam giác"}, {id: "1H8-7-5", txt: "Thể tích khối lăng trụ tứ giác"}, {id: "1H8-7-6", txt: "Thể tích khối chóp cụt và khối khác"}, {id: "1H8-7-7", txt: "Tỉ số thể tích"}, {id: "1H8-7-8", txt: "Ứng dụng thể tích tính góc, khoảng cách"}, {id: "1H8-7-9", txt: "Toán thực tế lăng trụ đứng, chóp đều"}] }
+            ]
+        };
+
+        const selectedSet = new Set();
+
+        // Format functions
+        function formatTopicName(ten, grade) {
+            const match = ten.match(/(?:Chuyên đề|CĐ)\s*(\d+)\.\s*(.+)/);
+            if (match) {
+                const topicNum = match[1];
+                const topicName = match[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            const match2 = ten.match(/(\d+)\.\s*(.+)/);
+            if (match2) {
+                const topicNum = match2[1];
+                const topicName = match2[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            return ten;
+        }
+
+        function formatSkillName(txt, grade, topicIndex, skillIndex) {
+            return `${grade}.${topicIndex}.${skillIndex}. ${txt}`;
+        }
+
+        function initUI() {
+            renderColumn(DATA.DaiSo, 'col-daiso', '11');
+            renderColumn(DATA.HinhHoc, 'col-hinhhoc', '11');
+            loadSelectedState();
+        }
+
+        function loadSelectedState() {
+            const saved = localStorage.getItem('selectedMathTypes');
+            if (saved) {
+                const savedIds = JSON.parse(saved);
+                savedIds.forEach(id => {
+                    selectedSet.add(id);
+                    const chk = document.getElementById(`chk-${id}`);
+                    if (chk) chk.checked = true;
+                });
+                updateCount();
+            }
+        }
+
+        function renderColumn(dataArray, containerId, grade) {
+            const container = document.getElementById(containerId);
+            dataArray.forEach((chapter, topicIdx) => {
+                const chapterEl = document.createElement('div');
+                chapterEl.className = 'chapter-item';
+                const formattedTopicName = formatTopicName(chapter.ten, grade);
+                chapterEl.innerHTML = `<span>${formattedTopicName}</span> <i class="fas fa-chevron-right"></i>`;
+
+                const popover = document.createElement('div');
+                popover.className = 'popover';
+
+                const popHeader = document.createElement('div');
+                popHeader.className = 'popover-header';
+                const chkAll = document.createElement('input');
+                chkAll.type = 'checkbox';
+                chkAll.id = `all-${chapter.id}`;
+                chkAll.onchange = (e) => toggleAll(chapter, e.target.checked);
+                const lblAll = document.createElement('label');
+                lblAll.htmlFor = `all-${chapter.id}`;
+                lblAll.innerText = "Chọn tất cả dạng toán này";
+                lblAll.style.cursor = 'pointer';
+                popHeader.appendChild(chkAll);
+                popHeader.appendChild(lblAll);
+                popover.appendChild(popHeader);
+
+                const popBody = document.createElement('div');
+                popBody.className = 'popover-body';
+                chapter.dang.forEach((d, skillIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'type-item';
+                    row.onclick = (e) => {
+                        if (e.target.tagName !== 'INPUT') {
+                            const chk = document.getElementById(`chk-${d.id}`);
+                            chk.checked = !chk.checked;
+                            toggleOne(d.id, chk.checked, chapter.id);
+                        }
+                    };
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.id = `chk-${d.id}`;
+                    chk.onchange = (e) => toggleOne(d.id, e.target.checked, chapter.id);
+                    const lbl = document.createElement('span');
+                    const formattedSkillName = formatSkillName(d.txt, grade, topicIdx + 1, skillIdx + 1);
+                    lbl.innerText = formattedSkillName;
+                    row.appendChild(chk);
+                    row.appendChild(lbl);
+                    popBody.appendChild(row);
+                });
+
+                popover.appendChild(popBody);
+                chapterEl.appendChild(popover);
+                container.appendChild(chapterEl);
+            });
+        }
+
+        function toggleOne(id, isChecked, chapterId) {
+            if (isChecked) selectedSet.add(id); else selectedSet.delete(id);
+            updateCount();
+            checkParentStatus(chapterId);
+        }
+
+        function toggleAll(chapter, isChecked) {
+            chapter.dang.forEach(d => {
+                const chk = document.getElementById(`chk-${d.id}`);
+                if (chk) chk.checked = isChecked;
+                if (isChecked) selectedSet.add(d.id); else selectedSet.delete(d.id);
+            });
+            updateCount();
+        }
+
+        function checkParentStatus(chapterId) {
+            let chapter = DATA.DaiSo.find(c => c.id === chapterId) || DATA.HinhHoc.find(c => c.id === chapterId);
+            if (!chapter) return;
+            const allIds = chapter.dang.map(d => d.id);
+            const isAllSelected = allIds.every(id => selectedSet.has(id));
+            const chkAll = document.getElementById(`all-${chapterId}`);
+            if (chkAll) chkAll.checked = isAllSelected;
+        }
+
+        function updateCount() {
+            document.getElementById('count-display').innerText = selectedSet.size;
+        }
+
+        function resetSelection() {
+            if (selectedSet.size === 0) {
+                alert("Bạn chưa chọn dạng nào để xóa!");
+                return;
+            }
+            if (confirm("Bạn có chắc chắn muốn bỏ chọn tất cả không?")) {
+                selectedSet.clear();
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(chk => chk.checked = false);
+                localStorage.removeItem('selectedMathTypes');
+                updateCount();
+            }
+        }
+
+        function hoanThanhChon() {
+            if (selectedSet.size === 0) {
+                alert("Bạn chưa chọn dạng toán nào!");
+                return;
+            }
+            localStorage.setItem('selectedMathTypes', JSON.stringify(Array.from(selectedSet)));
+            localStorage.setItem('currentGrade', 'Lop11');
+            // Chuyển sang trang cấu hình (Dùng chung với lớp 10)
+            window.location.href = 'TrangCauHinh.html';
+        }
+
+        initUI();
+    </script>
+</body>
+</html>

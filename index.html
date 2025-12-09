@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cổng Chọn Giao Diện - TOAN.VN</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style_final.css">
+    <style>
+        /* CSS riêng cho trang này */
+        body { 
+            display: flex; justify-content: center; align-items: center; height: 100vh; 
+            background: #2c3e50; 
+        }
+        .gateway-container { text-align: center; color: white; margin-top: -50px;}
+        h1 { margin-bottom: 50px; font-size: 2.5rem; text-transform: uppercase; letter-spacing: 2px;}
+        
+        .btn-choice {
+            display: inline-block; width: 250px; padding: 40px 20px; margin: 20px;
+            font-size: 1.2rem; text-decoration: none; color: white; border-radius: 20px;
+            transition: all 0.3s; border: 3px solid rgba(255,255,255,0.2);
+            font-weight: bold; cursor: pointer;
+        }
+        .btn-a { background-color: #e67e22; box-shadow: 0 10px 30px rgba(230, 126, 34, 0.3); }
+        .btn-b { background-color: #3498db; box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3); }
+        .btn-gv { background-color: #27ae60; box-shadow: 0 10px 30px rgba(39, 174, 96, 0.3); }
+        
+        .btn-choice:hover { transform: translateY(-10px); filter: brightness(110%); }
+        .btn-choice i { font-size: 3rem; display: block; margin-bottom: 15px; }
+        
+        .teacher-section { margin-top: 60px; padding-top: 30px; border-top: 1px solid rgba(255,255,255,0.2); }
+        .teacher-section h3 { font-size: 1.2rem; margin-bottom: 20px; color: rgba(255,255,255,0.7); }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2>
+        <span>Yêu học toán</span>
+    </div>
+    <div class="contact-btn"><i class="fas fa-phone-alt"></i> 024.7301.8910</div>
+
+    <div class="gateway-container">
+        <h1>Chọn Chế Độ Luyện Tập</h1>
+        
+        <div onclick="chuyenTrang('TuTao')" class="btn-choice btn-a">
+            <i class="fas fa-edit"></i>
+            LUYỆN ĐỀ TỰ TẠO
+            <div style="font-size: 0.8rem; margin-top: 10px; font-weight: normal;">(Chọn chuyên đề, dạng bài)</div>
+        </div>
+
+        <div onclick="chuyenTrang('TaoSan')" class="btn-choice btn-b">
+            <i class="fas fa-book-reader"></i>
+            LUYỆN ĐỀ CÓ SẴN
+            <div style="font-size: 0.8rem; margin-top: 10px; font-weight: normal;">(Đề thi thử, SAT, Vào 10...)</div>
+        </div>
+        
+        <div class="teacher-section">
+            <h3><i class="fas fa-chalkboard-teacher"></i> Dành cho Giáo viên</h3>
+            <div onclick="window.location.href='TrangQuanLyCauHoi.html'" class="btn-choice btn-gv">
+                <i class="fas fa-database"></i>
+                QUẢN LÝ CÂU HỎI
+                <div style="font-size: 0.8rem; margin-top: 10px; font-weight: normal;">(Thêm, sửa, xóa câu hỏi)</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Đề Tự Tạo - SAT Math</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; }
+        
+        .brand-logo {
+            position: fixed; top: 15px; left: 20px; z-index: 1100;
+            background: white; padding: 6px 15px; border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #27ae60;
+            display: flex; align-items: center; cursor: pointer; width: fit-content;
+        }
+        .brand-logo h2 { margin: 0; color: #27ae60; font-size: 1.1rem; }
+        .brand-logo span { font-size: 0.8rem; margin-left: 5px; color: #555; }
+
+        .top-bar {
+            background: white; height: 80px; 
+            display: flex; align-items: center; justify-content: flex-end; 
+            padding: 0 30px; border-bottom: 1px solid #ddd;
+            position: relative; z-index: 1000;
+        }
+
+        .page-title { 
+            position: absolute; left: 50%; transform: translateX(-50%);
+            margin: 0; color: #2c3e50; font-size: 1.4rem; 
+            text-transform: uppercase; font-weight: 800; white-space: nowrap;
+        }
+
+        .btn-back {
+            padding: 10px 20px; border: 1px solid #ccc; background: #fff;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; z-index: 1001;
+        }
+        .btn-back:hover { background: #eee; color: #333; }
+
+        /* --- 4 COLUMN LAYOUT --- */
+        .main-container {
+            display: flex; gap: 15px; padding: 20px;
+            max-width: 100%; margin: 0 auto; align-items: flex-start;
+        }
+
+        .column {
+            flex: 1; background: white; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: visible; position: relative;
+        }
+
+        .col-header {
+            padding: 15px 5px; text-align: center; color: white; font-weight: 800;
+            text-transform: uppercase; border-radius: 12px 12px 0 0; font-size: 0.9rem;
+            height: 50px; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .bg-alg { background: #3498db; } 
+        .bg-prob { background: #e67e22; } 
+        .bg-adv { background: #9b59b6; } 
+        .bg-geo { background: #e74c3c; } 
+
+        .chapter-list { padding: 10px; }
+
+        .chapter-item {
+            position: relative; padding: 12px; margin-bottom: 8px;
+            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
+            cursor: pointer; font-weight: 600; color: #444; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+            font-size: 0.85rem; line-height: 1.3;
+        }
+        .chapter-item:hover {
+            background: #eaf2f8; color: #2980b9; border-color: #2980b9; z-index: 20;
+        }
+        
+        /* --- POPOVER --- */
+        .popover {
+            display: none; position: absolute; top: -10px; width: 350px;
+            background: white; border: 1px solid #bbb;
+            box-shadow: 0 5px 25px rgba(0,0,0,0.2); border-radius: 8px;
+            z-index: 100; padding: 0; cursor: default;
+        }
+        .chapter-item:hover .popover { display: block; }
+
+        .popover::after {
+            content: ""; position: absolute; top: -20px; bottom: -20px;
+            width: 60px; background: transparent; 
+        }
+
+        /* Cột 1 & 2: Hiện sang PHẢI */
+        .column:nth-child(1) .popover, .column:nth-child(2) .popover {
+            left: 100%; margin-left: 5px;
+        }
+        .column:nth-child(1) .popover::after, .column:nth-child(2) .popover::after {
+            right: 100%; 
+        }
+        .column:nth-child(1) .popover::before, .column:nth-child(2) .popover::before {
+            content: ""; position: absolute; top: 20px; right: 100%;
+            border-width: 8px 8px 8px 0; border-style: solid;
+            border-color: transparent #fff transparent transparent;
+            filter: drop-shadow(-1px 0 0 #bbb);
+        }
+
+        /* Cột 3 & 4: Hiện sang TRÁI */
+        .column:nth-child(3) .popover, .column:nth-child(4) .popover {
+            right: 100%; left: auto; margin-right: 5px;
+        }
+        .column:nth-child(3) .popover::after, .column:nth-child(4) .popover::after {
+            left: 100%; 
+        }
+        .column:nth-child(3) .popover::before, .column:nth-child(4) .popover::before {
+            content: ""; position: absolute; top: 20px; left: 100%;
+            border-width: 8px 0 8px 8px; border-style: solid;
+            border-color: transparent transparent transparent #fff;
+            filter: drop-shadow(1px 0 0 #bbb);
+        }
+
+        /* === SỬA ĐỔI: CHỈ 2 MỤC CUỐI CÙNG HIỆN NGƯỢC LÊN === */
+        /* Sử dụng -n+2 thay vì -n+4 */
+        .chapter-item:nth-last-child(-n+2) .popover { 
+            top: auto; 
+            bottom: 0; 
+        }
+        .chapter-item:nth-last-child(-n+2) .popover::before { 
+            top: auto; 
+            bottom: 15px; 
+        }
+
+        .popover-header {
+            padding: 10px; background: #f1f1f1; border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0; font-weight: bold; font-size: 0.85rem;
+            display: flex; align-items: center; gap: 10px; color: #27ae60;
+        }
+        .popover-header input { transform: scale(1.3); cursor: pointer; }
+        
+        .popover-body { max-height: 350px; overflow-y: auto; padding: 10px; }
+        
+        .type-item {
+            display: flex; align-items: flex-start; gap: 10px; padding: 8px 5px;
+            border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.1s;
+        }
+        .type-item:hover { background: #f0f8ff; }
+        .type-item input { margin-top: 4px; transform: scale(1.2); cursor: pointer; }
+        .type-item span { font-size: 0.85rem; line-height: 1.4; color: #555; }
+
+        /* FOOTER */
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px; border-top: 2px solid #2c3e50;
+            text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; gap: 20px; align-items: center; z-index: 999;
+        }
+        .btn-create {
+            background: #27ae60; color: white; border: none; padding: 12px 40px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(46, 204, 113, 0.4); transition: 0.2s;
+        }
+        .btn-create:hover { background: #219150; transform: scale(1.05); }
+        .btn-reset {
+            background: #95a5a6; color: white; border: none; padding: 12px 30px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.4); transition: 0.2s;
+        }
+        .btn-reset:hover { background: #7f8c8d; transform: scale(1.05); }
+        .stats { font-weight: bold; color: #555; }
+        
+        /* Checkbox label để bấm được vào chữ (đã cập nhật từ yêu cầu trước) */
+        .diff-item { cursor: pointer; }
+        
+        /* MODAL POPUP */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); z-index: 2000;
+            justify-content: center; align-items: center; backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            background: white; width: 850px; max-width: 95%;
+            border-radius: 15px; padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-title { color: #2c3e50; font-size: 1.4rem; margin-bottom: 30px; font-weight: 800; }
+        .modal-options { display: flex; gap: 20px; }
+        
+        .option-card {
+            flex: 1; padding: 30px 20px; border: 2px solid #eee; border-radius: 12px;
+            transition: 0.2s; display: flex; flex-direction: column; 
+            justify-content: space-between; align-items: center; background: #f9f9f9;
+        }
+        .option-card:hover { border-color: #3498db; background: #f0f8ff; transform: translateY(-5px); }
+        .option-icon { font-size: 3rem; margin-bottom: 20px; color: #3498db; }
+        .option-text { font-size: 1rem; color: #555; line-height: 1.6; margin-bottom: 20px; }
+        
+        .opt-label { 
+            display: block; font-size: 1.5rem; font-weight: 900; color: #e74c3c; 
+            margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        .btn-modal-create {
+            background: #27ae60; color: white; border: none; padding: 10px 30px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 1rem;
+            width: 100%; transition: 0.2s; font-family: 'Montserrat', sans-serif;
+        }
+        .btn-modal-create:hover { background: #219150; }
+
+        .inline-input {
+            width: 50px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;
+            text-align: center; font-weight: bold; color: #e74c3c; font-size: 1rem;
+        }
+        .difficulty-trigger {
+            color: #27ae60; font-weight: bold; text-decoration: underline;
+            cursor: pointer; position: relative; display: inline-block;
+        }
+        .difficulty-popup {
+            display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            width: 250px; background: white; border: 1px solid #ccc;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2100; text-align: left;
+        }
+        .difficulty-popup::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -8px;
+            border-width: 8px 8px 0; border-style: solid; border-color: white transparent;
+        }
+        .difficulty-trigger:hover .difficulty-popup { display: block; }
+        
+        .diff-item { 
+            padding: 8px 5px; 
+            border-bottom: 1px solid #eee; 
+            font-size: 0.9rem; 
+            display: flex; 
+            align-items: center; 
+            gap: 8px; 
+            cursor: pointer;
+        }
+        .diff-item:hover {
+            background-color: #f0f8ff;
+        }
+        .diff-item:last-child { border: none; }
+        
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #999; cursor: pointer; line-height: 1; }
+        .close-modal:hover { color: #e74c3c; }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2><span>SAT</span>
+    </div>
+
+    <div class="top-bar">
+        <h1 class="page-title"><i class="fas fa-globe-americas"></i> Lựa chọn chuyên đề - SAT Math</h1>
+        <button class="btn-back" onclick="window.location.href='menu.html'">
+            <i class="fas fa-arrow-left"></i> Quay lại Danh mục
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="column">
+            <div class="col-header bg-alg">ALGEBRA</div>
+            <div class="chapter-list" id="col-algebra"></div>
+        </div>
+        
+        <div class="column">
+            <div class="col-header bg-prob">PROBLEM-SOLVING & DATA</div>
+            <div class="chapter-list" id="col-prob"></div>
+        </div>
+
+        <div class="column">
+            <div class="col-header bg-adv">ADVANCED MATH</div>
+            <div class="chapter-list" id="col-advanced"></div>
+        </div>
+
+        <div class="column">
+            <div class="col-header bg-geo">GEOMETRY & TRIG</div>
+            <div class="chapter-list" id="col-geo"></div>
+        </div>
+    </div>
+
+    <div style="height: 100px;"></div>
+    
+    <div class="bottom-bar">
+        <button class="btn-reset" onclick="resetSelection()">
+            <i class="fas fa-trash-alt"></i> XÓA CHỌN
+        </button>
+        <div class="stats">Đã chọn: <span id="count-display" style="color: #e74c3c; font-size: 1.2rem;">0</span> dạng toán</div>
+        <button class="btn-create" onclick="hoanThanhChon()">
+            <i class="fas fa-play-circle"></i> TIẾP TỤC
+        </button>
+    </div>
+
+    <div id="setup-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 class="modal-title">Bạn có muốn tùy chỉnh độ khó và định dạng của câu hỏi không?</h3>
+            
+            <div class="modal-options">
+                <div class="option-card" id="opt-random">
+                    <div>
+                        <span class="opt-label">KHÔNG</span>
+                        <div class="option-icon"><i class="fas fa-magic"></i></div>
+                        <div class="option-text">
+                            Tôi chỉ cần tạo một đề ngẫu nhiên, gồm 
+                            <input type="number" id="num-questions" class="inline-input" min="1" max="99" oninput="checkLimit(this)"> 
+                            câu, với (các) độ khó 
+                            <span class="difficulty-trigger">
+                                [Bấm chọn]
+                                <div class="difficulty-popup">
+                                    <label class="diff-item" style="font-weight:bold; color:#27ae60;">
+                                        <input type="checkbox" id="diff-all" onchange="toggleDiffAll(this)"> Chọn tất cả
+                                    </label>
+                                    <label class="diff-item">
+                                        <input type="checkbox" class="diff-chk" checked> Nhận biết
+                                    </label>
+                                    <label class="diff-item">
+                                        <input type="checkbox" class="diff-chk" checked> Thông hiểu
+                                    </label>
+                                    <label class="diff-item">
+                                        <input type="checkbox" class="diff-chk"> Vận dụng
+                                    </label>
+                                    <label class="diff-item">
+                                        <input type="checkbox" class="diff-chk"> Vận dụng cao
+                                    </label>
+                                </div>
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn-modal-create" onclick="createRandomExam()">
+                        TẠO ĐỀ NGAY
+                    </button>
+                </div>
+
+                <div class="option-card" style="cursor: pointer;" onclick="goToConfigPage()">
+                    <div>
+                        <span class="opt-label">CÓ</span>
+                        <div class="option-icon"><i class="fas fa-sliders-h"></i></div>
+                        <div class="option-text">
+                            Tôi muốn chọn cụ thể số câu ở mỗi dạng, điều chỉnh định dạng câu hỏi trong đề của mình.
+                        </div>
+                    </div>
+                    <button class="btn-modal-create" style="background:#3498db;">
+                        CẤU HÌNH CHI TIẾT
+                    </button>
+                </div>
+            </div>
+        </div>
+        </div>
+
+    <script>
+        const DATA = {
+            Algebra: [
+                { id: "SAT_A1", ten: "Linear equations in one variable", dang: [{id: "S-A1-1", txt: "Solving linear equations"}, {id: "S-A1-2", txt: "Interpreting constants/variables"}, {id: "S-A1-3", txt: "Word problems"}] },
+                { id: "SAT_A2", ten: "Linear functions", dang: [{id: "S-A2-1", txt: "Function notation & evaluation"}, {id: "S-A2-2", txt: "Graphs of linear functions"}, {id: "S-A2-3", txt: "Linear modeling"}] },
+                { id: "SAT_A3", ten: "Linear equations in two variables", dang: [{id: "S-A3-1", txt: "Standard & Slope-intercept forms"}, {id: "S-A3-2", txt: "Graphing lines"}, {id: "S-A3-3", txt: "Real-world context"}] },
+                { id: "SAT_A4", ten: "Systems of two linear equations", dang: [{id: "S-A4-1", txt: "Solving by substitution/elimination"}, {id: "S-A4-2", txt: "No solution / Infinitely many"}, {id: "S-A4-3", txt: "Systems word problems"}] },
+                { id: "SAT_A5", ten: "Linear inequalities", dang: [{id: "S-A5-1", txt: "Solving inequalities (1 variable)"}, {id: "S-A5-2", txt: "Graphing inequalities (2 variables)"}, {id: "S-A5-3", txt: "Systems of inequalities"}] }
+            ],
+            ProbData: [
+                { id: "SAT_P1", ten: "Ratios, rates, proportional relationships", dang: [{id: "S-P1-1", txt: "Calculating ratios & rates"}, {id: "S-P1-2", txt: "Unit conversion"}, {id: "S-P1-3", txt: "Proportional word problems"}] },
+                { id: "SAT_P2", ten: "Percentages", dang: [{id: "S-P2-1", txt: "Percent change (increase/decrease)"}, {id: "S-P2-2", txt: "Simple & Compound interest"}, {id: "S-P2-3", txt: "Percent of a number"}] },
+                { id: "SAT_P3", ten: "One-variable data (Center & Spread)", dang: [{id: "S-P3-1", txt: "Mean, Median, Mode"}, {id: "S-P3-2", txt: "Range & Standard Deviation"}, {id: "S-P3-3", txt: "Box plots & Histograms"}] },
+                { id: "SAT_P4", ten: "Two-variable data (Scatterplots)", dang: [{id: "S-P4-1", txt: "Line of best fit"}, {id: "S-P4-2", txt: "Interpreting slope/intercept"}, {id: "S-P4-3", txt: "Making predictions"}] },
+                { id: "SAT_P5", ten: "Probability", dang: [{id: "S-P5-1", txt: "Simple probability"}, {id: "S-P5-2", txt: "Conditional probability"}, {id: "S-P5-3", txt: "Probability from tables"}] },
+                { id: "SAT_P6", ten: "Inference & Sample statistics", dang: [{id: "S-P6-1", txt: "Sample vs Population"}, {id: "S-P6-2", txt: "Margin of error"}, {id: "S-P6-3", txt: "Confidence intervals"}] },
+                { id: "SAT_P7", ten: "Evaluating statistical claims", dang: [{id: "S-P7-1", txt: "Observational studies vs Experiments"}, {id: "S-P7-2", txt: "Bias & Sampling methods"}] }
+            ],
+            Advanced: [
+                { id: "SAT_M1", ten: "Nonlinear functions", dang: [{id: "S-M1-1", txt: "Quadratic functions"}, {id: "S-M1-2", txt: "Exponential functions"}, {id: "S-M1-3", txt: "Graphs of nonlinear functions"}] },
+                { id: "SAT_M2", ten: "Nonlinear equations & Systems", dang: [{id: "S-M2-1", txt: "Solving quadratic equations"}, {id: "S-M2-2", txt: "Radical & Rational equations"}, {id: "S-M2-3", txt: "Linear-Quadratic Systems"}] },
+                { id: "SAT_M3", ten: "Equivalent expressions", dang: [{id: "S-M3-1", txt: "Polynomial operations"}, {id: "S-M3-2", txt: "Rational expressions"}, {id: "S-M3-3", txt: "Exponents & Radicals structure"}] }
+            ],
+            Geometry: [
+                { id: "SAT_G1", ten: "Area and volume", dang: [{id: "S-G1-1", txt: "Area of 2D shapes"}, {id: "S-G1-2", txt: "Volume of prisms/cylinders/spheres"}, {id: "S-G1-3", txt: "Surface area"}] },
+                { id: "SAT_G2", ten: "Lines, angles, and triangles", dang: [{id: "S-G2-1", txt: "Parallel lines & Transversals"}, {id: "S-G2-2", txt: "Congruence & Similarity"}, {id: "S-G2-3", txt: "Triangle theorems"}] },
+                { id: "SAT_G3", ten: "Right triangles and trigonometry", dang: [{id: "S-G3-1", txt: "Pythagorean theorem"}, {id: "S-G3-2", txt: "SOH CAH TOA"}, {id: "S-G3-3", txt: "Special right triangles"}] },
+                { id: "SAT_G4", ten: "Circles", dang: [{id: "S-G4-1", txt: "Circle equations (h,k)"}, {id: "S-G4-2", txt: "Arc length & Sector area"}, {id: "S-G4-3", txt: "Angles in circles"}] }
+            ]
+        };
+
+        const selectedSet = new Set();
+
+        // Format functions
+        function formatTopicName(ten, grade) {
+            const match = ten.match(/(?:Chuyên đề|CĐ)\s*(\d+)\.\s*(.+)/);
+            if (match) {
+                const topicNum = match[1];
+                const topicName = match[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            const match2 = ten.match(/(\d+)\.\s*(.+)/);
+            if (match2) {
+                const topicNum = match2[1];
+                const topicName = match2[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            return ten;
+        }
+
+        function formatSkillName(txt, grade, topicIndex, skillIndex) {
+            return `${grade}.${topicIndex}.${skillIndex}. ${txt}`;
+        }
+
+        function initUI() {
+            renderColumn(DATA.Algebra, 'col-algebra', 'SAT');
+            renderColumn(DATA.ProbData, 'col-prob', 'SAT');
+            renderColumn(DATA.Advanced, 'col-advanced', 'SAT');
+            renderColumn(DATA.Geometry, 'col-geo', 'SAT');
+            loadSelectedState();
+        }
+
+        function loadSelectedState() {
+            const saved = localStorage.getItem('selectedMathTypes');
+            if (saved) {
+                const savedIds = JSON.parse(saved);
+                savedIds.forEach(id => {
+                    selectedSet.add(id);
+                    const chk = document.getElementById(`chk-${id}`);
+                    if (chk) chk.checked = true;
+                });
+                updateCount();
+            }
+        }
+
+        function renderColumn(dataArray, containerId, grade) {
+            const container = document.getElementById(containerId);
+            dataArray.forEach((chapter, topicIdx) => {
+                const chapterEl = document.createElement('div');
+                chapterEl.className = 'chapter-item';
+                const formattedTopicName = formatTopicName(chapter.ten, grade);
+                chapterEl.innerHTML = `<span>${formattedTopicName}</span> <i class="fas fa-caret-right"></i>`;
+
+                const popover = document.createElement('div');
+                popover.className = 'popover';
+
+                const popHeader = document.createElement('div');
+                popHeader.className = 'popover-header';
+                const chkAll = document.createElement('input');
+                chkAll.type = 'checkbox';
+                chkAll.id = `all-${chapter.id}`;
+                chkAll.onchange = (e) => toggleAll(chapter, e.target.checked);
+                const lblAll = document.createElement('label');
+                lblAll.htmlFor = `all-${chapter.id}`;
+                lblAll.innerText = "Chọn tất cả dạng toán này";
+                lblAll.style.cursor = 'pointer';
+                popHeader.appendChild(chkAll);
+                popHeader.appendChild(lblAll);
+                popover.appendChild(popHeader);
+
+                const popBody = document.createElement('div');
+                popBody.className = 'popover-body';
+                chapter.dang.forEach((d, skillIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'type-item';
+                    row.onclick = (e) => {
+                        if (e.target.tagName !== 'INPUT') {
+                            const chk = document.getElementById(`chk-${d.id}`);
+                            chk.checked = !chk.checked;
+                            toggleOne(d.id, chk.checked, chapter.id);
+                        }
+                    };
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.id = `chk-${d.id}`;
+                    chk.onchange = (e) => toggleOne(d.id, e.target.checked, chapter.id);
+                    const lbl = document.createElement('span');
+                    const formattedSkillName = formatSkillName(d.txt, grade, topicIdx + 1, skillIdx + 1);
+                    lbl.innerText = formattedSkillName;
+                    row.appendChild(chk);
+                    row.appendChild(lbl);
+                    popBody.appendChild(row);
+                });
+
+                popover.appendChild(popBody);
+                chapterEl.appendChild(popover);
+                container.appendChild(chapterEl);
+            });
+        }
+
+        function toggleOne(id, isChecked, chapterId) {
+            if (isChecked) selectedSet.add(id); else selectedSet.delete(id);
+            updateCount();
+            checkParentStatus(chapterId);
+        }
+
+        function toggleAll(chapter, isChecked) {
+            chapter.dang.forEach(d => {
+                const chk = document.getElementById(`chk-${d.id}`);
+                if (chk) chk.checked = isChecked;
+                if (isChecked) selectedSet.add(d.id); else selectedSet.delete(d.id);
+            });
+            updateCount();
+        }
+
+        function checkParentStatus(chapterId) {
+            let chapter = DATA.Algebra.find(c=>c.id===chapterId) || DATA.ProbData.find(c=>c.id===chapterId) || DATA.Advanced.find(c=>c.id===chapterId) || DATA.Geometry.find(c=>c.id===chapterId);
+            if (!chapter) return;
+            const allIds = chapter.dang.map(d => d.id);
+            const isAllSelected = allIds.every(id => selectedSet.has(id));
+            const chkAll = document.getElementById(`all-${chapterId}`);
+            if (chkAll) chkAll.checked = isAllSelected;
+        }
+
+        function updateCount() {
+            document.getElementById('count-display').innerText = selectedSet.size;
+        }
+
+        function resetSelection() {
+            if (selectedSet.size === 0) { alert("Bạn chưa chọn dạng toán nào để xóa!"); return; }
+            if (confirm("Bạn có chắc chắn muốn bỏ chọn tất cả không?")) {
+                selectedSet.clear();
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(chk => chk.checked = false);
+                localStorage.removeItem('selectedMathTypes');
+                updateCount();
+            }
+        }
+
+        function hoanThanhChon() {
+            if (selectedSet.size === 0) { 
+                alert("Bạn vui lòng chọn ít nhất 1 dạng toán!"); 
+                return; 
+            }
+            // Lưu dữ liệu trước khi hiện Modal
+            localStorage.setItem('selectedMathTypes', JSON.stringify(Array.from(selectedSet)));
+            localStorage.setItem('currentGrade', 'SAT');
+            
+            document.getElementById('setup-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('setup-modal').style.display = 'none';
+        }
+
+        function checkLimit(input) {
+            if (input.value > 99) {
+                alert("Quá tải đó vị hảo hán à! (Giới hạn 99 câu)");
+                input.value = 99;
+            }
+            if (input.value < 0) input.value = 1;
+        }
+
+        function toggleDiffAll(source) {
+            const checkboxes = document.querySelectorAll('.diff-chk');
+            checkboxes.forEach(chk => chk.checked = source.checked);
+        }
+
+        // Nút Tạo Ngẫu nhiên (Option 1)
+        function createRandomExam() {
+            const soCau = parseInt(document.getElementById('num-questions').value);
+            if (!soCau || soCau <= 0) {
+                alert("Vui lòng điền số lượng câu hỏi!");
+                document.getElementById('num-questions').focus();
+                return;
+            }
+
+            // Lấy các độ khó đã chọn
+            const selectedDifficulties = [];
+            const diffCheckboxes = document.querySelectorAll('.diff-chk');
+            const diffLabels = ['nb', 'th', 'vd', 'vdc'];
+            diffCheckboxes.forEach((chk, idx) => {
+                if (chk.checked) selectedDifficulties.push(diffLabels[idx]);
+            });
+
+            if (selectedDifficulties.length === 0) {
+                alert("Vui lòng chọn ít nhất một mức độ khó!");
+                return;
+            }
+
+            // Tỉ lệ phân bổ: TN 12/22, DS 4/22, TL 6/22, KT 0
+            const totalRatio = 22;
+            const tnCount = Math.round(soCau * 12 / totalRatio);
+            const dsCount = Math.round(soCau * 4 / totalRatio);
+            const tlCount = Math.round(soCau * 6 / totalRatio);
+            const ktCount = 0; // Tạm thời = 0
+
+            // Tỉ lệ độ khó: NB 40%, TH 30%, VD 20%, VDC 10%
+            const difficultyRatios = { nb: 0.4, th: 0.3, vd: 0.2, vdc: 0.1 };
+
+            // Tạo exam config
+            const examConfig = {
+                grade: 'SAT',
+                selectedTypes: Array.from(selectedSet),
+                config: [],
+                totalQuestions: soCau,
+                totalTime: 0
+            };
+
+            // Công thức thời gian (phút/câu)
+            const TIME_FORMULA = {
+                tn: { nb: 1, th: 2, vd: 4, vdc: 6 },
+                ds: 9, // Đúng/Sai: 9 phút/câu (gồm 4 ý)
+                tl: { nb: 1.5, th: 3, vd: 5, vdc: 8 },
+                kt: { nb: 1, th: 2, vd: 4, vdc: 7 }
+            };
+
+            let totalTime = 0;
+
+            // Phân bổ Trắc nghiệm
+            selectedDifficulties.forEach(level => {
+                const ratio = difficultyRatios[level];
+                const count = Math.round(tnCount * ratio);
+                if (count > 0) {
+                    examConfig.config.push({
+                        typeId: 'random',
+                        typeName: 'Trắc nghiệm',
+                        questionType: 'tn',
+                        level: level,
+                        count: count,
+                        time: count * TIME_FORMULA.tn[level]
+                    });
+                    totalTime += count * TIME_FORMULA.tn[level];
+                }
+            });
+
+            // Phân bổ Đúng/Sai (không phân mức độ, mỗi câu = 9 phút)
+            if (dsCount > 0) {
+                examConfig.config.push({
+                    typeId: 'random',
+                    typeName: 'Đúng/Sai',
+                    questionType: 'ds',
+                    level: 'all', // Gồm cả 4 mức độ
+                    count: dsCount,
+                    time: dsCount * TIME_FORMULA.ds
+                });
+                totalTime += dsCount * TIME_FORMULA.ds;
+            }
+
+            // Phân bổ Trả lời ngắn
+            selectedDifficulties.forEach(level => {
+                const ratio = difficultyRatios[level];
+                const count = Math.round(tlCount * ratio);
+                if (count > 0) {
+                    examConfig.config.push({
+                        typeId: 'random',
+                        typeName: 'Trả lời ngắn',
+                        questionType: 'tl',
+                        level: level,
+                        count: count,
+                        time: count * TIME_FORMULA.tl[level]
+                    });
+                    totalTime += count * TIME_FORMULA.tl[level];
+                }
+            });
+
+            examConfig.totalTime = Math.round(totalTime * 10) / 10;
+
+            // Lưu và chuyển trang
+            localStorage.setItem('examConfig', JSON.stringify(examConfig));
+            window.location.href = 'exam_interface.html';
+        }
+
+        // Nút Tùy Chỉnh (Option 2)
+        function goToConfigPage() {
+            window.location.href = 'TrangCauHinh.html';
+        }
+
+        initUI();
+    </script>
+</body>
+</html>

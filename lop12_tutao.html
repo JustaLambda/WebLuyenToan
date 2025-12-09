@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Đề Tự Tạo - Toán 12</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style_final.css">
+    
+    <style>
+        /* CSS dùng chung (Bạn có thể tách ra file .css nhưng để đây cho tiện copy) */
+        body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; }
+        .brand-logo { position: fixed; top: 15px; left: 20px; z-index: 1100; background: white; padding: 6px 15px; border-radius: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #27ae60; display: flex; align-items: center; cursor: pointer; width: fit-content; }
+        .brand-logo h2 { margin: 0; color: #27ae60; font-size: 1.1rem; }
+        .brand-logo span { font-size: 0.8rem; margin-left: 5px; color: #555; }
+        .top-bar { background: white; height: 80px; display: flex; align-items: center; justify-content: flex-end; padding: 0 30px; border-bottom: 1px solid #ddd; position: relative; z-index: 1000; }
+        .page-title { position: absolute; left: 50%; transform: translateX(-50%); margin: 0; color: #d35400; font-size: 1.4rem; text-transform: uppercase; font-weight: 800; white-space: nowrap; }
+        .btn-back { padding: 10px 20px; border: 1px solid #ccc; background: #fff; border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s; display: flex; align-items: center; gap: 8px; z-index: 1001; }
+        .btn-back:hover { background: #eee; color: #333; }
+        .main-container { display: flex; gap: 30px; padding: 30px; max-width: 1400px; margin: 0 auto; align-items: flex-start; }
+        .column { flex: 1; background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: visible; position: relative; }
+        .col-header { padding: 15px; text-align: center; color: white; font-weight: 800; text-transform: uppercase; border-radius: 12px 12px 0 0; font-size: 1.1rem; }
+        .bg-dai { background: #3498db; } .bg-hinh { background: #e74c3c; }
+        .chapter-list { padding: 15px; }
+        .chapter-item { position: relative; padding: 15px 20px; margin-bottom: 10px; background: #f9f9f9; border: 1px solid #eee; border-radius: 8px; cursor: pointer; font-weight: 600; color: #444; transition: 0.2s; display: flex; justify-content: space-between; align-items: center; }
+        .chapter-item:hover { background: #eaf2f8; color: #3498db; border-color: #3498db; z-index: 20; }
+        .popover { display: none; position: absolute; top: -10px; width: 380px; background: white; border: 1px solid #bbb; box-shadow: 0 5px 25px rgba(0,0,0,0.2); border-radius: 8px; z-index: 100; padding: 0; cursor: default; }
+        .chapter-item:hover .popover { display: block; }
+        .popover::after { content: ""; position: absolute; top: -20px; bottom: -20px; width: 60px; background: transparent; }
+        .column:first-child .popover { left: 100%; margin-left: 10px; }
+        .column:first-child .popover::after { right: 100%; }
+        .column:first-child .popover::before { content: ""; position: absolute; top: 22px; right: 100%; border-width: 10px 10px 10px 0; border-style: solid; border-color: transparent #fff transparent transparent; filter: drop-shadow(-1px 0 0 #bbb); }
+        .column:last-child .popover { right: 100%; left: auto; margin-right: 2px; }
+        .column:last-child .popover::after { left: 100%; }
+        .column:last-child .popover::before { content: ""; position: absolute; top: 22px; left: 100%; border-width: 10px 0 10px 10px; border-style: solid; border-color: transparent transparent transparent #fff; filter: drop-shadow(1px 0 0 #bbb); }
+        .chapter-item:nth-last-child(-n+4) .popover { top: auto; bottom: 0; }
+        .chapter-item:nth-last-child(-n+4) .popover::before { top: auto; bottom: 15px; }
+        .chapter-item:nth-last-child(-n+4) .popover::after { top: auto; bottom: 0; height: 60px; }
+        .popover-header { padding: 12px 15px; background: #f1f1f1; border-bottom: 1px solid #ddd; border-radius: 8px 8px 0 0; font-weight: bold; font-size: 0.9rem; display: flex; align-items: center; gap: 10px; color: #27ae60; }
+        .popover-header input { transform: scale(1.3); cursor: pointer; }
+        .popover-body { max-height: 400px; overflow-y: auto; padding: 10px; }
+        .type-item { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #f9f9f9; cursor: pointer; transition: 0.1s; }
+        .type-item:hover { background: #f0f8ff; }
+        .type-item input { margin-top: 4px; transform: scale(1.2); cursor: pointer; }
+        .type-item span { font-size: 0.9rem; line-height: 1.4; color: #555; }
+        .bottom-bar { position: fixed; bottom: 0; left: 0; width: 100%; background: white; padding: 15px; border-top: 2px solid #27ae60; text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.1); display: flex; justify-content: center; gap: 20px; align-items: center; z-index: 999; }
+        .btn-create { background: #e74c3c; color: white; border: none; padding: 12px 40px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); transition: 0.2s; }
+        .btn-create:hover { background: #c0392b; transform: scale(1.05); }
+        .btn-reset { background: #95a5a6; color: white; border: none; padding: 12px 30px; border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer; box-shadow: 0 4px 10px rgba(149, 165, 166, 0.4); transition: 0.2s; }
+        .btn-reset:hover { background: #7f8c8d; transform: scale(1.05); }
+        .stats { font-weight: bold; color: #555; }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2><span>Lớp 12</span>
+    </div>
+
+    <div class="top-bar">
+        <h1 class="page-title"><i class="fas fa-edit"></i> Lựa chọn chuyên đề - Toán 12</h1>
+        <button class="btn-back" onclick="window.location.href='menu.html'">
+            <i class="fas fa-arrow-left"></i> Quay lại Danh mục
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="column">
+            <div class="col-header bg-dai">GIẢI TÍCH & THỐNG KÊ 12</div>
+            <div class="chapter-list" id="col-daiso"></div>
+        </div>
+        <div class="column">
+            <div class="col-header bg-hinh">HÌNH HỌC & VECTƠ 12</div>
+            <div class="chapter-list" id="col-hinhhoc"></div>
+        </div>
+    </div>
+
+    <div style="height: 100px;"></div>
+    
+    <div class="bottom-bar">
+        <button class="btn-reset" onclick="resetSelection()"><i class="fas fa-trash-alt"></i> XÓA CHỌN</button>
+        <div class="stats">Đã chọn: <span id="count-display" style="color: #e74c3c; font-size: 1.2rem;">0</span> dạng toán</div>
+        <button class="btn-create" onclick="hoanThanhChon()"><i class="fas fa-play-circle"></i> TIẾP TỤC</button>
+    </div>
+
+    <script>
+        // DỮ LIỆU LỚP 12 (TỪ ẢNH)
+        const DATA = {
+            DaiSo: [
+                { id: "12D_1", ten: "Chuyên đề 1. Sự đồng biến và nghịch biến", dang: [ {id: "2D1-1-1", txt: "Xét tính đơn điệu cho bởi công thức"}, {id: "2D1-1-2", txt: "Xét tính đơn điệu dựa vào BBT, đồ thị"}, {id: "2D1-1-3", txt: "Tìm tham số m để hàm số đơn điệu"}, {id: "2D1-1-4", txt: "Ứng dụng tính đơn điệu chứng minh BĐT, PT"}, {id: "2D1-1-5", txt: "Toán thực tế ứng dụng"} ] },
+                { id: "12D_2", ten: "Chuyên đề 2. Cực trị của hàm số", dang: [ {id: "2D1-2-1", txt: "Tìm cực trị của hàm số cho bởi công thức"}, {id: "2D1-2-2", txt: "Tìm cực trị dựa vào BBT, đồ thị"}, {id: "2D1-2-3", txt: "Tìm m để hàm số đạt cực trị tại x0"}, {id: "2D1-2-4", txt: "Tìm m để HS bậc 3 có cực trị thỏa mãn ĐK"}, {id: "2D1-2-5", txt: "Tìm m để HS trùng phương có cực trị thỏa ĐK"}, {id: "2D1-2-6", txt: "Tìm m để các hàm số khác có cực trị thỏa ĐK"}, {id: "2D1-2-7", txt: "Toán thực tế ứng dụng"} ] },
+                { id: "12D_3", ten: "Chuyên đề 3. GTLN và GTNN", dang: [ {id: "2D1-3-1", txt: "GTLN, GTNN trên đoạn [a;b]"}, {id: "2D1-3-2", txt: "GTLN, GTNN trên khoảng"}, {id: "2D1-3-3", txt: "Sử dụng đánh giá, BĐT cổ điển"}, {id: "2D1-3-4", txt: "Ứng dụng GTLN, GTNN trong bài toán PT, BPT"}, {id: "2D1-3-5", txt: "GTLN, GTNN hàm nhiều biến"}, {id: "2D1-3-6", txt: "Toán thực tế ứng dụng"} ] },
+                { id: "12D_4", ten: "Chuyên đề 4. Đường tiệm cận", dang: [ {id: "2D1-4-1", txt: "Tìm tiệm cận (không tham số) hoặc biết BBT"}, {id: "2D1-4-2", txt: "Tìm tiệm cận của hàm số có chứa tham số"}, {id: "2D1-4-3", txt: "Bài toán liên quan đồ thị và tiệm cận"}, {id: "2D1-4-4", txt: "Toán thực tế ứng dụng"} ] },
+                { id: "12D_5", ten: "Chuyên đề 5. Khảo sát biến thiên và đồ thị", dang: [ {id: "2D1-5-1", txt: "Nhận dạng đồ thị"}, {id: "2D1-5-2", txt: "Các phép biến đổi đồ thị"}, {id: "2D1-5-3", txt: "Biện luận số giao điểm dựa vào đồ thị, BBT"}, {id: "2D1-5-4", txt: "Sự tương giao của hai đồ thị (tọa độ giao điểm)"}, {id: "2D1-5-5", txt: "Đồ thị của hàm đạo hàm"}, {id: "2D1-5-6", txt: "Phương trình tiếp tuyến của đồ thị hàm số"}, {id: "2D1-5-7", txt: "Điểm đặc biệt của đồ thị hàm số"}, {id: "2D1-5-8", txt: "Toán thực tế ứng dụng"} ] },
+                { id: "12D_6", ten: "Chuyên đề 6. Khoảng biến thiên, tứ phân vị (ghép nhóm)", dang: [ {id: "2D3-1-1", txt: "Công thức lý thuyết"}, {id: "2D3-1-2", txt: "Tìm khoảng biến thiên"}, {id: "2D3-1-3", txt: "Tìm khoảng tứ phân vị"}, {id: "2D3-1-4", txt: "Câu hỏi tổng hợp"} ] },
+                { id: "12D_7", ten: "Chuyên đề 7. Phương sai, độ lệch chuẩn (ghép nhóm)", dang: [ {id: "2D3-2-1", txt: "Công thức lý thuyết"}, {id: "2D3-2-2", txt: "Tìm phương sai, độ lệch chuẩn"}, {id: "2D3-2-3", txt: "Câu hỏi tổng hợp"} ] },
+                { id: "12D_8", ten: "Chuyên đề 8. Nguyên hàm", dang: [ {id: "2D4-1-1", txt: "Công thức lý thuyết"}, {id: "2D4-1-2", txt: "Nguyên hàm cơ bản đa thức, phân thức"}, {id: "2D4-1-3", txt: "Nguyên hàm cơ bản hàm lượng giác"}, {id: "2D4-1-4", txt: "Nguyên hàm cơ bản hàm mũ, lũy thừa"}, {id: "2D4-1-5", txt: "Phương pháp đổi biến số cơ bản"}, {id: "2D4-1-6", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12D_9", ten: "Chuyên đề 9. Tích phân", dang: [ {id: "2D4-2-1", txt: "Công thức lý thuyết"}, {id: "2D4-2-2", txt: "Tích phân cơ bản đa thức, phân thức"}, {id: "2D4-2-3", txt: "Tích phân cơ bản hàm lượng giác"}, {id: "2D4-2-4", txt: "Tích phân cơ bản hàm mũ, lũy thừa"}, {id: "2D4-2-5", txt: "Phương pháp đổi biến số cơ bản"}, {id: "2D4-2-6", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12D_10", ten: "Chuyên đề 10. Ứng dụng tích phân", dang: [ {id: "2D4-3-1", txt: "Diện tích hình phẳng giới hạn bởi các đồ thị"}, {id: "2D4-3-2", txt: "Bài toán thực tế diện tích hình phẳng"}, {id: "2D4-3-3", txt: "Thể tích giới hạn bởi các đồ thị (tròn xoay)"}, {id: "2D4-3-4", txt: "Thể tích tính theo mặt cắt S(x)"}, {id: "2D4-3-5", txt: "Bài toán thực tế thể tích tròn xoay"} ] },
+                { id: "12D_11", ten: "Chuyên đề 11. Xác suất có điều kiện", dang: [ {id: "2D6-1-1", txt: "Công thức lý thuyết"}, {id: "2D6-1-2", txt: "Tính XS có điều kiện bằng công thức"}, {id: "2D6-1-3", txt: "Tính XS có điều kiện bằng sơ đồ cây"}, {id: "2D6-1-4", txt: "Bài toán tổng hợp"} ] },
+                { id: "12D_12", ten: "Chuyên đề 12. Xác suất toàn phần - Bayes", dang: [ {id: "2D6-2-1", txt: "Công thức lý thuyết"}, {id: "2D6-2-2", txt: "Tính xác suất bằng công thức XS toàn phần"}, {id: "2D6-2-3", txt: "Tính xác suất bằng công thức XS Bayes"}, {id: "2D6-2-4", txt: "Bài toán tổng hợp"} ] }
+            ],
+            HinhHoc: [
+                { id: "12H_1", ten: "Chuyên đề 1. Vectơ trong không gian", dang: [ {id: "2H2-1-1", txt: "Công thức lý thuyết"}, {id: "2H2-1-2", txt: "Tổng, hiệu, tích một số với vectơ"}, {id: "2H2-1-3", txt: "Tích vô hướng và ứng dụng"}, {id: "2H2-1-4", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12H_2", ten: "Chuyên đề 2. Tọa độ của vectơ và các công thức", dang: [ {id: "2H2-2-1", txt: "Công thức lý thuyết"}, {id: "2H2-2-2", txt: "Tìm tọa độ điểm"}, {id: "2H2-2-3", txt: "Tìm tọa độ vectơ"}, {id: "2H2-2-4", txt: "Công thức tọa độ của tích vô hướng"}, {id: "2H2-2-5", txt: "Công thức tọa độ của tích có hướng"}, {id: "2H2-2-6", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12H_3", ten: "Chuyên đề 3. Phương trình mặt phẳng", dang: [ {id: "2H5-1-1", txt: "Câu hỏi lý thuyết"}, {id: "2H5-1-2", txt: "Xác định VTPT, cặp VTCP"}, {id: "2H5-1-3", txt: "Viết phương trình tổng quát mặt phẳng"}, {id: "2H5-1-4", txt: "Vị trí tương đối giữa hai mặt phẳng"}, {id: "2H5-1-5", txt: "Khoảng cách điểm tới mặt phẳng"}, {id: "2H5-1-6", txt: "Góc giữa hai mặt phẳng"}, {id: "2H5-1-7", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12H_4", ten: "Chuyên đề 4. Phương trình đường thẳng", dang: [ {id: "2H5-2-1", txt: "Câu hỏi lý thuyết"}, {id: "2H5-2-2", txt: "Xác định VTCP, cặp VTPT"}, {id: "2H5-2-3", txt: "Viết PT tổng quát, chính tắc, tham số"}, {id: "2H5-2-4", txt: "Vị trí tương đối giữa hai đường thẳng"}, {id: "2H5-2-5", txt: "Vị trí tương đối giữa đường thẳng và mặt phẳng"}, {id: "2H5-2-6", txt: "Khoảng cách điểm tới đường thẳng"}, {id: "2H5-2-7", txt: "Góc giữa hai đường, đường và mặt"}, {id: "2H5-2-8", txt: "Toán thực tế áp dụng"} ] },
+                { id: "12H_5", ten: "Chuyên đề 5. Phương trình mặt cầu", dang: [ {id: "2H5-3-1", txt: "Câu hỏi lý thuyết"}, {id: "2H5-3-2", txt: "Xác định tâm, bán kính, đường kính"}, {id: "2H5-3-3", txt: "Viết phương trình tổng quát mặt cầu"}, {id: "2H5-3-4", txt: "Toán thực tế áp dụng"} ] }
+            ]
+        };
+
+        const selectedSet = new Set();
+        // Format functions
+        function formatTopicName(ten, grade) {
+            const match = ten.match(/(?:Chuyên đề|CĐ)\s*(\d+)\.\s*(.+)/);
+            if (match) {
+                const topicNum = match[1];
+                const topicName = match[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            const match2 = ten.match(/(\d+)\.\s*(.+)/);
+            if (match2) {
+                const topicNum = match2[1];
+                const topicName = match2[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            return ten;
+        }
+
+        function formatSkillName(txt, grade, topicIndex, skillIndex) {
+            return `${grade}.${topicIndex}.${skillIndex}. ${txt}`;
+        }
+
+        function initUI() {
+            renderColumn(DATA.DaiSo, 'col-daiso', '12');
+            renderColumn(DATA.HinhHoc, 'col-hinhhoc', '12');
+            loadSelectedState();
+        }
+
+        // --- CÁC HÀM XỬ LÝ (GIỐNG HỆT LỚP 11) ---
+        function loadSelectedState() {
+            const saved = localStorage.getItem('selectedMathTypes');
+            if (saved) {
+                const savedIds = JSON.parse(saved);
+                savedIds.forEach(id => {
+                    selectedSet.add(id);
+                    const chk = document.getElementById(`chk-${id}`);
+                    if (chk) chk.checked = true;
+                });
+                updateCount();
+            }
+        }
+
+        function renderColumn(dataArray, containerId, grade) {
+            const container = document.getElementById(containerId);
+            dataArray.forEach((chapter, topicIdx) => {
+                const chapterEl = document.createElement('div');
+                chapterEl.className = 'chapter-item';
+                const formattedTopicName = formatTopicName(chapter.ten, grade);
+                chapterEl.innerHTML = `<span>${formattedTopicName}</span> <i class="fas fa-chevron-right"></i>`;
+                const popover = document.createElement('div');
+                popover.className = 'popover';
+                const popHeader = document.createElement('div');
+                popHeader.className = 'popover-header';
+                const chkAll = document.createElement('input');
+                chkAll.type = 'checkbox';
+                chkAll.id = `all-${chapter.id}`;
+                chkAll.onchange = (e) => toggleAll(chapter, e.target.checked);
+                const lblAll = document.createElement('label');
+                lblAll.htmlFor = `all-${chapter.id}`;
+                lblAll.innerText = "Chọn tất cả dạng toán này";
+                lblAll.style.cursor = 'pointer';
+                popHeader.appendChild(chkAll);
+                popHeader.appendChild(lblAll);
+                popover.appendChild(popHeader);
+                const popBody = document.createElement('div');
+                popBody.className = 'popover-body';
+                chapter.dang.forEach((d, skillIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'type-item';
+                    row.onclick = (e) => {
+                        if (e.target.tagName !== 'INPUT') {
+                            const chk = document.getElementById(`chk-${d.id}`);
+                            chk.checked = !chk.checked;
+                            toggleOne(d.id, chk.checked, chapter.id);
+                        }
+                    };
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.id = `chk-${d.id}`;
+                    chk.onchange = (e) => toggleOne(d.id, e.target.checked, chapter.id);
+                    const lbl = document.createElement('span');
+                    const formattedSkillName = formatSkillName(d.txt, grade, topicIdx + 1, skillIdx + 1);
+                    lbl.innerText = formattedSkillName;
+                    row.appendChild(chk);
+                    row.appendChild(lbl);
+                    popBody.appendChild(row);
+                });
+                popover.appendChild(popBody);
+                chapterEl.appendChild(popover);
+                container.appendChild(chapterEl);
+            });
+        }
+
+        function toggleOne(id, isChecked, chapterId) {
+            if (isChecked) selectedSet.add(id); else selectedSet.delete(id);
+            updateCount();
+            checkParentStatus(chapterId);
+        }
+
+        function toggleAll(chapter, isChecked) {
+            chapter.dang.forEach(d => {
+                const chk = document.getElementById(`chk-${d.id}`);
+                if (chk) chk.checked = isChecked;
+                if (isChecked) selectedSet.add(d.id); else selectedSet.delete(d.id);
+            });
+            updateCount();
+        }
+
+        function checkParentStatus(chapterId) {
+            let chapter = DATA.DaiSo.find(c => c.id === chapterId) || DATA.HinhHoc.find(c => c.id === chapterId);
+            if (!chapter) return;
+            const allIds = chapter.dang.map(d => d.id);
+            const isAllSelected = allIds.every(id => selectedSet.has(id));
+            const chkAll = document.getElementById(`all-${chapterId}`);
+            if (chkAll) chkAll.checked = isAllSelected;
+        }
+
+        function updateCount() {
+            document.getElementById('count-display').innerText = selectedSet.size;
+        }
+
+        function resetSelection() {
+            if (selectedSet.size === 0) { alert("Bạn chưa chọn dạng nào để xóa!"); return; }
+            if (confirm("Bạn có chắc chắn muốn bỏ chọn tất cả các dạng toán không?")) {
+                selectedSet.clear();
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(chk => chk.checked = false);
+                localStorage.removeItem('selectedMathTypes');
+                updateCount();
+            }
+        }
+
+        function hoanThanhChon() {
+            if (selectedSet.size === 0) { alert("Bạn chưa chọn dạng toán nào!"); return; }
+            localStorage.setItem('selectedMathTypes', JSON.stringify(Array.from(selectedSet)));
+            localStorage.setItem('currentGrade', 'Lop12');
+            window.location.href = 'TrangCauHinh.html';
+        }
+
+        initUI();
+    </script>
+</body>
+</html>

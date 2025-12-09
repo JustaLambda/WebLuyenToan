@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard Luyện Đề - TOAN.VN</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="style_final.css">
+</head>
+<button onclick="window.location.href='index.html'" style="
+    position: fixed; bottom: 20px; left: 20px;
+    background: #95a5a6; color: white; border: none;
+    padding: 10px 20px; border-radius: 5px; font-weight: bold;
+    cursor: pointer; z-index: 1000; box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    transition: 0.2s;
+">
+    <i class="fas fa-arrow-left"></i> Quay lại trang chủ
+</button>
+
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'" style="cursor: pointer;" title="Về trang chủ">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2>
+        <span>Yêu học toán</span>
+    </div>
+
+    <div class="contact-btn" onclick="alert('Hotline: 024.7301.8910')">
+        <i class="fas fa-phone-alt"></i> 024.7301.8910
+    </div>
+
+    <div class="top-section">
+        <div class="showcase-box hot-exams">
+            <h2 class="section-title"><i class="fas fa-fire-alt"></i> ĐỀ THI MỚI NHẤT</h2>
+            <div class="scroller">
+                <div class="scroller-inner">
+                    <div class="card-item"><div class="badge-hot">HOT</div><h3>Thi thử THPT QG 2025</h3><p>THPT Chuyên Sư Phạm</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><div class="badge-new">MỚI</div><h3>SAT Math - Module 1</h3><p>Format Digital Mới</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><h3>Toán 9 - Giữa Kỳ 1</h3><p>Phòng GD&ĐT Hà Nội</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><h3>Toán 12 - Hàm Số</h3><p>Chuyên đề Nâng cao</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><h3>Đề Vào 10 Chuyên</h3><p>Chuyên KHTN 2024</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><div class="badge-hot">HOT</div><h3>Thi thử THPT QG 2025</h3><p>THPT Chuyên Sư Phạm</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><div class="badge-new">MỚI</div><h3>SAT Math - Module 1</h3><p>Format Digital Mới</p><button class="btn-do">Làm ngay</button></div>
+                    <div class="card-item"><h3>Toán 9 - Giữa Kỳ 1</h3><p>Phòng GD&ĐT Hà Nội</p><button class="btn-do">Làm ngay</button></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="showcase-box hall-fame">
+            <h2 class="section-title"><i class="fas fa-trophy"></i> BẢNG VÀNG</h2>
+            <div class="scroller">
+                <div class="scroller-inner">
+                    <div class="fame-item"><div class="avatar">A</div><div class="info"><strong>Nguyễn Văn A</strong><p>1550 SAT - K65</p></div></div>
+                    <div class="fame-item"><div class="avatar" style="background:#e67e22">B</div><div class="info"><strong>Trần Thị B</strong><p>9.8 Toán Vào 10</p></div></div>
+                    <div class="fame-item"><div class="avatar" style="background:#9b59b6">C</div><div class="info"><strong>Lê Văn C</strong><p>Thủ Khoa 2025</p></div></div>
+                    <div class="fame-item"><div class="avatar">A</div><div class="info"><strong>Nguyễn Văn A</strong><p>1550 SAT - K65</p></div></div>
+                    <div class="fame-item"><div class="avatar" style="background:#e67e22">B</div><div class="info"><strong>Trần Thị B</strong><p>9.8 Toán Vào 10</p></div></div>
+                    <div class="fame-item"><div class="avatar" style="background:#9b59b6">C</div><div class="info"><strong>Lê Văn C</strong><p>Thủ Khoa 2025</p></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div style="text-align: center; margin-bottom: 10px;">
+        <h2 id="dynamicTitle" style="text-transform: uppercase; color: #2c3e50; font-size: 1.5rem; border-bottom: 3px solid #3498db; display: inline-block; padding-bottom: 5px;">
+            DANH MỤC LỰA CHỌN
+        </h2>
+    </div>
+
+    <div class="main-menu">
+        <div class="col-group">
+            <div class="col-header bg-blue">CHƯƠNG TRÌNH PHỔ THÔNG</div>
+            <div class="col-body">
+                <div class="level-group">
+                    <div class="level-label">Cấp Tiểu học</div>
+                    <div class="btn-grid">
+                        <button onclick="chonChiTiet('Lop1')">Lớp 1</button><button onclick="chonChiTiet('Lop2')">Lớp 2</button>
+                        <button onclick="chonChiTiet('Lop3')">Lớp 3</button><button onclick="chonChiTiet('Lop4')">Lớp 4</button>
+                        <button style="grid-column: span 2;" onclick="chonChiTiet('Lop5')">Lớp 5</button>
+                    </div>
+                </div>
+                <div class="level-group">
+                    <div class="level-label">Cấp THCS</div>
+                    <div class="btn-grid">
+                        <button onclick="chonChiTiet('Lop6')">Lớp 6</button><button onclick="chonChiTiet('Lop7')">Lớp 7</button>
+                        <button onclick="chonChiTiet('Lop8')">Lớp 8</button><button onclick="chonChiTiet('Lop9')">Lớp 9</button>
+                    </div>
+                </div>
+                 <div class="level-group">
+                    <div class="level-label">Cấp THPT</div>
+                    <div class="btn-grid">
+                        <button onclick="chonChiTiet('Lop10')">Lớp 10</button><button onclick="chonChiTiet('Lop11')">Lớp 11</button>
+                        <button style="grid-column: span 2;" onclick="chonChiTiet('Lop12')">Lớp 12</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-header bg-green">THI CHUYỂN CẤP</div>
+            <div class="col-body">
+                <button class="btn-big" onclick="chonChiTiet('Vao6')">Thi vào lớp 6 CLC</button>
+                <button class="btn-big" onclick="chonChiTiet('Vao10')">Thi vào lớp 10</button>
+                <button class="btn-big" onclick="chonChiTiet('THPTQG')">Tốt nghiệp THPT & ĐH</button>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-header bg-orange">KỲ THI RIÊNG</div>
+            <div class="col-body">
+                <button class="btn-big" onclick="chonChiTiet('HSA')">ĐGNL ĐHQG HN (HSA)</button>
+                <button class="btn-big" onclick="chonChiTiet('TSA')">ĐGTD Bách Khoa (TSA)</button>
+                <button class="btn-big" onclick="chonChiTiet('VACT')">V-ACT</button>
+                <button class="btn-big" onclick="chonChiTiet('SuPham')">Đánh giá Sư phạm</button>
+                <button class="btn-big" onclick="chonChiTiet('CongAn')">Đánh giá Bộ Công An</button>
+            </div>
+        </div>
+
+        <div class="col-group">
+            <div class="col-header bg-purple">TOÁN QUỐC TẾ</div>
+            <div class="col-body">
+                <button class="btn-big" onclick="chonChiTiet('SAT')">SAT Math</button>
+                <button class="btn-big" onclick="chonChiTiet('IGCSE')">IGCSE</button>
+                <button class="btn-big" onclick="chonChiTiet('ALevel')">A-Level</button>
+                <button class="btn-big" onclick="chonChiTiet('ASLevel')">AS-Level</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Kiểm tra chế độ (Tự tạo hay Có sẵn) để hiển thị tiêu đề đúng
+        document.addEventListener('DOMContentLoaded', () => {
+            const cheDo = localStorage.getItem('cheDoLuyenDe');
+            const title = document.getElementById('dynamicTitle');
+            
+            if (cheDo === 'TuTao') {
+                title.innerText = "CHẾ ĐỘ: LUYỆN ĐỀ TỰ TẠO (Chọn Chuyên Đề)";
+                title.style.borderBottomColor = "#e67e22"; 
+                title.style.color = "#d35400";
+            } else {
+                title.innerText = "CHẾ ĐỘ: KHO ĐỀ CÓ SẴN";
+                title.style.borderBottomColor = "#27ae60"; 
+                title.style.color = "#27ae60";
+            }
+        });
+
+        // Hàm xử lý khi bấm nút chọn lớp/kỳ thi
+        function chonChiTiet(maLop) {
+            const cheDo = localStorage.getItem('cheDoLuyenDe');
+
+            // 1. Nếu đang ở chế độ TỰ TẠO -> Chuyển đến file tương ứng
+            if (cheDo === 'TuTao') {
+                if (maLop === 'Lop10') {
+                    window.location.href = 'lop10_tutao.html';
+                    return;
+                }
+                if (maLop === 'Lop11') {
+                    window.location.href = 'lop11_tutao.html'; 
+                    return;
+                }
+                if (maLop === 'Lop12') {
+                    window.location.href = 'lop12_tutao.html'; 
+                    return;
+                }
+                if (maLop === 'SAT')   { 
+                    window.location.href = 'sat_tutao.html'; 
+                    return; }
+                // Các lớp khác chưa làm -> Hiện thông báo
+                alert(`Chức năng Luyện đề Tự tạo cho ${maLop} đang được xây dựng!`);
+                return;
+            }
+
+            // 2. Nếu ở chế độ CÓ SẴN (hoặc khác)
+            // (Chỗ này bạn có thể sửa để trỏ đến các trang kho đề sau này)
+            alert(`Kho đề thi có sẵn cho ${maLop} đang được cập nhật!`);
+        }
+        
+        function quayLaiMenu() {
+            // Hàm này nếu cần dùng cho các giao diện con nhúng vào (nếu có)
+            // Hiện tại nút Back ở trên đã dùng window.location.href nên hàm này có thể để trống hoặc mở rộng sau
+        }
+    </script>
+</body>
+</html>

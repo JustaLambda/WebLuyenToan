@@ -1,0 +1,964 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Luyện Đề Tự Tạo - Toán 10</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    
+    <style>
+        body { font-family: 'Montserrat', sans-serif; background: #f4f6f8; margin: 0; padding: 0; color: #333; }
+        
+        /* HEADER & LOGO */
+        .brand-logo {
+            position: fixed; top: 15px; left: 20px; z-index: 1100;
+            background: white; padding: 6px 15px; border-radius: 30px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1); border: 2px solid #27ae60;
+            display: flex; align-items: center; cursor: pointer; width: fit-content;
+        }
+        .brand-logo h2 { margin: 0; color: #27ae60; font-size: 1.1rem; }
+        .brand-logo span { font-size: 0.8rem; margin-left: 5px; color: #555; }
+
+        .top-bar {
+            background: white; height: 80px; 
+            display: flex; align-items: center; justify-content: flex-end; 
+            padding: 0 30px; border-bottom: 1px solid #ddd;
+            position: relative; z-index: 1000;
+        }
+
+        .page-title { 
+            position: absolute; left: 50%; transform: translateX(-50%);
+            margin: 0; color: #d35400; font-size: 1.4rem; 
+            text-transform: uppercase; font-weight: 800; white-space: nowrap;
+        }
+
+        .btn-back {
+            padding: 10px 20px; border: 1px solid #ccc; background: #fff;
+            border-radius: 5px; cursor: pointer; font-weight: bold; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; z-index: 1001;
+        }
+        .btn-back:hover { background: #eee; color: #333; }
+
+        /* MAIN LAYOUT */
+        .main-container {
+            display: flex; gap: 30px; padding: 30px;
+            max-width: 1400px; margin: 0 auto; align-items: flex-start;
+        }
+
+        .column {
+            flex: 1; background: white; border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05); overflow: visible; position: relative;
+        }
+
+        .col-header {
+            padding: 15px; text-align: center; color: white; font-weight: 800;
+            text-transform: uppercase; border-radius: 12px 12px 0 0; font-size: 1.1rem;
+        }
+        .bg-dai { background: #3498db; }
+        .bg-hinh { background: #e74c3c; }
+
+        .chapter-list { padding: 15px; }
+
+        /* ITEM CHƯƠNG & HOVER FIX */
+        .chapter-item {
+            position: relative; padding: 15px 20px; margin-bottom: 10px;
+            background: #f9f9f9; border: 1px solid #eee; border-radius: 8px;
+            cursor: pointer; font-weight: 600; color: #444; transition: 0.2s;
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .chapter-item:hover {
+            background: #eaf2f8; color: #3498db; border-color: #3498db; z-index: 20;
+        }
+        
+/* --- STYLE CHUNG CHO POPOVER --- */
+.popover {
+    display: none;
+    position: absolute;
+    top: -10px;
+    width: 380px;
+    background: white;
+    border: 1px solid #bbb;
+    box-shadow: 0 5px 25px rgba(0,0,0,0.2);
+    border-radius: 8px;
+    z-index: 100;
+    padding: 0;
+    cursor: default;
+}
+
+.chapter-item:hover .popover {
+    display: block;
+}
+
+/* --- CẦU NỐI VÔ HÌNH (QUAN TRỌNG) --- */
+/* Tăng chiều cao lên (top/bottom âm) để bắt được chuột kể cả khi di hơi chéo */
+.popover::after {
+    content: "";
+    position: absolute;
+    top: -20px;    /* Mở rộng vùng nhận diện lên trên */
+    bottom: -20px; /* Mở rộng vùng nhận diện xuống dưới */
+    width: 60px;   /* Cầu nối rộng hơn để chắc chắn bắt được chuột */
+    background: transparent; 
+    /* background: rgba(255, 0, 0, 0.2); */ /* Bật dòng này lên nếu muốn nhìn thấy cầu nối để test */
+}
+
+/* === CỘT TRÁI (ĐẠI SỐ) - HIỆN SANG PHẢI === */
+.column:first-child .popover {
+    left: 100%;
+    margin-left: 10px; /* Khoảng cách vừa phải */
+}
+.column:first-child .popover::after {
+    right: 100%; /* Cầu nối nằm bên trái của menu (nối về cha) */
+}
+.column:first-child .popover::before { /* Mũi tên */
+    content: ""; position: absolute; top: 22px; right: 100%;
+    border-width: 10px 10px 10px 0; border-style: solid;
+    border-color: transparent #fff transparent transparent;
+    filter: drop-shadow(-1px 0 0 #bbb);
+}
+
+/* === CỘT PHẢI (HÌNH HỌC) - HIỆN SANG TRÁI === */
+/* Đã sửa để sát lại gần và không bị tuột */
+.column:last-child .popover {
+    right: 100%;        /* Đẩy sang bên trái của cha */
+    left: auto;         /* Reset left */
+    
+    /* SỬA 1: Giảm khoảng cách xuống còn 2px để sát lại gần như bạn muốn */
+    margin-right: 2px;  
+}
+
+.column:last-child .popover::after {
+    /* SỬA 2: Cầu nối nằm bên PHẢI của menu (để nối về cha bên phải) */
+    left: 100%; 
+}
+
+/* Mũi tên chỉ sang phải */
+.column:last-child .popover::before {
+    content: ""; position: absolute; top: 22px; left: 100%;
+    border-width: 10px 0 10px 10px; border-style: solid;
+    border-color: transparent transparent transparent #fff;
+    filter: drop-shadow(1px 0 0 #bbb);
+}
+
+        /* Cột Phải: Hiện sang Trái */
+        .column:last-child .popover { right: 105%; left: auto; }
+        .column:last-child .popover::after { left: 100%; } /* Cầu nối bên phải */
+        .column:last-child .popover::before {
+            content: ""; position: absolute; top: 18px; right: -10px;
+            border-width: 10px 0 10px 10px; border-style: solid; border-color: transparent transparent transparent #bbb;
+        }
+
+        .popover-header {
+            padding: 12px 15px; background: #f1f1f1; border-bottom: 1px solid #ddd;
+            border-radius: 8px 8px 0 0; font-weight: bold; font-size: 0.9rem;
+            display: flex; align-items: center; gap: 10px; color: #27ae60;
+        }
+        .popover-header input { transform: scale(1.3); cursor: pointer; }
+        .popover-body { max-height: 400px; overflow-y: auto; padding: 10px; }
+        .type-item {
+            display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; border-bottom: 1px solid #f9f9f9;
+            cursor: pointer; transition: 0.1s;
+        }
+        .type-item:hover { background: #f0f8ff; }
+        .type-item input { margin-top: 4px; transform: scale(1.2); cursor: pointer; }
+        .type-item span { font-size: 0.9rem; line-height: 1.4; color: #555; }
+
+        /* BOTTOM BAR */
+        .bottom-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%;
+            background: white; padding: 15px; border-top: 2px solid #27ae60;
+            text-align: center; box-shadow: 0 -5px 20px rgba(0,0,0,0.1);
+            display: flex; justify-content: center; gap: 20px; align-items: center; z-index: 999;
+        }
+        /* Thêm vào phần style */
+        .btn-reset {
+            background: #95a5a6; /* Màu xám */
+            color: white; 
+            border: none; 
+            padding: 12px 30px;
+            border-radius: 30px; 
+            font-weight: bold; 
+            font-size: 1.1rem; 
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(149, 165, 166, 0.4); 
+            transition: 0.2s;
+        }
+        .btn-reset:hover { 
+            background: #7f8c8d; 
+            transform: scale(1.05); 
+        }
+        .btn-create {
+            background: #e74c3c; color: white; border: none; padding: 12px 40px;
+            border-radius: 30px; font-weight: bold; font-size: 1.1rem; cursor: pointer;
+            box-shadow: 0 4px 10px rgba(231, 76, 60, 0.4); transition: 0.2s;
+        }
+        .btn-create:hover { background: #c0392b; transform: scale(1.05); }
+        .stats { font-weight: bold; color: #555; }
+
+        /* MODAL POPUP */
+        .modal-overlay {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.6); z-index: 2000;
+            justify-content: center; align-items: center; backdrop-filter: blur(4px);
+        }
+        .modal-box {
+            background: white; width: 850px; max-width: 95%;
+            border-radius: 15px; padding: 40px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.3); text-align: center; position: relative;
+            animation: zoomIn 0.3s ease;
+        }
+        @keyframes zoomIn { from { transform: scale(0.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        
+        .modal-title { color: #2c3e50; font-size: 1.4rem; margin-bottom: 30px; font-weight: 800; }
+        .modal-options { display: flex; gap: 20px; }
+        
+        .option-card {
+            flex: 1; padding: 30px 20px; border: 2px solid #eee; border-radius: 12px;
+            transition: 0.2s; display: flex; flex-direction: column; 
+            justify-content: space-between; align-items: center; background: #f9f9f9;
+        }
+        .option-card:hover { border-color: #3498db; background: #f0f8ff; transform: translateY(-5px); }
+        .option-icon { font-size: 3rem; margin-bottom: 20px; color: #3498db; }
+        .option-text { font-size: 1rem; color: #555; line-height: 1.6; margin-bottom: 20px; }
+        
+        /* Chữ KHÔNG/CÓ to đỏ */
+        .opt-label { 
+            display: block; font-size: 1.5rem; font-weight: 900; color: #e74c3c; 
+            margin-bottom: 10px; text-transform: uppercase;
+        }
+
+        /* Nút Tạo đề ngay trong Modal */
+        .btn-modal-create {
+            background: #27ae60; color: white; border: none; padding: 10px 30px;
+            border-radius: 20px; font-weight: bold; cursor: pointer; font-size: 1rem;
+            width: 100%; transition: 0.2s;
+        }
+        .btn-modal-create:hover { background: #219150; }
+
+        /* Input Modal */
+        .inline-input {
+            width: 50px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;
+            text-align: center; font-weight: bold; color: #e74c3c; font-size: 1rem;
+        }
+        .difficulty-trigger {
+            color: #27ae60; font-weight: bold; text-decoration: underline;
+            cursor: pointer; position: relative; display: inline-block;
+        }
+        .difficulty-popup {
+            display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
+            width: 250px; background: white; border: 1px solid #ccc;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2100; text-align: left;
+        }
+        .difficulty-popup::after {
+            content: ""; position: absolute; top: 100%; left: 50%; margin-left: -8px;
+            border-width: 8px 8px 0; border-style: solid; border-color: white transparent;
+        }
+        .difficulty-trigger:hover .difficulty-popup { display: block; }
+        
+       .diff-item { 
+    padding: 8px 5px; 
+    border-bottom: 1px solid #eee; 
+    font-size: 0.9rem; 
+    display: flex; 
+    align-items: center; 
+    gap: 8px; 
+    cursor: pointer; /* Biến con trỏ thành bàn tay */
+}
+.diff-item:hover {
+    background-color: #f0f8ff; /* Hiệu ứng sáng lên khi di chuột vào */
+}
+        .diff-item:last-child { border: none; }
+        
+        .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #999; cursor: pointer; line-height: 1; }
+        .close-modal:hover { color: #e74c3c; }
+
+        @media (max-width: 1000px) {
+            .page-title { font-size: 1rem; position: static; transform: none; }
+            .top-bar { justify-content: space-between; padding-top: 60px; height: auto; padding-left: 20px; }
+            .main-container, .modal-options { flex-direction: column; }
+            .popover { left: 50px !important; right: auto !important; top: 90%; width: 80%; z-index: 200; }
+        }
+        /* ============================================================
+   FIX LỖI HIỂN THỊ CHO CÁC MỤC Ở CUỐI TRANG (HIỆN NGƯỢC LÊN)
+   ============================================================ */
+
+/* 1. Áp dụng cho 4 mục cuối cùng của mỗi cột (-n+4) */
+.chapter-item:nth-last-child(-n+4) .popover {
+    top: auto;      /* Hủy bỏ căn lề trên */
+    bottom: 0;      /* Căn đáy của Menu bằng đáy của ô Chương */
+    
+    /* Tùy chọn: Đẩy lên một chút (10px) để nhìn thoáng hơn nếu cần */
+    /* transform: translateY(-10px); */ 
+}
+
+/* 2. Điều chỉnh lại vị trí mũi tên tam giác cho các mục cuối */
+/* Mũi tên cần chạy xuống dưới đáy của Menu để trỏ vào ô Chương */
+.chapter-item:nth-last-child(-n+4) .popover::before {
+    top: auto;      /* Hủy bỏ vị trí cũ (ở trên) */
+    bottom: 15px;   /* Đặt mũi tên xuống góc dưới */
+}
+
+/* 3. Cập nhật lại cầu nối (chống tuột) cho trường hợp này */
+/* Vì menu mọc ngược lên, cầu nối vẫn cần bao phủ vùng di chuột */
+.chapter-item:nth-last-child(-n+4) .popover::after {
+    top: auto;
+    bottom: 0;      /* Cầu nối bám sát đáy */
+    height: 60px;   /* Chiều cao cầu nối đủ để bắt chuột từ dưới lên */
+}
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2><span>Self-Learning</span>
+    </div>
+
+    <div class="top-bar">
+        <h1 class="page-title"><i class="fas fa-edit"></i> Lựa chọn chuyên đề - Toán 10</h1>
+        <button class="btn-back" onclick="window.location.href='menu.html'">
+            <i class="fas fa-arrow-left"></i> Quay lại Danh mục
+        </button>
+    </div>
+
+    <div class="main-container">
+        <div class="column">
+            <div class="col-header bg-dai">ĐẠI SỐ & THỐNG KÊ 10</div>
+            <div class="chapter-list" id="col-daiso"></div>
+        </div>
+        <div class="column">
+            <div class="col-header bg-hinh">HÌNH HỌC & VECTƠ 10</div>
+            <div class="chapter-list" id="col-hinhhoc"></div>
+        </div>
+    </div>
+
+    <div style="height: 100px;"></div>
+    
+<div class="bottom-bar">
+        <button class="btn-reset" onclick="resetSelection()">
+            <i class="fas fa-trash-alt"></i> XÓA CHỌN
+        </button>
+
+        <div class="stats">Đã chọn: <span id="count-display" style="color: #e74c3c; font-size: 1.2rem;">0</span> dạng toán</div>
+        
+        <button class="btn-create" onclick="hoanThanhChon()">
+            <i class="fas fa-play-circle"></i> TIẾP TỤC
+        </button>
+    </div>
+
+    <div id="setup-modal" class="modal-overlay">
+        <div class="modal-box">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <h3 class="modal-title">Bạn có muốn tùy chỉnh độ khó và định dạng của câu hỏi không?</h3>
+            
+            <div class="modal-options">
+                <div class="option-card" id="opt-random">
+                    <div>
+                        <span class="opt-label">KHÔNG</span>
+                        <div class="option-icon"><i class="fas fa-magic"></i></div>
+                        <div class="option-text">
+                            Tôi chỉ cần tạo một đề ngẫu nhiên, gồm 
+                            <input type="number" id="num-questions" class="inline-input" min="1" max="99" oninput="checkLimit(this)"> 
+                            câu, với (các) độ khó 
+                            <span class="difficulty-trigger">
+                                [Bấm chọn]
+                                <div class="difficulty-popup">
+    <label class="diff-item" style="font-weight:bold; color:#27ae60;">
+        <input type="checkbox" id="diff-all" onchange="toggleDiffAll(this)"> Chọn tất cả
+    </label>
+
+    <label class="diff-item">
+        <input type="checkbox" class="diff-chk" checked> Nhận biết
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="diff-chk" checked> Thông hiểu
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="diff-chk"> Vận dụng
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="diff-chk"> Vận dụng cao
+    </label>
+</div>
+                            </span>
+                        </div>
+                    </div>
+                    <button class="btn-modal-create" onclick="createRandomExam()">
+                        TẠO ĐỀ NGAY
+                    </button>
+                </div>
+
+                <div class="option-card" style="cursor: pointer;" onclick="goToConfigPage()">
+                    <div>
+                        <span class="opt-label">CÓ</span>
+                        <div class="option-icon"><i class="fas fa-sliders-h"></i></div>
+                        <div class="option-text">
+                            Tôi muốn chọn cụ thể số câu ở mỗi dạng, điều chỉnh định dạng câu hỏi trong đề của mình.
+                        </div>
+                    </div>
+                    <button class="btn-modal-create" style="background:#3498db;">
+                        CẤU HÌNH CHI TIẾT
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // DỮ LIỆU ĐÃ CẬP NHẬT THEO BÀI HỌC (BỎ CHƯƠNG)
+// DỮ LIỆU ĐÃ CẬP NHẬT: THAY § -> CHUYÊN ĐỀ & ĐÁNH SỐ LẠI LIÊN TỤC
+        const DATA = {
+            DaiSo: [
+                // --- CHƯƠNG 1 CŨ ---
+                {
+                    id: "DS_1", ten: "Chuyên đề 1. Mệnh đề",
+                    dang: [
+                        {id: "0D1-1-1", txt: "Xác định mệnh đề, mệnh đề chứa biến"},
+                        {id: "0D1-1-2", txt: "Tính đúng-sai của mệnh đề"},
+                        {id: "0D1-1-3", txt: "Phủ định của một mệnh đề"},
+                        {id: "0D1-1-4", txt: "Mệnh đề kéo theo, đảo, tương đương"},
+                        {id: "0D1-1-5", txt: "Mệnh đề với mọi, tồn tại"},
+                        {id: "0D1-1-6", txt: "Áp dụng mệnh đề vào suy luận"}
+                    ]
+                },
+                {
+                    id: "DS_2", ten: "Chuyên đề 2. Tập hợp",
+                    dang: [
+                        {id: "0D1-2-1", txt: "Tập hợp và phần tử của tập hợp"},
+                        {id: "0D1-2-2", txt: "Tập hợp con. Hai tập hợp bằng nhau"},
+                        {id: "0D1-2-3", txt: "Ký hiệu khoảng, đoạn, nửa khoảng"}
+                    ]
+                },
+                {
+                    id: "DS_3", ten: "Chuyên đề 3. Các phép toán tập hợp",
+                    dang: [
+                        {id: "0D1-3-1", txt: "Giao và hợp của hai tập hợp (rời rạc)"},
+                        {id: "0D1-3-2", txt: "Hiệu và phần bù của hai tập hợp"},
+                        {id: "0D1-3-3", txt: "Giao và hợp (dùng đoạn, khoảng)"},
+                        {id: "0D1-3-4", txt: "Hiệu và phần bù (dùng đoạn, khoảng)"},
+                        {id: "0D1-3-5", txt: "Toán thực tế ứng dụng của tập hợp"}
+                    ]
+                },
+                // --- CHƯƠNG 2 CŨ ---
+                {
+                    id: "DS_4", ten: "Chuyên đề 4. Bất phương trình bậc nhất hai ẩn",
+                    dang: [
+                        {id: "0D2-1-1", txt: "Các khái niệm về BPT bậc nhất hai ẩn"},
+                        {id: "0D2-1-2", txt: "Miền nghiệm của BPT bậc nhất hai ẩn"},
+                        {id: "0D2-1-3", txt: "Toán thực tế về BPT bậc nhất hai ẩn"}
+                    ]
+                },
+                {
+                    id: "DS_5", ten: "Chuyên đề 5. Hệ bất phương trình bậc nhất hai ẩn",
+                    dang: [
+                        {id: "0D2-2-1", txt: "Các khái niệm về Hệ BPT bậc nhất hai ẩn"},
+                        {id: "0D2-2-2", txt: "Miền nghiệm của Hệ BPT bậc nhất hai ẩn"},
+                        {id: "0D2-2-3", txt: "Toán thực tế về Hệ BPT bậc nhất hai ẩn"}
+                    ]
+                },
+                // --- CHƯƠNG 3 CŨ ---
+                {
+                    id: "DS_6", ten: "Chuyên đề 6. Hàm số và đồ thị",
+                    dang: [
+                        {id: "0D3-1-1", txt: "Xác định một hàm số"},
+                        {id: "0D3-1-2", txt: "Tập xác định của hàm số"},
+                        {id: "0D3-1-3", txt: "Giá trị của hàm số"},
+                        {id: "0D3-1-4", txt: "Đồ thị của hàm số"},
+                        {id: "0D3-1-5", txt: "Tính đồng biến, nghịch biến"},
+                        {id: "0D3-1-6", txt: "Tính chẵn, lẻ"},
+                        {id: "0D3-1-7", txt: "Toán thực tế về hàm số"}
+                    ]
+                },
+                {
+                    id: "DS_7", ten: "Chuyên đề 7. Hàm số bậc hai",
+                    dang: [
+                        {id: "0D3-2-1", txt: "Xác định hàm số bậc hai"},
+                        {id: "0D3-2-2", txt: "Bảng biến thiên, tính đơn điệu, max, min"},
+                        {id: "0D3-2-3", txt: "Đồ thị của hàm số bậc hai"},
+                        {id: "0D3-2-4", txt: "Bài toán về sự tương giao"},
+                        {id: "0D3-2-5", txt: "Hàm số chứa dấu giá trị tuyệt đối"},
+                        {id: "0D3-2-6", txt: "Toán thực tế ứng dụng hàm số bậc hai"}
+                    ]
+                },
+                // --- CHƯƠNG 6 CŨ ---
+                {
+                    id: "DS_8", ten: "Chuyên đề 8. Số gần đúng. Sai số",
+                    dang: [
+                        {id: "0D6-1-1", txt: "Sai số tuyệt đối, tương đối"},
+                        {id: "0D6-1-2", txt: "Độ chính xác của kết quả"},
+                        {id: "0D6-1-3", txt: "Quy tròn số gần đúng"},
+                        {id: "0D6-1-4", txt: "Viết số gần đúng biết độ chính xác"}
+                    ]
+                },
+                {
+                    id: "DS_9", ten: "Chuyên đề 9. Mô tả và biểu diễn dữ liệu",
+                    dang: [
+                        {id: "0D6-2-1", txt: "Đọc và phân tích thông tin trên bảng"},
+                        {id: "0D6-2-2", txt: "Đọc và phân tích thông tin biểu đồ"},
+                        {id: "0D6-2-3", txt: "Số liệu bất thường trên bảng số liệu"},
+                        {id: "0D6-2-4", txt: "Số liệu bất thường trên biểu đồ"}
+                    ]
+                },
+                {
+                    id: "DS_10", ten: "Chuyên đề 10. Các số đặc trưng đo xu thế trung tâm",
+                    dang: [
+                        {id: "0D6-3-1", txt: "Câu hỏi lý thuyết"},
+                        {id: "0D6-3-2", txt: "Số trung bình cộng"},
+                        {id: "0D6-3-3", txt: "Số trung vị"},
+                        {id: "0D6-3-4", txt: "Tứ phân vị"},
+                        {id: "0D6-3-5", txt: "Mốt (Mode)"}
+                    ]
+                },
+                {
+                    id: "DS_11", ten: "Chuyên đề 11. Các số đặc trưng đo mức độ phân tán",
+                    dang: [
+                        {id: "0D6-4-1", txt: "Câu hỏi lý thuyết"},
+                        {id: "0D6-4-2", txt: "Khoảng biến thiên, khoảng tứ phân vị"},
+                        {id: "0D6-4-3", txt: "Giá trị bất thường của mẫu số liệu"},
+                        {id: "0D6-4-4", txt: "Phương sai, độ lệch chuẩn"}
+                    ]
+                },
+                // --- CHƯƠNG 7 CŨ ---
+                {
+                    id: "DS_12", ten: "Chuyên đề 12. Dấu của tam thức bậc 2",
+                    dang: [
+                        {id: "0D7-1-1", txt: "Xác định tam thức bậc 2"},
+                        {id: "0D7-1-2", txt: "Dấu của tam thức bậc 2 và ứng dụng"},
+                        {id: "0D7-1-3", txt: "Bài toán xét dấu biết BXD, đồ thị"},
+                        {id: "0D7-1-4", txt: "Xét dấu biểu thức dạng tích, thương"},
+                        {id: "0D7-1-5", txt: "Toán thực tế ứng dụng"}
+                    ]
+                },
+                {
+                    id: "DS_13", ten: "Chuyên đề 13. Giải bất phương trình bậc 2 một ẩn",
+                    dang: [
+                        {id: "0D7-2-1", txt: "Bất phương trình bậc 2 và ứng dụng"},
+                        {id: "0D7-2-2", txt: "Giải bất phương trình biết BXD, đồ thị"},
+                        {id: "0D7-2-3", txt: "Bất phương trình dạng tích, thương"},
+                        {id: "0D7-2-4", txt: "Hệ bất phương trình BPT bậc 2"},
+                        {id: "0D7-2-5", txt: "Bất phương trình chứa căn, trị tuyệt đối"},
+                        {id: "0D7-2-6", txt: "Bài toán có tham số m"},
+                        {id: "0D7-2-7", txt: "Toán thực tế ứng dụng BPT bậc 2"}
+                    ]
+                },
+                {
+                    id: "DS_14", ten: "Chuyên đề 14. Phương trình quy về phương trình bậc hai",
+                    dang: [
+                        {id: "0D7-3-1", txt: "Phương trình căn f(x) = căn g(x)"},
+                        {id: "0D7-3-2", txt: "Phương trình căn f(x) = g(x)"},
+                        {id: "0D7-3-3", txt: "Phương trình căn thức có tham số"},
+                        {id: "0D7-3-4", txt: "Phương trình căn thức dạng khác"},
+                        {id: "0D7-3-5", txt: "Phương trình khác quy về bậc 2"},
+                        {id: "0D7-3-6", txt: "Toán hình, toán thực tế ứng dụng"}
+                    ]
+                },
+                // --- CHƯƠNG 8 CŨ ---
+                {
+                    id: "DS_15", ten: "Chuyên đề 15. Quy tắc cộng - quy tắc nhân",
+                    dang: [
+                        {id: "0D8-1-1", txt: "Bài toán chỉ sử dụng quy tắc cộng"},
+                        {id: "0D8-1-2", txt: "Bài toán chỉ sử dụng quy tắc nhân"},
+                        {id: "0D8-1-3", txt: "Kết hợp quy tắc cộng và nhân"},
+                        {id: "0D8-1-4", txt: "Bài toán dùng quy tắc bù trừ"},
+                        {id: "0D8-1-5", txt: "Bài toán đếm số tự nhiên"},
+                        {id: "0D8-1-6", txt: "Sơ đồ hình cây"}
+                    ]
+                },
+                {
+                    id: "DS_16", ten: "Chuyên đề 16. Hoán vị. Chỉnh hợp. Tổ hợp",
+                    dang: [
+                        {id: "0D8-2-1", txt: "Lý thuyết tổng hợp về P, C, A"},
+                        {id: "0D8-2-2", txt: "Bài toán có biểu thức P, C, A"},
+                        {id: "0D8-2-3", txt: "Bài toán đếm số tự nhiên"},
+                        {id: "0D8-2-4", txt: "Bài toán chọn người"},
+                        {id: "0D8-2-5", txt: "Bài toán chọn đối tượng khác"},
+                        {id: "0D8-2-6", txt: "Bài toán có yếu tố hình học"},
+                        {id: "0D8-2-7", txt: "Bài toán xếp chỗ (không tròn, không lặp)"},
+                        {id: "0D8-2-8", txt: "Hoán vị bàn tròn"},
+                        {id: "0D8-2-9", txt: "Hoán vị lặp"}
+                    ]
+                },
+                {
+                    id: "DS_17", ten: "Chuyên đề 17. Nhị thức Newton",
+                    dang: [
+                        {id: "0D8-3-1", txt: "Các câu hỏi lý thuyết tổng hợp"},
+                        {id: "0D8-3-2", txt: "Khai triển một nhị thức Newton"},
+                        {id: "0D8-3-3", txt: "Tìm hệ số, số hạng bằng tam giác Pascal"},
+                        {id: "0D8-3-4", txt: "Tìm hệ số, số hạng trong khai triển"},
+                        {id: "0D8-3-5", txt: "Tính tổng nhờ khai triển nhị thức"},
+                        {id: "0D8-3-6", txt: "Toán tổ hợp có dùng nhị thức Newton"}
+                    ]
+                },
+                // --- CHƯƠNG 10 CŨ ---
+                {
+                    id: "DS_18", ten: "Chuyên đề 18. Không gian mẫu và biến cố",
+                    dang: [
+                        {id: "0D10-1-1", txt: "Các câu hỏi lý thuyết tổng hợp"},
+                        {id: "0D10-1-2", txt: "Mô tả không gian mẫu, biến cố"},
+                        {id: "0D10-1-3", txt: "Đếm phần tử không gian mẫu, biến cố"}
+                    ]
+                },
+                {
+                    id: "DS_19", ten: "Chuyên đề 19. Xác suất của biến cố",
+                    dang: [
+                        {id: "0D10-2-1", txt: "Các câu hỏi lý thuyết tổng hợp"},
+                        {id: "0D10-2-2", txt: "Liên quan xúc xắc, đồng tiền"},
+                        {id: "0D10-2-3", txt: "Liên quan việc sắp xếp chỗ"},
+                        {id: "0D10-2-4", txt: "Liên quan việc chọn người"},
+                        {id: "0D10-2-5", txt: "Liên quan việc chọn đối tượng khác"},
+                        {id: "0D10-2-6", txt: "Liên quan hình học"},
+                        {id: "0D10-2-7", txt: "Liên quan việc đếm số"},
+                        {id: "0D10-2-8", txt: "Liên quan bàn tròn hoặc hoán vị lặp"},
+                        {id: "0D10-2-9", txt: "Liên quan vấn đề khác"}
+                    ]
+                }
+            ],
+            HinhHoc: [
+                // --- CHƯƠNG 4 CŨ ---
+                {
+                    id: "HH_1", ten: "Chuyên đề 1. Giá trị lượng giác của góc (0-180°)",
+                    dang: [
+                        {id: "0H4-1-1", txt: "Xét dấu của biểu thức lượng giác"},
+                        {id: "0H4-1-2", txt: "Tính các giá trị lượng giác"},
+                        {id: "0H4-1-3", txt: "Biến đổi, rút gọn biểu thức lượng giác"}
+                    ]
+                },
+                {
+                    id: "HH_2", ten: "Chuyên đề 2. Định lý sin và định lý côsin",
+                    dang: [
+                        {id: "0H4-2-1", txt: "Bài toán chỉ dùng định lý Sin, Côsin"},
+                        {id: "0H4-2-2", txt: "Bài toán có dùng công thức diện tích"},
+                        {id: "0H4-2-3", txt: "Biến đổi, rút gọn biểu thức"},
+                        {id: "0H4-2-4", txt: "Nhận dạng tam giác"}
+                    ]
+                },
+                {
+                    id: "HH_3", ten: "Chuyên đề 3. Giải tam giác và ứng dụng thực tế",
+                    dang: [
+                        {id: "0H4-3-1", txt: "Giải tam giác"},
+                        {id: "0H4-3-2", txt: "Các ứng dụng thực tế"}
+                    ]
+                },
+                // --- CHƯƠNG 5 CŨ ---
+                {
+                    id: "HH_4", ten: "Chuyên đề 4. Khái niệm vectơ",
+                    dang: [
+                        {id: "0H5-1-1", txt: "Xác định một vectơ"},
+                        {id: "0H5-1-2", txt: "Xét phương và hướng của các vectơ"},
+                        {id: "0H5-1-3", txt: "Hai vectơ bằng nhau"},
+                        {id: "0H5-1-4", txt: "Hai vectơ đối nhau"},
+                        {id: "0H5-1-5", txt: "Độ dài của một vectơ"},
+                        {id: "0H5-1-6", txt: "Toán thực tế áp dụng vectơ"}
+                    ]
+                },
+                {
+                    id: "HH_5", ten: "Chuyên đề 5. Tổng và hiệu của hai vectơ",
+                    dang: [
+                        {id: "0H5-2-1", txt: "Tính toán, thu gọn hiệu các vectơ"},
+                        {id: "0H5-2-2", txt: "Tính đúng-sai của 1 đẳng thức vectơ"},
+                        {id: "0H5-2-3", txt: "Tìm điểm nhờ đẳng thức vectơ"},
+                        {id: "0H5-2-4", txt: "Tính độ dài của vectơ tổng, hiệu"},
+                        {id: "0H5-2-5", txt: "Cực trị hình học"},
+                        {id: "0H5-2-6", txt: "Toán thực tế áp dụng tổng hiệu vectơ"}
+                    ]
+                },
+                {
+                    id: "HH_6", ten: "Chuyên đề 6. Tích của một số với vectơ",
+                    dang: [
+                        {id: "0H5-3-1", txt: "Xác định k và độ dài của nó"},
+                        {id: "0H5-3-2", txt: "Biến đổi, thu gọn 1 đẳng thức vectơ"},
+                        {id: "0H5-3-3", txt: "Tìm điểm nhờ đẳng thức vectơ"},
+                        {id: "0H5-3-4", txt: "Sự cùng phương của 2 vectơ và ứng dụng"},
+                        {id: "0H5-3-5", txt: "Phân tích 1 vectơ theo 2 vectơ khác"},
+                        {id: "0H5-3-6", txt: "Tính độ dài của vectơ tổng, hiệu"},
+                        {id: "0H5-3-7", txt: "Tập hợp điểm"},
+                        {id: "0H5-3-8", txt: "Cực trị hình học"},
+                        {id: "0H5-3-9", txt: "Toán thực tế áp dụng tích 1 số với vectơ"}
+                    ]
+                },
+                {
+                    id: "HH_7", ten: "Chuyên đề 7. Tích vô hướng (chưa xét tọa độ)",
+                    dang: [
+                        {id: "0H5-4-1", txt: "Tích vô hướng, góc giữa 2 vectơ"},
+                        {id: "0H5-4-2", txt: "Tìm góc nhờ tích vô hướng"},
+                        {id: "0H5-4-3", txt: "Đẳng thức về tích vô hướng hoặc độ dài"},
+                        {id: "0H5-4-4", txt: "Điều kiện vuông góc"},
+                        {id: "0H5-4-5", txt: "Các bài toán tìm điểm và tập hợp điểm"},
+                        {id: "0H5-4-6", txt: "Cực trị và chứng minh bất đẳng thức"},
+                        {id: "0H5-4-7", txt: "Toán thực tế áp dụng tích vô hướng"}
+                    ]
+                },
+                // --- CHƯƠNG 9 CŨ ---
+                {
+                    id: "HH_8", ten: "Chuyên đề 8. Tọa độ của vectơ",
+                    dang: [
+                        {id: "0H9-1-1", txt: "Tọa độ điểm, độ dài đại số trên 1 trục"},
+                        {id: "0H9-1-2", txt: "Phép toán vectơ trong Oxy"},
+                        {id: "0H9-1-3", txt: "Tọa độ điểm và vectơ trên hệ trục Oxy"},
+                        {id: "0H9-1-4", txt: "Sự cùng phương của 2 vectơ và ứng dụng"},
+                        {id: "0H9-1-5", txt: "Phân tích một vectơ theo 2 vectơ"},
+                        {id: "0H9-1-6", txt: "Toán thực tế dùng hệ tọa độ"}
+                    ]
+                },
+                {
+                    id: "HH_9", ten: "Chuyên đề 9. Tích vô hướng (theo tọa độ)",
+                    dang: [
+                        {id: "0H9-2-1", txt: "Tích vô hướng, góc giữa 2 vectơ"},
+                        {id: "0H9-2-2", txt: "Tìm góc nhờ tích vô hướng"},
+                        {id: "0H9-2-3", txt: "Đẳng thức về tích vô hướng hoặc độ dài"},
+                        {id: "0H9-2-4", txt: "Điều kiện vuông góc"},
+                        {id: "0H9-2-5", txt: "Các bài toán tìm điểm và tập hợp điểm"},
+                        {id: "0H9-2-6", txt: "Cực trị và chứng minh bất đẳng thức"},
+                        {id: "0H9-2-7", txt: "Toán thực tế, liên môn"}
+                    ]
+                },
+                {
+                    id: "HH_10", ten: "Chuyên đề 10. Đường thẳng trong mặt phẳng tọa độ",
+                    dang: [
+                        {id: "0H9-3-1", txt: "Điểm, vectơ, hệ số góc của đường thẳng"},
+                        {id: "0H9-3-2", txt: "Phương trình đường thẳng"},
+                        {id: "0H9-3-3", txt: "Vị trí tương đối giữa hai đường thẳng"},
+                        {id: "0H9-3-4", txt: "Bài toán về góc giữa hai đường thẳng"},
+                        {id: "0H9-3-5", txt: "Bài toán về khoảng cách"},
+                        {id: "0H9-3-6", txt: "Bài toán tìm điểm"},
+                        {id: "0H9-3-7", txt: "Bài toán dùng cho tam giác, tứ giác"},
+                        {id: "0H9-3-8", txt: "Bài toán thực tế, PP tọa độ hóa"}
+                    ]
+                },
+                {
+                    id: "HH_11", ten: "Chuyên đề 11. Đường tròn trong mặt phẳng tọa độ",
+                    dang: [
+                        {id: "0H9-4-1", txt: "Tìm tâm, bán kính và điều kiện là đường tròn"},
+                        {id: "0H9-4-2", txt: "Phương trình đường tròn"},
+                        {id: "0H9-4-3", txt: "Phương trình tiếp tuyến của đường tròn"},
+                        {id: "0H9-4-4", txt: "Vị trí tương đối liên quan đường tròn"},
+                        {id: "0H9-4-5", txt: "Toán tổng hợp đường thẳng và đường tròn"},
+                        {id: "0H9-4-6", txt: "Bài toán dùng cho tam giác, tứ giác"},
+                        {id: "0H9-4-7", txt: "Bài toán thực tế, PP tọa độ hóa"}
+                    ]
+                },
+                {
+                    id: "HH_12", ten: "Chuyên đề 12. Ba đường conic",
+                    dang: [
+                        {id: "0H9-5-1", txt: "Xác định các yếu tố của elip"},
+                        {id: "0H9-5-2", txt: "Phương trình chính tắc của elip"},
+                        {id: "0H9-5-3", txt: "Bài toán điểm trên elip"},
+                        {id: "0H9-5-4", txt: "Xác định các yếu tố của hypebol"},
+                        {id: "0H9-5-5", txt: "Phương trình chính tắc của hypebol"},
+                        {id: "0H9-5-6", txt: "Bài toán điểm trên hypebol"},
+                        {id: "0H9-5-7", txt: "Xác định các yếu tố của parabol"},
+                        {id: "0H9-5-8", txt: "Phương trình chính tắc của parabol"},
+                        {id: "0H9-5-9", txt: "Bài toán điểm trên parabol"},
+                        {id: "0H9-5-0", txt: "Bài toán tổng hợp 3 đường conic"}
+                    ]
+                }
+            ]
+        };
+
+        const selectedSet = new Set();
+
+        // Format functions
+        function formatTopicName(ten, grade) {
+            // Extract number from "Chuyên đề X. ..." or "CĐ X. ..."
+            const match = ten.match(/(?:Chuyên đề|CĐ)\s*(\d+)\.\s*(.+)/);
+            if (match) {
+                const topicNum = match[1];
+                const topicName = match[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            // If no match, try to extract number from beginning
+            const match2 = ten.match(/(\d+)\.\s*(.+)/);
+            if (match2) {
+                const topicNum = match2[1];
+                const topicName = match2[2];
+                return `${grade}.CĐ${topicNum}. ${topicName}`;
+            }
+            return ten; // Fallback
+        }
+
+        function formatSkillName(txt, grade, topicIndex, skillIndex) {
+            return `${grade}.${topicIndex}.${skillIndex}. ${txt}`;
+        }
+
+        function initUI() {
+            renderColumn(DATA.DaiSo, 'col-daiso', '10');
+            renderColumn(DATA.HinhHoc, 'col-hinhhoc', '10');
+            
+            // FIX: Load trạng thái đã lưu nếu có (Khi từ trang cấu hình quay lại)
+            loadSelectedState();
+        }
+
+        // Hàm tải lại trạng thái
+        function loadSelectedState() {
+            const saved = localStorage.getItem('selectedMathTypes');
+            if (saved) {
+                const savedIds = JSON.parse(saved);
+                savedIds.forEach(id => {
+                    selectedSet.add(id);
+                    // Tích vào ô checkbox tương ứng
+                    const chk = document.getElementById(`chk-${id}`);
+                    if (chk) chk.checked = true;
+                });
+                updateCount();
+            }
+        }
+
+        function renderColumn(dataArray, containerId, grade) {
+            const container = document.getElementById(containerId);
+            dataArray.forEach((chapter, topicIdx) => {
+                const chapterEl = document.createElement('div');
+                chapterEl.className = 'chapter-item';
+                const formattedTopicName = formatTopicName(chapter.ten, grade);
+                chapterEl.innerHTML = `<span>${formattedTopicName}</span> <i class="fas fa-chevron-right"></i>`;
+
+                const popover = document.createElement('div');
+                popover.className = 'popover';
+
+                const popHeader = document.createElement('div');
+                popHeader.className = 'popover-header';
+                const chkAll = document.createElement('input');
+                chkAll.type = 'checkbox';
+                chkAll.id = `all-${chapter.id}`;
+                chkAll.onchange = (e) => toggleAll(chapter, e.target.checked);
+                const lblAll = document.createElement('label');
+                lblAll.htmlFor = `all-${chapter.id}`;
+                lblAll.innerText = "Chọn tất cả dạng toán này";
+                lblAll.style.cursor = 'pointer';
+                popHeader.appendChild(chkAll);
+                popHeader.appendChild(lblAll);
+                popover.appendChild(popHeader);
+
+                const popBody = document.createElement('div');
+                popBody.className = 'popover-body';
+                chapter.dang.forEach((d, skillIdx) => {
+                    const row = document.createElement('div');
+                    row.className = 'type-item';
+                    row.onclick = (e) => {
+                        if (e.target.tagName !== 'INPUT') {
+                            const chk = document.getElementById(`chk-${d.id}`);
+                            chk.checked = !chk.checked;
+                            toggleOne(d.id, chk.checked, chapter.id);
+                        }
+                    };
+                    const chk = document.createElement('input');
+                    chk.type = 'checkbox';
+                    chk.id = `chk-${d.id}`;
+                    chk.onchange = (e) => toggleOne(d.id, e.target.checked, chapter.id);
+                    const lbl = document.createElement('span');
+                    const formattedSkillName = formatSkillName(d.txt, grade, topicIdx + 1, skillIdx + 1);
+                    lbl.innerText = formattedSkillName;
+                    row.appendChild(chk);
+                    row.appendChild(lbl);
+                    popBody.appendChild(row);
+                });
+
+                popover.appendChild(popBody);
+                chapterEl.appendChild(popover);
+                container.appendChild(chapterEl);
+            });
+        }
+
+        function toggleOne(id, isChecked, chapterId) {
+            if (isChecked) selectedSet.add(id); else selectedSet.delete(id);
+            updateCount();
+            checkParentStatus(chapterId);
+        }
+
+        function toggleAll(chapter, isChecked) {
+            chapter.dang.forEach(d => {
+                const chk = document.getElementById(`chk-${d.id}`);
+                if (chk) chk.checked = isChecked;
+                if (isChecked) selectedSet.add(d.id); else selectedSet.delete(d.id);
+            });
+            updateCount();
+        }
+
+        function checkParentStatus(chapterId) {
+            let chapter = DATA.DaiSo.find(c => c.id === chapterId) || DATA.HinhHoc.find(c => c.id === chapterId);
+            if (!chapter) return;
+            const allIds = chapter.dang.map(d => d.id);
+            const isAllSelected = allIds.every(id => selectedSet.has(id));
+            const chkAll = document.getElementById(`all-${chapterId}`);
+            if (chkAll) chkAll.checked = isAllSelected;
+        }
+
+        function updateCount() {
+            document.getElementById('count-display').innerText = selectedSet.size;
+        }
+
+        function checkLimit(input) {
+            if (input.value > 99) {
+                alert("Quá tải đó vị hảo hán à! (Giới hạn 99 câu)");
+                input.value = 99;
+            }
+            if (input.value < 0) input.value = 1;
+        }
+
+        function toggleDiffAll(source) {
+            const checkboxes = document.querySelectorAll('.diff-chk');
+            checkboxes.forEach(chk => chk.checked = source.checked);
+        }
+
+        function hoanThanhChon() {
+            if (selectedSet.size === 0) {
+                alert("Bạn chưa chọn dạng toán nào!");
+                return;
+            }
+            // Lưu dữ liệu trước khi hiện Modal (Để nếu chọn option 2 thì đã có sẵn)
+            localStorage.setItem('selectedMathTypes', JSON.stringify(Array.from(selectedSet)));
+            localStorage.setItem('currentGrade', 'Lop10');
+            
+            document.getElementById('setup-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('setup-modal').style.display = 'none';
+        }
+
+        document.getElementById('num-questions').addEventListener('click', function(e) { e.stopPropagation(); });
+        document.querySelector('.difficulty-trigger').addEventListener('click', function(e) { });
+
+        // Nút Tạo Ngẫu nhiên (Option 1)
+        function createRandomExam() {
+            const soCau = document.getElementById('num-questions').value;
+            if (!soCau) {
+                alert("Vui lòng điền số lượng câu hỏi!");
+                document.getElementById('num-questions').focus();
+                return;
+            }
+            alert("Đã nhận lệnh: Tạo đề ngẫu nhiên " + soCau + " câu. (Chuyển sang làm bài...)");
+        }
+
+        // Nút Tùy Chỉnh (Option 2)
+        function goToConfigPage() {
+            window.location.href = 'TrangCauHinh.html';
+        }
+
+        // --- HÀM XÓA TẤT CẢ LỰA CHỌN ---
+        function resetSelection() {
+            if (selectedSet.size === 0) {
+                alert("Bạn chưa chọn dạng nào để xóa!");
+                return;
+            }
+
+            if (confirm("Bạn có chắc chắn muốn bỏ chọn tất cả các dạng toán không?")) {
+                // 1. Xóa trong bộ nhớ Set
+                selectedSet.clear();
+
+                // 2. Bỏ tick toàn bộ checkbox trên giao diện
+                const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+                checkboxes.forEach(chk => chk.checked = false);
+
+                // 3. Xóa dữ liệu lưu trong localStorage (Sửa lỗi hiển thị tên dạng toán)
+                localStorage.removeItem('selectedMathTypes');
+
+                // 4. Cập nhật số lượng về 0
+                updateCount();
+            }
+        }
+        initUI();
+    </script>
+</body>
+</html>

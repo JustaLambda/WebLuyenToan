@@ -147,7 +147,21 @@ app.post('/api/questions', (req, res) => {
 
 // Tìm kiếm câu hỏi - hỗ trợ mảng giá trị
 app.post('/api/questions/search', (req, res) => {
-    const { program, grade, subject, topic, skill, question_type, difficulty, year, keyword, page = 1, limit = 20 } = req.body;
+    const { program, program_type, grade, subject, topic, skill, question_type, difficulty, year, keyword, page = 1, limit = 20 } = req.body;
+
+    // Log để debug
+    console.log('[Search] Request body:', {
+        program,
+        program_type,
+        grade,
+        subject,
+        topic,
+        skill,
+        question_type,
+        difficulty,
+        year,
+        keyword
+    });
 
     let sql = 'SELECT * FROM questions WHERE 1=1';
     let countSql = 'SELECT COUNT(*) as total FROM questions WHERE 1=1';
@@ -172,9 +186,10 @@ app.post('/api/questions/search', (req, res) => {
         }
     };
 
-    // Check for both program and program_type
-    if (program) {
-        addFilter('program', program, 'program_type'); // Map to program_type column
+    // Check for both program and program_type - map to program_type column
+    const programValue = program_type || program;
+    if (programValue) {
+        addFilter('program', programValue, 'program_type'); // Map to program_type column
     }
     addFilter('grade', grade, 'grade');
     addFilter('subject', subject, 'subject');
@@ -226,11 +241,15 @@ app.post('/api/questions/search', (req, res) => {
         }
 
         // Then get data
+        console.log('[Search] SQL:', sql);
+        console.log('[Search] Params:', params);
+        
         db.all(sql, params, (err, rows) => {
             if (err) {
                 console.error('Error searching questions:', err);
                 res.json({ success: false, message: err.message, data: [] });
             } else {
+                console.log(`[Search] Found ${rows ? rows.length : 0} questions (total: ${countResult.total})`);
                 res.json({
                     success: true,
                     data: rows,
@@ -363,6 +382,15 @@ app.post('/api/exams/generate', (req, res) => {
         let sql = 'SELECT * FROM questions WHERE 1=1';
         let params = [];
 
+        // Log để debug
+        console.log(`[Exam Generate] Section ${index}:`, {
+            grade,
+            typeId: section.typeId,
+            questionType: section.questionType,
+            level: section.level,
+            count: section.count
+        });
+
         // Filter by grade if provided
         if (grade) {
             sql += ' AND grade = ?';
@@ -400,16 +428,25 @@ app.post('/api/exams/generate', (req, res) => {
         sql += ' ORDER BY RANDOM() LIMIT ?';
         params.push(count);
 
+        // Log SQL query for debugging
+        console.log(`[Exam Generate] SQL: ${sql}`);
+        console.log(`[Exam Generate] Params:`, params);
+
         db.all(sql, params, (err, rows) => {
             if (err) {
                 console.error('Error fetching questions for section:', err);
                 hasError = true;
-            } else if (rows) {
+            } else {
+                console.log(`[Exam Generate] Found ${rows ? rows.length : 0} questions for section ${index}`);
                 // Check if we got enough questions
-                if (rows.length < count) {
-                    console.warn(`Warning: Only found ${rows.length} questions for section ${index}, requested ${count}`);
+                if (!rows || rows.length < count) {
+                    console.warn(`Warning: Only found ${rows ? rows.length : 0} questions for section ${index}, requested ${count}`);
+                    console.warn(`Query was: ${sql}`);
+                    console.warn(`Params were:`, params);
                 }
-                allQuestions = allQuestions.concat(rows);
+                if (rows && rows.length > 0) {
+                    allQuestions = allQuestions.concat(rows);
+                }
             }
             
             completed++;
@@ -434,6 +471,21 @@ app.post('/api/exams/generate', (req, res) => {
     });
 });
 
+// Debug endpoint - Xem dữ liệu mẫu trong database
+app.get('/api/debug/questions-sample', (req, res) => {
+    db.all('SELECT id, program_type, grade, subject, topic, skill, question_type, difficulty FROM questions LIMIT 10', [], (err, rows) => {
+        if (err) {
+            res.json({ success: false, message: err.message, data: [] });
+        } else {
+            res.json({
+                success: true,
+                data: rows,
+                message: `Found ${rows.length} sample questions`
+            });
+        }
+    });
+});
+
 // Start server
 app.listen(PORT, () => {
     console.log(`Server running at http://localhost:${PORT}`);
@@ -444,5 +496,6 @@ app.listen(PORT, () => {
     console.log('  GET  /api/questions/:id - Lấy câu hỏi theo ID');
     console.log('  PUT  /api/questions/:id - Cập nhật câu hỏi');
     console.log('  DELETE /api/questions/:id - Xóa câu hỏi');
+    console.log('  GET  /api/debug/questions-sample - Xem mẫu dữ liệu (debug)');
 });
 

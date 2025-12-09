@@ -416,10 +416,19 @@ app.post('/api/exams/generate', (req, res) => {
             sql += ' AND difficulty IN (1, 2, 3, 4)';
         }
 
-        // Filter by topic (typeId is the topic ID)
+        // Filter by topic or skill (typeId can be either topic ID or skill ID)
+        // Check if typeId matches a skill pattern (contains dashes like "0H5-1-3")
+        // or a topic pattern (like "HH10_4", "DS10_1")
         if (section.typeId) {
-            sql += ' AND topic = ?';
-            params.push(section.typeId);
+            // If typeId contains dashes, it's likely a skill ID
+            if (section.typeId.includes('-')) {
+                sql += ' AND skill = ?';
+                params.push(section.typeId);
+            } else {
+                // Otherwise, it's likely a topic ID
+                sql += ' AND topic = ?';
+                params.push(section.typeId);
+            }
         }
 
         // Get the count of questions needed

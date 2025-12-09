@@ -480,6 +480,11 @@ app.post('/api/exams/generate', (req, res) => {
     });
 });
 
+// Route để serve insert_demo.html
+app.get('/insert_demo.html', (req, res) => {
+    res.sendFile(path.join(__dirname, 'insert_demo.html'));
+});
+
 // Debug endpoint - Xem dữ liệu mẫu trong database
 app.get('/api/debug/questions-sample', (req, res) => {
     db.all('SELECT id, program_type, grade, subject, topic, skill, question_type, difficulty FROM questions LIMIT 10', [], (err, rows) => {

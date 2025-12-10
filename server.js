@@ -136,6 +136,10 @@ app.post('/api/questions', (req, res) => {
             console.error('Error saving question:', err);
             res.json({ success: false, message: err.message });
         } else {
+            console.log(`[Save Question] ✓ Đã lưu câu hỏi ID: ${this.lastID}`);
+            console.log(`[Save Question] Chương trình: ${programValue}, Lớp: ${grade}, Môn: ${subject}`);
+            console.log(`[Save Question] Chủ đề: ${topic || 'N/A'}, Kỹ năng: ${skill || 'N/A'}`);
+            console.log(`[Save Question] Dạng: ${question_type}, Độ khó: ${difficulty}`);
             res.json({ 
                 success: true, 
                 message: 'Lưu câu hỏi thành công!',
@@ -480,11 +484,6 @@ app.post('/api/exams/generate', (req, res) => {
     });
 });
 
-// Route để serve insert_demo.html
-app.get('/insert_demo.html', (req, res) => {
-    res.sendFile(path.join(__dirname, 'insert_demo.html'));
-});
-
 // Debug endpoint - Xem dữ liệu mẫu trong database
 app.get('/api/debug/questions-sample', (req, res) => {
     db.all('SELECT id, program_type, grade, subject, topic, skill, question_type, difficulty FROM questions LIMIT 10', [], (err, rows) => {
@@ -500,122 +499,6 @@ app.get('/api/debug/questions-sample', (req, res) => {
     });
 });
 
-// Endpoint để insert demo questions (chỉ dùng cho development/testing)
-app.post('/api/debug/insert-demo-questions', (req, res) => {
-    const demoQuestions = [
-        {
-            program_type: 'Chương trình phổ thông',
-            grade: 'Lop10',
-            subject: 'Hình học & Vectơ 10',
-            topic: 'HH10_4',
-            skill: '0H5-1-3',
-            question_type: 'mc',
-            difficulty: 1,
-            content: '<p>Cho hai vectơ \\(\\vec{a} = (2, 3)\\) và \\(\\vec{b} = (1, -1)\\). Tính \\(\\vec{a} + \\vec{b}\\)?</p>',
-            answer: JSON.stringify(['(3, 2)', '(1, 4)', '(2, 2)', '(3, 4)']),
-            correct_answer: 'A',
-            solution: '<p>Ta có: \\(\\vec{a} + \\vec{b} = (2+1, 3+(-1)) = (3, 2)\\)</p>',
-            year: 2025,
-            note: 'Demo question 1'
-        },
-        {
-            program_type: 'Chương trình phổ thông',
-            grade: 'Lop10',
-            subject: 'Hình học & Vectơ 10',
-            topic: 'HH10_4',
-            skill: '0H5-1-3',
-            question_type: 'mc',
-            difficulty: 1,
-            content: '<p>Vectơ \\(\\vec{u} = (4, 6)\\) có độ dài bằng bao nhiêu?</p>',
-            answer: JSON.stringify(['\\(2\\sqrt{13}\\)', '\\(10\\)', '\\(\\sqrt{52}\\)', '\\(52\\)']),
-            correct_answer: 'A',
-            solution: '<p>Độ dài vectơ: \\(|\\vec{u}| = \\sqrt{4^2 + 6^2} = \\sqrt{16 + 36} = \\sqrt{52} = 2\\sqrt{13}\\)</p>',
-            year: 2025,
-            note: 'Demo question 2'
-        },
-        {
-            program_type: 'Chương trình phổ thông',
-            grade: 'Lop10',
-            subject: 'Hình học & Vectơ 10',
-            topic: 'HH10_4',
-            skill: '0H5-1-3',
-            question_type: 'mc',
-            difficulty: 1,
-            content: '<p>Cho \\(\\vec{a} = (3, 4)\\). Vectơ đối của \\(\\vec{a}\\) là:</p>',
-            answer: JSON.stringify(['\\((-3, -4)\\)', '\\((3, -4)\\)', '\\((-3, 4)\\)', '\\((0, 0)\\)']),
-            correct_answer: 'A',
-            solution: '<p>Vectơ đối của \\(\\vec{a} = (3, 4)\\) là \\(-\\vec{a} = (-3, -4)\\)</p>',
-            year: 2025,
-            note: 'Demo question 3'
-        },
-        {
-            program_type: 'Chương trình phổ thông',
-            grade: 'Lop10',
-            subject: 'Hình học & Vectơ 10',
-            topic: 'HH10_4',
-            skill: '0H5-1-3',
-            question_type: 'mc',
-            difficulty: 1,
-            content: '<p>Cho \\(\\vec{a} = (1, 2)\\) và \\(\\vec{b} = (3, 1)\\). Tính \\(2\\vec{a} - \\vec{b}\\)?</p>',
-            answer: JSON.stringify(['\\((-1, 3)\\)', '\\((5, 3)\\)', '\\((2, 4)\\)', '\\((1, 1)\\)']),
-            correct_answer: 'A',
-            solution: '<p>Ta có: \\(2\\vec{a} - \\vec{b} = 2(1, 2) - (3, 1) = (2, 4) - (3, 1) = (-1, 3)\\)</p>',
-            year: 2025,
-            note: 'Demo question 4'
-        },
-        {
-            program_type: 'Chương trình phổ thông',
-            grade: 'Lop10',
-            subject: 'Hình học & Vectơ 10',
-            topic: 'HH10_4',
-            skill: '0H5-1-3',
-            question_type: 'mc',
-            difficulty: 1,
-            content: '<p>Hai vectơ \\(\\vec{a}\\) và \\(\\vec{b}\\) bằng nhau khi và chỉ khi:</p>',
-            answer: JSON.stringify([
-                'Chúng có cùng hướng và cùng độ dài',
-                'Chúng có cùng độ dài',
-                'Chúng có cùng hướng',
-                'Chúng có cùng điểm đầu'
-            ]),
-            correct_answer: 'A',
-            solution: '<p>Hai vectơ bằng nhau khi và chỉ khi chúng có cùng hướng và cùng độ dài.</p>',
-            year: 2025,
-            note: 'Demo question 5'
-        }
-    ];
-
-    const sql = `INSERT INTO questions 
-        (program_type, grade, subject, topic, skill, question_type, difficulty, content, answer, correct_answer, solution, year, note)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`;
-
-    let inserted = 0;
-    let errors = [];
-
-    demoQuestions.forEach((q, index) => {
-        db.run(sql, [
-            q.program_type, q.grade, q.subject, q.topic, q.skill,
-            q.question_type, q.difficulty, q.content, q.answer,
-            q.correct_answer, q.solution, q.year, q.note
-        ], function(err) {
-            if (err) {
-                console.error(`Error inserting question ${index + 1}:`, err);
-                errors.push({ index: index + 1, error: err.message });
-            } else {
-                inserted++;
-            }
-
-            if (inserted + errors.length === demoQuestions.length) {
-                res.json({
-                    success: errors.length === 0,
-                    message: `Inserted ${inserted} questions, ${errors.length} errors`,
-                    inserted: inserted,
-                    errors: errors
-                });
-            }
-        });
-    });
-});
 
 // Start server
 app.listen(PORT, () => {
@@ -628,6 +511,5 @@ app.listen(PORT, () => {
     console.log('  PUT  /api/questions/:id - Cập nhật câu hỏi');
     console.log('  DELETE /api/questions/:id - Xóa câu hỏi');
     console.log('  GET  /api/debug/questions-sample - Xem mẫu dữ liệu (debug)');
-    console.log('  POST /api/debug/insert-demo-questions - Insert 5 demo questions');
 });
 

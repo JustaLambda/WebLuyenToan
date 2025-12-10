@@ -3,29 +3,47 @@
 
 const API = {
     // Base URL cho API server
-    BASE_URL: window.location.origin + '/api',
+    // Sử dụng Render.com URL nếu đang chạy trên Render, nếu không dùng localhost
+    BASE_URL: (() => {
+        // Nếu đang chạy trên Render.com (có thể detect qua hostname)
+        if (window.location.hostname.includes('render.com') || window.location.hostname.includes('onrender.com')) {
+            return window.location.origin + '/api';
+        }
+        // Hoặc nếu có biến môi trường hoặc config
+        return window.location.origin + '/api';
+    })(),
     
     // Chế độ: 'server' hoặc 'local'
-    MODE: 'server', // Đổi thành 'local' để dùng localStorage
+    MODE: 'server', // Luôn dùng server, không fallback tự động
     
     // ============ HELPER FUNCTIONS ============
     
     // Gọi API
     async _fetch(endpoint, options = {}) {
+        const url = this.BASE_URL + endpoint;
+        console.log('[API] Calling:', url, options.method || 'GET');
+        
         try {
-            const response = await fetch(this.BASE_URL + endpoint, {
+            const response = await fetch(url, {
                 ...options,
                 headers: {
                     'Content-Type': 'application/json',
                     ...options.headers
                 }
             });
-            return await response.json();
+            
+            if (!response.ok) {
+                const errorData = await response.json().catch(() => ({ message: response.statusText }));
+                console.error('[API] Response error:', response.status, errorData);
+                throw new Error(errorData.message || `Server error: ${response.status}`);
+            }
+            
+            const data = await response.json();
+            console.log('[API] Success:', endpoint, data);
+            return data;
         } catch (error) {
-            console.error('API Error:', error);
-            // Fallback to localStorage if server not available
-            console.warn('Server không khả dụng, chuyển sang localStorage');
-            this.MODE = 'local';
+            console.error('[API] Fetch error:', error);
+            // KHÔNG tự động fallback - để caller quyết định
             throw error;
         }
     },
@@ -55,13 +73,17 @@ const API = {
     async saveQuestion(questionData) {
         if (this.MODE === 'server') {
             try {
-                return await this._fetch('/questions', {
+                console.log('[API] Saving question to server:', questionData);
+                const result = await this._fetch('/questions', {
                     method: 'POST',
                     body: JSON.stringify(questionData)
                 });
+                console.log('[API] Question saved successfully:', result);
+                return result;
             } catch (e) {
-                // Fallback to localStorage
-                return this._saveQuestionLocal(questionData);
+                console.error('[API] Failed to save to server:', e);
+                // KHÔNG fallback tự động - throw error để UI hiển thị
+                throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.');
             }
         }
         return this._saveQuestionLocal(questionData);
@@ -276,12 +298,17 @@ const API = {
     async generateExam(examConfig) {
         if (this.MODE === 'server') {
             try {
-                return await this._fetch('/exams/generate', {
+                console.log('[API] Generating exam from server:', examConfig);
+                const result = await this._fetch('/exams/generate', {
                     method: 'POST',
                     body: JSON.stringify(examConfig)
                 });
+                console.log('[API] Exam generated successfully:', result);
+                return result;
             } catch (e) {
-                return this._generateExamLocal(examConfig);
+                console.error('[API] Failed to generate exam from server:', e);
+                // KHÔNG fallback tự động - throw error để UI hiển thị
+                throw new Error('Không thể tạo đề thi từ server. Vui lòng kiểm tra kết nối mạng và thử lại.');
             }
         }
         return this._generateExamLocal(examConfig);

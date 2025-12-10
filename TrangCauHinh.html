@@ -748,6 +748,15 @@
                     throw new Error('API module chưa được load. Vui lòng đảm bảo api.js được include.');
                 }
 
+                // Log examData để debug
+                console.log('[TrangCauHinh] Sending examData to server:', examData);
+                console.log('[TrangCauHinh] Config array length:', examData.config ? examData.config.length : 0);
+                if (examData.config && examData.config.length > 0) {
+                    console.log('[TrangCauHinh] Config sections:', examData.config);
+                } else {
+                    console.warn('[TrangCauHinh] WARNING: Config array is empty!');
+                }
+
                 // Gọi API generateExam
                 const result = await API.generateExam(examData);
 

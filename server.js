@@ -356,11 +356,17 @@ app.put('/api/questions/:id', (req, res) => {
 app.post('/api/exams/generate', (req, res) => {
     const { grade, config, selectedTypes } = req.body;
     
+    // Log toàn bộ request để debug
+    console.log('[Exam Generate] Full request body:', JSON.stringify(req.body, null, 2));
+    
     // Validate input
     if (!config || !Array.isArray(config) || config.length === 0) {
-        res.json({ success: false, message: 'Cấu hình đề thi không hợp lệ', data: [], total: 0 });
+        console.warn('[Exam Generate] Invalid config:', { config, grade, selectedTypes });
+        res.json({ success: false, message: 'Cấu hình đề thi không hợp lệ: config array rỗng hoặc không tồn tại', data: [], total: 0 });
         return;
     }
+    
+    console.log(`[Exam Generate] Processing ${config.length} sections for grade: ${grade}`);
 
     let allQuestions = [];
     let completed = 0;
@@ -464,12 +470,23 @@ app.post('/api/exams/generate', (req, res) => {
             
             completed++;
             if (completed === config.length) {
+                console.log(`[Exam Generate] Completed all ${config.length} sections. Total questions found: ${allQuestions.length}`);
+                
                 if (hasError) {
                     res.json({ 
                         success: false, 
                         message: 'Có lỗi xảy ra khi tạo đề thi', 
                         data: allQuestions, 
                         total: allQuestions.length 
+                    });
+                } else if (allQuestions.length === 0) {
+                    // Không tìm thấy câu hỏi nào - cung cấp thông tin debug
+                    console.warn('[Exam Generate] No questions found. Check database for matching questions.');
+                    res.json({
+                        success: true,
+                        data: [],
+                        total: 0,
+                        message: `Đã tạo đề thi với 0 câu hỏi. Không tìm thấy câu hỏi phù hợp với cấu hình. Vui lòng kiểm tra:\n- Grade: ${grade}\n- Config sections: ${config.length}\n- Database có câu hỏi với skill/topic tương ứng không?`
                     });
                 } else {
                     res.json({
@@ -494,6 +511,53 @@ app.get('/api/debug/questions-sample', (req, res) => {
                 success: true,
                 data: rows,
                 message: `Found ${rows.length} sample questions`
+            });
+        }
+    });
+});
+
+// Debug endpoint - Kiểm tra câu hỏi theo filter
+app.post('/api/debug/check-questions', (req, res) => {
+    const { grade, skill, topic, question_type, difficulty } = req.body;
+    
+    let sql = 'SELECT id, program_type, grade, subject, topic, skill, question_type, difficulty FROM questions WHERE 1=1';
+    let params = [];
+    
+    if (grade) {
+        sql += ' AND grade = ?';
+        params.push(grade);
+    }
+    if (skill) {
+        sql += ' AND skill = ?';
+        params.push(skill);
+    }
+    if (topic) {
+        sql += ' AND topic = ?';
+        params.push(topic);
+    }
+    if (question_type) {
+        sql += ' AND question_type = ?';
+        params.push(question_type);
+    }
+    if (difficulty) {
+        sql += ' AND difficulty = ?';
+        params.push(difficulty);
+    }
+    
+    sql += ' LIMIT 20';
+    
+    console.log('[Debug] Checking questions with SQL:', sql);
+    console.log('[Debug] Params:', params);
+    
+    db.all(sql, params, (err, rows) => {
+        if (err) {
+            res.json({ success: false, message: err.message, data: [] });
+        } else {
+            res.json({
+                success: true,
+                data: rows,
+                count: rows.length,
+                message: `Found ${rows.length} questions matching criteria`
             });
         }
     });

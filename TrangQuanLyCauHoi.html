@@ -941,6 +941,7 @@
                         <div class="suggestions" id="programSuggestions"></div>
                     </div>
                     <button class="btn-select" onclick="openSelectionModal('program')">Chọn</button>
+                    <button class="btn-save" onclick="addCustomItem('program')" title="Thêm chương trình mới">+ Thêm mới</button>
                     <button class="btn-save" onclick="saveOptions('program')" title="Lưu các lựa chọn">
                         <i class="fas fa-save"></i>
                     </button>
@@ -960,6 +961,7 @@
                         <div class="suggestions" id="gradeSuggestions"></div>
                     </div>
                     <button class="btn-select" onclick="openSelectionModal('grade')">Chọn</button>
+                    <button class="btn-save" onclick="addCustomItem('grade')" title="Thêm lớp/kỳ thi mới">+ Thêm mới</button>
                     <button class="btn-save" onclick="saveOptions('grade')" title="Lưu các lựa chọn">
                         <i class="fas fa-save"></i>
                     </button>
@@ -979,6 +981,7 @@
                         <div class="suggestions" id="subjectSuggestions"></div>
                     </div>
                     <button class="btn-select" onclick="openSelectionModal('subject')">Chọn</button>
+                    <button class="btn-save" onclick="addCustomItem('subject')" title="Thêm chủ đề mới">+ Thêm mới</button>
                     <button class="btn-save" onclick="saveOptions('subject')" title="Lưu các lựa chọn">
                         <i class="fas fa-save"></i>
                     </button>
@@ -998,6 +1001,7 @@
                         <div class="suggestions" id="topicSuggestions"></div>
                     </div>
                     <button class="btn-select" onclick="openSelectionModal('topic')">Chọn</button>
+                    <button class="btn-save" onclick="addCustomItem('topic')" title="Thêm chuyên đề mới">+ Thêm mới</button>
                     <button class="btn-save" onclick="saveOptions('topic')" title="Lưu các lựa chọn">
                         <i class="fas fa-save"></i>
                     </button>
@@ -1017,6 +1021,7 @@
                         <div class="suggestions" id="skillSuggestions"></div>
                     </div>
                     <button class="btn-select" onclick="openSelectionModal('skill')">Chọn</button>
+                    <button class="btn-save" onclick="addCustomItem('skill')" title="Thêm dạng toán mới">+ Thêm mới</button>
                     <button class="btn-save" onclick="saveOptions('skill')" title="Lưu các lựa chọn">
                         <i class="fas fa-save"></i>
                     </button>
@@ -1071,8 +1076,11 @@
                 <div class="modal-title" id="modalTitle">Chọn</div>
                 <button class="modal-close" onclick="closeSelectionModal()">&times;</button>
             </div>
-            <div class="modal-search">
-                <input type="text" class="search-input" id="modalSearch" placeholder="Tìm kiếm..." autocomplete="off">
+            <div class="modal-search" style="display:flex; gap:10px; align-items:center;">
+                <input type="text" class="search-input" id="modalSearch" placeholder="Tìm kiếm..." autocomplete="off" style="flex:1;">
+                <button class="btn-save" style="white-space:nowrap;" onclick="addCustomItemFromModal()">
+                    + Thêm mới
+                </button>
             </div>
             <div class="modal-body" id="modalBody">
                 <!-- Selection items will be inserted here -->
@@ -1087,6 +1095,65 @@
     <script>
         // Data structures - Lazy loaded
         const PROGRAMS = ['Chương trình phổ thông', 'Thi chuyển cấp', 'Kỳ thi riêng', 'Toán Quốc Tế'];
+
+        // ==== CUSTOM ITEMS (thêm mới bởi người dùng, lưu localStorage) ====
+        const CUSTOM_KEY = 'customItems_v1';
+        let customItems = loadCustomItems();
+        function loadCustomItems() {
+            try {
+                const raw = localStorage.getItem(CUSTOM_KEY);
+                if (raw) return JSON.parse(raw);
+            } catch (e) {}
+            return { program: [], grade: [], subject: [], topic: [], skill: [] };
+        }
+        function saveCustomItems() { localStorage.setItem(CUSTOM_KEY, JSON.stringify(customItems)); }
+        function addCustomItem(type) {
+            const labelMap = { program: 'chương trình', grade: 'lớp/kỳ thi', subject: 'chủ đề', topic: 'chuyên đề', skill: 'dạng toán' };
+            const name = prompt(`Nhập ${labelMap[type] || type} mới:`);
+            if (!name || !name.trim()) return;
+            const trimmed = name.trim();
+            // Ngữ cảnh để gắn kết
+            const ctx = {
+                program: currentSelections.program[0] || null,
+                grade: currentSelections.grade[0] || null,
+                subject: currentSelections.subject[0] || null,
+                topic: currentSelections.topic[0] || null
+            };
+            // Không thêm trùng
+            if (customItems[type].some(i => i.id === trimmed)) {
+                alert('Mục này đã tồn tại trong danh sách.');
+                return;
+            }
+            customItems[type].push({ id: trimmed, name: trimmed, ...ctx });
+            saveCustomItems();
+            alert('Đã thêm mới: ' + trimmed);
+        }
+
+        // Thêm mới trực tiếp ngay trong modal chọn
+        function addCustomItemFromModal() {
+            if (!currentModalType) return;
+            const labelMap = { program: 'chương trình', grade: 'lớp/kỳ thi', subject: 'chủ đề', topic: 'chuyên đề', skill: 'dạng toán' };
+            const name = prompt(`Nhập ${labelMap[currentModalType] || currentModalType} mới:`);
+            if (!name || !name.trim()) return;
+            const trimmed = name.trim();
+            if (!customItems[currentModalType]) customItems[currentModalType] = [];
+            if (customItems[currentModalType].some(i => i.id === trimmed)) {
+                alert('Mục này đã tồn tại trong danh sách.');
+                return;
+            }
+            // Gắn ngữ cảnh đang chọn ở form thêm mới
+            const ctx = {
+                program: currentSelections.program[0] || null,
+                grade: currentSelections.grade[0] || null,
+                subject: currentSelections.subject[0] || null,
+                topic: currentSelections.topic[0] || null
+            };
+            customItems[currentModalType].push({ id: trimmed, name: trimmed, ...ctx });
+            saveCustomItems();
+            // Thêm vào danh sách đang chọn trong modal
+            modalSelectedItems.add(trimmed);
+            renderModalContent(currentModalType, document.getElementById('modalSearch')?.value || '');
+        }
         
         const GRADE_MAP = {
             'Chương trình phổ thông': ['Lớp 1', 'Lớp 2', 'Lớp 3', 'Lớp 4', 'Lớp 5', 'Lớp 6', 'Lớp 7', 'Lớp 8', 'Lớp 9', 'Lớp 10', 'Lớp 11', 'Lớp 12'],
@@ -1264,6 +1331,24 @@
             suggestionsDiv.style.display = 'block';
         }
 
+        function getCustomOptions(type) {
+            const list = customItems[type] || [];
+            // Lọc theo ngữ cảnh đang chọn
+            return list.filter(opt => {
+                if (type === 'grade' && currentSelections.program.length && opt.program && !currentSelections.program.includes(opt.program)) return false;
+                if (type === 'subject' && currentSelections.grade.length && opt.grade && !currentSelections.grade.includes(opt.grade)) return false;
+                if (type === 'topic') {
+                    if (currentSelections.grade.length && opt.grade && !currentSelections.grade.includes(opt.grade)) return false;
+                    if (currentSelections.subject.length && opt.subject && !currentSelections.subject.includes(opt.subject)) return false;
+                }
+                if (type === 'skill') {
+                    if (currentSelections.grade.length && opt.grade && !currentSelections.grade.includes(opt.grade)) return false;
+                    if (currentSelections.topic.length && opt.topic && !currentSelections.topic.includes(opt.topic)) return false;
+                }
+                return true;
+            }).map(opt => ({ id: opt.id, name: opt.name }));
+        }
+
         function getFilteredOptions(type, query) {
             const lowerQuery = query.toLowerCase();
             let options = [];
@@ -1271,18 +1356,23 @@
             switch(type) {
                 case 'program':
                     options = PROGRAMS.map(p => ({ id: p, name: p }));
+                    options = options.concat(getCustomOptions('program'));
                     break;
                 case 'grade':
                     options = getFilteredGradeOptions();
+                    options = options.concat(getCustomOptions('grade'));
                     break;
                 case 'subject':
                     options = getFilteredSubjectOptions();
+                    options = options.concat(getCustomOptions('subject'));
                     break;
                 case 'topic':
                     options = getFilteredTopics();
+                    options = options.concat(getCustomOptions('topic'));
                     break;
                 case 'skill':
                     options = getFilteredSkills();
+                    options = options.concat(getCustomOptions('skill'));
                     break;
             }
 

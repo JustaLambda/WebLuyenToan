@@ -239,6 +239,49 @@
         }
         .diff-item:last-child { border: none; }
         
+        /* Thanh tìm kiếm + đề xuất */
+        .search-panel {
+            max-width: 1400px;
+            margin: 15px auto 0;
+            padding: 0 20px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #searchBox {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .suggest-btn, .suggest-send {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .suggest-btn { background: #3498db; color: #fff; }
+        .suggest-btn:hover { background: #2980b9; }
+        .suggest-box {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #suggestInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .suggest-send { background: #27ae60; color: white; }
+        .suggest-send:hover { background: #219150; }
         .close-modal { position: absolute; top: 15px; right: 20px; font-size: 2rem; color: #999; cursor: pointer; line-height: 1; }
         .close-modal:hover { color: #e74c3c; }
     </style>

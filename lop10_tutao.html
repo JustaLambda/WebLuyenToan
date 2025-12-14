@@ -240,20 +240,21 @@
             width: 50px; padding: 5px; border: 1px solid #ccc; border-radius: 4px;
             text-align: center; font-weight: bold; color: #e74c3c; font-size: 1rem;
         }
-        .difficulty-trigger {
+        .difficulty-trigger, .qtype-trigger {
             color: #27ae60; font-weight: bold; text-decoration: underline;
             cursor: pointer; position: relative; display: inline-block;
         }
-        .difficulty-popup {
+        .difficulty-popup, .qtype-popup {
             display: none; position: absolute; bottom: 120%; left: 50%; transform: translateX(-50%);
             width: 250px; background: white; border: 1px solid #ccc;
             box-shadow: 0 5px 15px rgba(0,0,0,0.2); border-radius: 8px; padding: 10px; z-index: 2100; text-align: left;
         }
-        .difficulty-popup::after {
+        .difficulty-popup::after, .qtype-popup::after {
             content: ""; position: absolute; top: 100%; left: 50%; margin-left: -8px;
             border-width: 8px 8px 0; border-style: solid; border-color: white transparent;
         }
-        .difficulty-trigger:hover .difficulty-popup { display: block; }
+        .difficulty-trigger:hover .difficulty-popup,
+        .qtype-trigger:hover .qtype-popup { display: block; }
         
        .diff-item { 
     padding: 8px 5px; 
@@ -305,6 +306,50 @@
     bottom: 0;      /* Cầu nối bám sát đáy */
     height: 60px;   /* Chiều cao cầu nối đủ để bắt chuột từ dưới lên */
 }
+
+        /* Thanh tìm kiếm + đề xuất */
+        .search-panel {
+            max-width: 1400px;
+            margin: 15px auto 0;
+            padding: 0 30px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        #searchBox {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .suggest-btn, .suggest-send {
+            padding: 10px 16px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 700;
+            cursor: pointer;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .suggest-btn { background: #3498db; color: #fff; }
+        .suggest-btn:hover { background: #2980b9; }
+        .suggest-box {
+            width: 100%;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+        #suggestInput {
+            flex: 1;
+            padding: 10px 14px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 0.95rem;
+        }
+        .suggest-send { background: #27ae60; color: white; }
+        .suggest-send:hover { background: #219150; }
     </style>
 </head>
 <body>
@@ -318,6 +363,15 @@
         <button class="btn-back" onclick="window.location.href='menu.html'">
             <i class="fas fa-arrow-left"></i> Quay lại Danh mục
         </button>
+    </div>
+
+    <div class="search-panel">
+        <input type="text" id="searchBox" placeholder="Tìm kiếm dạng toán..." oninput="filterSkills()" />
+        <button class="suggest-btn" onclick="toggleSuggest()">Không có dạng toán bạn cần tìm? Đề xuất ngay!</button>
+        <div id="suggestBox" class="suggest-box" style="display:none;">
+            <input type="text" id="suggestInput" placeholder="Nhập dạng toán đề xuất..." />
+            <button class="suggest-send" onclick="sendSuggestion()">Gửi</button>
+        </div>
     </div>
 
     <div class="main-container">
@@ -363,23 +417,48 @@
                                 [Bấm chọn]
                                 <div class="difficulty-popup">
     <label class="diff-item" style="font-weight:bold; color:#27ae60;">
-        <input type="checkbox" id="diff-all" onchange="toggleDiffAll(this)"> Chọn tất cả
+        <input type="checkbox" id="diff-all" onchange="toggleDiffAll(this)" checked> Chọn tất cả
     </label>
 
     <label class="diff-item">
-        <input type="checkbox" class="diff-chk" checked> Nhận biết
+        <input type="checkbox" class="diff-chk" data-diff="nb" checked> Nhận biết
     </label>
     
     <label class="diff-item">
-        <input type="checkbox" class="diff-chk" checked> Thông hiểu
+        <input type="checkbox" class="diff-chk" data-diff="th" checked> Thông hiểu
     </label>
     
     <label class="diff-item">
-        <input type="checkbox" class="diff-chk"> Vận dụng
+        <input type="checkbox" class="diff-chk" data-diff="vd" checked> Vận dụng
     </label>
     
     <label class="diff-item">
-        <input type="checkbox" class="diff-chk"> Vận dụng cao
+        <input type="checkbox" class="diff-chk" data-diff="vdc" checked> Vận dụng cao
+    </label>
+</div>
+                            </span>
+                            , với các dạng câu hỏi 
+                            <span class="qtype-trigger">
+                                [Bấm chọn]
+                                <div class="qtype-popup">
+    <label class="diff-item" style="font-weight:bold; color:#27ae60;">
+        <input type="checkbox" id="qtype-all" onchange="toggleQTypeAll(this)" checked> Chọn tất cả
+    </label>
+
+    <label class="diff-item">
+        <input type="checkbox" class="qtype-chk" data-qtype="tn" checked> Trắc nghiệm (TN)
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="qtype-chk" data-qtype="ds" checked> Đúng/Sai (ĐS)
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="qtype-chk" data-qtype="tl" checked> Trả lời ngắn (TL)
+    </label>
+    
+    <label class="diff-item">
+        <input type="checkbox" class="qtype-chk" data-qtype="kt" checked> Kéo/Thả (KT)
     </label>
 </div>
                             </span>
@@ -409,6 +488,23 @@
     <script>
         // DỮ LIỆU ĐÃ CẬP NHẬT THEO BÀI HỌC (BỎ CHƯƠNG)
 // DỮ LIỆU ĐÃ CẬP NHẬT: THAY § -> CHUYÊN ĐỀ & ĐÁNH SỐ LẠI LIÊN TỤC
+        // Tải các mục tùy chỉnh từ TrangQuanLyCauHoi (localStorage)
+        function loadCustomItemsForGrade(gradeKey) {
+            try {
+                const raw = localStorage.getItem('customItems_v1');
+                if (!raw) return { topics: [], skills: [] };
+                const parsed = JSON.parse(raw);
+                return {
+                    topics: (parsed.topic || []).filter(t => (t.grade || '').includes('Lớp 10') || (t.grade || '').includes('Lop10') || gradeKey === '10'),
+                    skills: (parsed.skill || []).filter(s => (s.grade || '').includes('Lớp 10') || (s.grade || '').includes('Lop10') || gradeKey === '10')
+                };
+            } catch (e) {
+                return { topics: [], skills: [] };
+            }
+        }
+
+        const customItems = loadCustomItemsForGrade('10');
+
         const DATA = {
             DaiSo: [
                 // --- CHƯƠNG 1 CŨ ---
@@ -757,6 +853,39 @@
             ]
         };
 
+        // Trộn các topic/skill tùy chỉnh vào DATA dựa trên subject
+        function mergeCustomIntoData() {
+            // Thêm topic tùy chỉnh
+            customItems.topics.forEach(t => {
+                const targetArray = (t.subject && t.subject.toLowerCase().includes('hình')) ? DATA.HinhHoc : DATA.DaiSo;
+                // Nếu chưa có topic này, tạo mới
+                if (!targetArray.find(ch => ch.id === t.id)) {
+                    targetArray.push({
+                        id: t.id,
+                        ten: t.name || t.id,
+                        dang: []
+                    });
+                }
+            });
+
+            // Thêm skill tùy chỉnh vào topic tương ứng (nếu có)
+            customItems.skills.forEach(s => {
+                const targetArray = (s.subject && s.subject.toLowerCase().includes('hình')) ? DATA.HinhHoc : DATA.DaiSo;
+                // Tìm topic phù hợp
+                let topic = targetArray.find(ch => ch.id === s.topic);
+                if (!topic) {
+                    // Nếu topic chưa tồn tại, tạo topic tạm cho skill này
+                    topic = { id: s.topic || `CUSTOM_TOPIC_${Date.now()}`, ten: s.topic || 'Chuyên đề tùy chỉnh', dang: [] };
+                    targetArray.push(topic);
+                }
+                if (!topic.dang.find(d => d.id === s.id)) {
+                    topic.dang.push({ id: s.id, txt: s.name || s.id });
+                }
+            });
+        }
+
+        mergeCustomIntoData();
+
         const selectedSet = new Set();
 
         // Format functions
@@ -896,9 +1025,72 @@
             if (input.value < 0) input.value = 1;
         }
 
+        const selectedDiffs = new Set(['nb','th','vd','vdc']);
+        const selectedQTypes = new Set(['tn','ds','tl','kt']);
+
+        function syncDiffState() {
+            const checks = document.querySelectorAll('.diff-chk');
+            selectedDiffs.clear();
+            checks.forEach(chk => {
+                if (chk.checked) selectedDiffs.add(chk.dataset.diff);
+            });
+            const all = document.getElementById('diff-all');
+            if (all) all.checked = selectedDiffs.size === 4;
+        }
         function toggleDiffAll(source) {
             const checkboxes = document.querySelectorAll('.diff-chk');
-            checkboxes.forEach(chk => chk.checked = source.checked);
+            checkboxes.forEach(chk => { chk.checked = source.checked; });
+            syncDiffState();
+        }
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('diff-chk')) {
+                syncDiffState();
+            }
+        });
+
+        function syncQTypeState() {
+            const checks = document.querySelectorAll('.qtype-chk');
+            selectedQTypes.clear();
+            checks.forEach(chk => { if (chk.checked) selectedQTypes.add(chk.dataset.qtype); });
+            const all = document.getElementById('qtype-all');
+            if (all) all.checked = selectedQTypes.size === 4;
+        }
+        function toggleQTypeAll(source) {
+            const checks = document.querySelectorAll('.qtype-chk');
+            checks.forEach(chk => { chk.checked = source.checked; });
+            syncQTypeState();
+        }
+        document.addEventListener('change', (e) => {
+            if (e.target.classList.contains('qtype-chk')) {
+                syncQTypeState();
+            }
+        });
+
+        // --- TÌM KIẾM DẠNG TOÁN ---
+        function filterSkills() {
+            const q = document.getElementById('searchBox').value.toLowerCase().trim();
+            document.querySelectorAll('.chapter-item').forEach(item => {
+                const text = item.innerText.toLowerCase();
+                item.style.display = text.includes(q) ? 'block' : 'none';
+            });
+        }
+
+        // --- ĐỀ XUẤT DẠNG TOÁN ---
+        const SUGGEST_KEY = 'suggestedTypes';
+        function toggleSuggest() {
+            const box = document.getElementById('suggestBox');
+            box.style.display = box.style.display === 'none' ? 'flex' : 'none';
+        }
+        function sendSuggestion() {
+            const val = document.getElementById('suggestInput').value.trim();
+            if (!val) return;
+            let list = [];
+            try { list = JSON.parse(localStorage.getItem(SUGGEST_KEY) || '[]'); } catch (e) {}
+            list.push({ text: val, ts: Date.now(), grade: 'Lop10' });
+            localStorage.setItem(SUGGEST_KEY, JSON.stringify(list));
+            alert('Đã ghi nhận đề xuất của bạn!');
+            document.getElementById('suggestInput').value = '';
+            toggleSuggest();
         }
 
         function hoanThanhChon() {
@@ -922,13 +1114,48 @@
 
         // Nút Tạo Ngẫu nhiên (Option 1)
         function createRandomExam() {
-            const soCau = document.getElementById('num-questions').value;
-            if (!soCau) {
+            const soCau = parseInt(document.getElementById('num-questions').value, 10);
+            if (!soCau || soCau < 1) {
                 alert("Vui lòng điền số lượng câu hỏi!");
                 document.getElementById('num-questions').focus();
                 return;
             }
-            alert("Đã nhận lệnh: Tạo đề ngẫu nhiên " + soCau + " câu. (Chuyển sang làm bài...)");
+            if (selectedSet.size === 0) {
+                alert("Bạn chưa chọn dạng toán nào!");
+                return;
+            }
+
+            // Nếu người dùng bỏ hết, fallback chọn tất cả
+            const diffs = selectedDiffs.size ? Array.from(selectedDiffs) : ['nb','th','vd','vdc'];
+            const qtypes = selectedQTypes.size ? Array.from(selectedQTypes) : ['tn','ds','tl','kt'];
+
+            const typesArr = Array.from(selectedSet);
+            const config = [];
+
+            for (let i = 0; i < soCau; i++) {
+                const typeId = typesArr[i % typesArr.length];
+                const level = diffs[Math.floor(Math.random() * diffs.length)];
+                const qtype = qtypes[Math.floor(Math.random() * qtypes.length)];
+                config.push({
+                    typeId,
+                    questionType: qtype,
+                    level,
+                    count: 1,
+                    time: 1.5 // placeholder; TrangCauHinh/exam_interface không dùng server
+                });
+            }
+
+            const examData = {
+                grade: 'Lop10',
+                selectedTypes: typesArr,
+                config,
+                totalQuestions: soCau,
+                totalTime: Math.max(30, Math.round(soCau * 1.5)), // tạm tính 1.5 phút/câu
+                questions: [] // để exam_interface.html tự fallback mẫu
+            };
+
+            localStorage.setItem('examConfig', JSON.stringify(examData));
+            window.location.href = 'exam_interface.html';
         }
 
         // Nút Tùy Chỉnh (Option 2)

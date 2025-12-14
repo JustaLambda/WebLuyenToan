@@ -1,53 +1,11 @@
-// API Client for Question Management
-// Hỗ trợ cả Server API và localStorage fallback
+// API Client for Question Management (local-only)
+// Giữ liên kết giữa các trang, không gọi server hay deploy online
 
 const API = {
-    // Base URL cho API server
-    // Sử dụng Render.com URL nếu đang chạy trên Render, nếu không dùng localhost
-    BASE_URL: (() => {
-        // Nếu đang chạy trên Render.com (có thể detect qua hostname)
-        if (window.location.hostname.includes('render.com') || window.location.hostname.includes('onrender.com')) {
-            return window.location.origin + '/api';
-        }
-        // Hoặc nếu có biến môi trường hoặc config
-        return window.location.origin + '/api';
-    })(),
-    
-    // Chế độ: 'server' hoặc 'local'
-    MODE: 'server', // Luôn dùng server, không fallback tự động
+    // Chế độ chỉ dùng localStorage
+    MODE: 'local',
     
     // ============ HELPER FUNCTIONS ============
-    
-    // Gọi API
-    async _fetch(endpoint, options = {}) {
-        const url = this.BASE_URL + endpoint;
-        console.log('[API] Calling:', url, options.method || 'GET');
-        
-        try {
-            const response = await fetch(url, {
-                ...options,
-                headers: {
-                    'Content-Type': 'application/json',
-                    ...options.headers
-                }
-            });
-            
-            if (!response.ok) {
-                const errorData = await response.json().catch(() => ({ message: response.statusText }));
-                console.error('[API] Response error:', response.status, errorData);
-                throw new Error(errorData.message || `Server error: ${response.status}`);
-            }
-            
-            const data = await response.json();
-            console.log('[API] Success:', endpoint, data);
-            return data;
-        } catch (error) {
-            console.error('[API] Fetch error:', error);
-            // KHÔNG tự động fallback - để caller quyết định
-            throw error;
-        }
-    },
-    
     // LocalStorage helpers
     STORAGE_KEY: 'questions_database',
     
@@ -71,21 +29,6 @@ const API = {
     
     // Lưu câu hỏi mới
     async saveQuestion(questionData) {
-        if (this.MODE === 'server') {
-            try {
-                console.log('[API] Saving question to server:', questionData);
-                const result = await this._fetch('/questions', {
-                    method: 'POST',
-                    body: JSON.stringify(questionData)
-                });
-                console.log('[API] Question saved successfully:', result);
-                return result;
-            } catch (e) {
-                console.error('[API] Failed to save to server:', e);
-                // KHÔNG fallback tự động - throw error để UI hiển thị
-                throw new Error('Không thể kết nối đến server. Vui lòng kiểm tra kết nối mạng và thử lại.');
-            }
-        }
         return this._saveQuestionLocal(questionData);
     },
     
@@ -113,16 +56,6 @@ const API = {
     
     // Tìm kiếm câu hỏi
     async searchQuestions(searchParams) {
-        if (this.MODE === 'server') {
-            try {
-                return await this._fetch('/questions/search', {
-                    method: 'POST',
-                    body: JSON.stringify(searchParams)
-                });
-            } catch (e) {
-                return this._searchQuestionsLocal(searchParams);
-            }
-        }
         return this._searchQuestionsLocal(searchParams);
     },
     
@@ -196,13 +129,6 @@ const API = {
     
     // Lấy câu hỏi theo ID
     async getQuestionById(id) {
-        if (this.MODE === 'server') {
-            try {
-                return await this._fetch('/questions/' + id);
-            } catch (e) {
-                return this._getQuestionByIdLocal(id);
-            }
-        }
         return this._getQuestionByIdLocal(id);
     },
     
@@ -217,13 +143,6 @@ const API = {
     
     // Lấy tất cả câu hỏi
     async getAllQuestions(page = 1, limit = 20) {
-        if (this.MODE === 'server') {
-            try {
-                return await this._fetch(`/questions?page=${page}&limit=${limit}`);
-            } catch (e) {
-                return this._getAllQuestionsLocal(page, limit);
-            }
-        }
         return this._getAllQuestionsLocal(page, limit);
     },
     
@@ -242,13 +161,6 @@ const API = {
     
     // Xóa câu hỏi
     async deleteQuestion(id) {
-        if (this.MODE === 'server') {
-            try {
-                return await this._fetch('/questions/' + id, { method: 'DELETE' });
-            } catch (e) {
-                return this._deleteQuestionLocal(id);
-            }
-        }
         return this._deleteQuestionLocal(id);
     },
     
@@ -265,16 +177,6 @@ const API = {
     
     // Cập nhật câu hỏi
     async updateQuestion(id, questionData) {
-        if (this.MODE === 'server') {
-            try {
-                return await this._fetch('/questions/' + id, {
-                    method: 'PUT',
-                    body: JSON.stringify(questionData)
-                });
-            } catch (e) {
-                return this._updateQuestionLocal(id, questionData);
-            }
-        }
         return this._updateQuestionLocal(id, questionData);
     },
     
@@ -296,21 +198,6 @@ const API = {
     
     // Tạo đề thi
     async generateExam(examConfig) {
-        if (this.MODE === 'server') {
-            try {
-                console.log('[API] Generating exam from server:', examConfig);
-                const result = await this._fetch('/exams/generate', {
-                    method: 'POST',
-                    body: JSON.stringify(examConfig)
-                });
-                console.log('[API] Exam generated successfully:', result);
-                return result;
-            } catch (e) {
-                console.error('[API] Failed to generate exam from server:', e);
-                // KHÔNG fallback tự động - throw error để UI hiển thị
-                throw new Error('Không thể tạo đề thi từ server. Vui lòng kiểm tra kết nối mạng và thử lại.');
-            }
-        }
         return this._generateExamLocal(examConfig);
     },
     

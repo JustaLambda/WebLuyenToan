@@ -432,8 +432,8 @@
         }
 
         function validateInput(input) {
-            if(input.value > 100) input.value = 100;
-            if(input.value < 0) input.value = 1;
+            if(input.value > 99) input.value = 99;
+            if(input.value < 1 && input.value !== "") input.value = 1;
         }
 
         function randomSub(cardId, type) {
@@ -464,8 +464,14 @@
 
         function randomGlobal(cardId) {
             const input = document.getElementById(`g-inp-${cardId}`);
-            // Luôn random lại mỗi lần click, không phụ thuộc vào giá trị hiện tại
-            const total = Math.floor(Math.random() * 15) + 5; 
+            
+            // Nếu không có giá trị, random trong khoảng 1-99
+            let total = parseInt(input.value);
+            if (!total || isNaN(total) || total < 1) {
+                total = Math.floor(Math.random() * 99) + 1;
+            }
+            // Giới hạn 1-99 nếu người dùng nhập sẵn
+            total = Math.max(1, Math.min(total, 99));
             input.value = total;
 
             // Tỉ lệ phân bổ: TN 12/22, DS 4/22, TL 6/22, KT 0
@@ -729,8 +735,10 @@
                 return;
             }
 
-            // Gọi API để tạo đề thi từ server
-            generateExamFromServer(examData);
+            // Bỏ qua server, lưu cấu hình và chuyển thẳng sang trang làm bài
+            examData.questions = []; // để exam_interface.html fallback sang sample hoặc tự xử lý
+            localStorage.setItem('examConfig', JSON.stringify(examData));
+            window.location.href = 'exam_interface.html';
         }
 
         // Hàm gọi API để tạo đề thi

@@ -63,7 +63,7 @@
         }
         .start-box h2 {
             color: #2c3e50;
-            margin-bottom: 30px;
+            margin-bottom: 10px;
             text-transform: uppercase;
             font-size: 1.8rem;
             font-weight: 800;
@@ -73,6 +73,12 @@
             font-variant-ligatures: none;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
+        }
+        .start-subtitle {
+            margin: 0 0 20px 0;
+            color: #566573;
+            font-weight: 600;
+            font-size: 1rem;
         }
         .start-info {
             display: flex;
@@ -550,6 +556,7 @@
     <div class="modal-overlay" id="startModal">
         <div class="start-box">
             <h2>Chuẩn Bị Làm Bài</h2>
+            <div class="start-subtitle" id="examSubtitle">Đề luyện tập · 45 phút · 40 câu</div>
             <div class="start-info">
                 <div class="info-item"><b>45</b><span>Phút</span></div>
                 <div class="info-item"><b>40</b><span>Câu hỏi</span></div>
@@ -630,43 +637,61 @@
     </div>
 
     <script>
-        // Đọc dữ liệu từ localStorage
+        // Đọc dữ liệu từ localStorage / query
         let examConfig = null;
         let examInfo = {
             totalQuestions: 40,
             totalTime: 45,
-            grade: 'Toán 12'
+            grade: 'Toán 12',
+            title: 'Đề luyện tập'
         };
+
+        function applyGradeName(gradeKey) {
+            const gradeMap = {
+                'Lop10': 'Toán 10',
+                'Lop11': 'Toán 11',
+                'Lop12': 'Toán 12',
+                'SAT': 'SAT Math'
+            };
+            return gradeMap[gradeKey] || gradeKey || 'Toán 12';
+        }
+
+        function loadConfig() {
+            const params = new URLSearchParams(window.location.search);
+            const tenDe = params.get('tenDe');
+            const thoiGian = Number(params.get('thoiGian'));
+            const soCau = Number(params.get('soCau'));
+            const storedConfig = localStorage.getItem('examConfig');
+
+            if (tenDe || thoiGian || soCau) {
+                examConfig = {
+                    title: tenDe || 'Đề luyện tập',
+                    totalTime: thoiGian || 45,
+                    totalQuestions: soCau || 40,
+                    grade: applyGradeName(params.get('grade') || 'Toán 12'),
+                    questions: []
+                };
+                localStorage.setItem('examConfig', JSON.stringify(examConfig));
+            } else if (storedConfig) {
+                examConfig = JSON.parse(storedConfig);
+            }
+
+            if (examConfig) {
+                examInfo.title = examConfig.title || 'Đề luyện tập';
+                examInfo.totalQuestions = examConfig.totalQuestions || 40;
+                examInfo.totalTime = examConfig.totalTime || 45;
+                examInfo.grade = applyGradeName(examConfig.grade || 'Toán 12');
+                timeRemaining = Math.round(examInfo.totalTime * 60);
+            }
+        }
 
         // Load exam config nếu có
         // Gọi loadExamQuestions khi page load
         window.onload = function() {
+            loadConfig();
             loadExamQuestions();
-            const storedConfig = localStorage.getItem('examConfig');
-            if (storedConfig) {
-                examConfig = JSON.parse(storedConfig);
-                examInfo.totalQuestions = examConfig.totalQuestions || 40;
-                examInfo.totalTime = examConfig.totalTime || 45;
-                
-                // Xác định tên khối/kỳ thi
-                const gradeMap = {
-                    'Lop10': 'Toán 10',
-                    'Lop11': 'Toán 11',
-                    'Lop12': 'Toán 12',
-                    'SAT': 'SAT Math'
-                };
-                examInfo.grade = gradeMap[examConfig.grade] || 'Toán 12';
-                
-                // Cập nhật thời gian
-                timeRemaining = Math.round(examInfo.totalTime * 60);
-                
-                // Cập nhật modal và timer display
-                updateStartModal();
-                updateTimerDisplay();
-            } else {
-                // Nếu không có config, dùng giá trị mặc định
-                updateTimerDisplay();
-            }
+            updateStartModal();
+            updateTimerDisplay();
         };
 
         function updateTimerDisplay() {
@@ -680,6 +705,10 @@
             document.querySelector('.start-info .info-item:nth-child(1) b').innerText = Math.round(examInfo.totalTime);
             document.querySelector('.start-info .info-item:nth-child(2) b').innerText = examInfo.totalQuestions;
             document.querySelector('.start-info .info-item:nth-child(3) b').innerText = examInfo.grade;
+            const sub = document.getElementById('examSubtitle');
+            if (sub) {
+                sub.innerText = `${examInfo.title} · ${Math.round(examInfo.totalTime)} phút · ${examInfo.totalQuestions} câu`;
+            }
         }
 
         let questions = [];
@@ -745,6 +774,16 @@
             loadQuestion(0);
             startTimer();
             document.getElementById('mainArea').addEventListener('mouseup', handleMouseUp);
+            // Chặn drop ngoài vùng drop-zone (drag & drop)
+            const blockInvalidDrop = (e) => {
+                const target = e.target && e.target.closest ? e.target.closest('.drop-zone') : null;
+                if (!target) {
+                    e.preventDefault();
+                    e.stopPropagation();
+                }
+            };
+            document.addEventListener('dragover', blockInvalidDrop, true);
+            document.addEventListener('drop', blockInvalidDrop, true);
             // Also listen to mouseup in answer area
             document.addEventListener('mouseup', function(e) {
                 // Check if mouseup is in answer area or question content
@@ -765,8 +804,8 @@
             infoBox.innerHTML = `
                 <div style="display: flex; justify-content: space-around; align-items: center; flex-wrap: wrap; gap: 20px;">
                     <div style="text-align: center;">
-                        <div style="font-size: 0.9rem; opacity: 0.9;">Môn thi</div>
-                        <div style="font-size: 1.3rem; font-weight: 800;">${examInfo.grade}</div>
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Tên đề</div>
+                        <div style="font-size: 1.3rem; font-weight: 800;">${examInfo.title}</div>
                     </div>
                     <div style="text-align: center;">
                         <div style="font-size: 0.9rem; opacity: 0.9;">Tổng số câu</div>
@@ -775,6 +814,10 @@
                     <div style="text-align: center;">
                         <div style="font-size: 0.9rem; opacity: 0.9;">Thời gian làm bài</div>
                         <div style="font-size: 1.3rem; font-weight: 800;">${Math.round(examInfo.totalTime)} phút</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 0.9rem; opacity: 0.9;">Môn thi</div>
+                        <div style="font-size: 1.3rem; font-weight: 800;">${examInfo.grade}</div>
                     </div>
                 </div>
             `;
@@ -1377,13 +1420,13 @@
         function toggleEliminate(e, btn) { e.stopPropagation(); const item = btn.parentElement; const icon = btn.querySelector('i'); if (item.classList.contains('eliminated')) { item.classList.remove('eliminated'); icon.className = 'far fa-eye'; } else { item.classList.add('eliminated'); icon.className = 'far fa-eye-slash'; if (item.classList.contains('selected')) { item.classList.remove('selected'); delete userAnswers[questions[currentIdx].id]; updateDashboard(); } } }
         function handleDragStart(e, text) { e.dataTransfer.setData("text", text); }
         function handleDragOver(e) {
-            // Chỉ cho phép drop vào drop-zone
-            if (e.target.classList.contains('drop-zone')) {
+            const target = e.target.closest && e.target.closest('.drop-zone');
+            if (target) {
                 e.preventDefault();
-                e.target.style.background = '#d4edda'; // Highlight khi drag over
+                target.style.background = '#d4edda'; // Highlight khi drag over
                 return true;
             }
-            e.preventDefault(); // Prevent drop ở nơi khác
+            e.preventDefault(); // chặn drop ngoài vùng hợp lệ
             return false;
         }
         
@@ -1398,13 +1441,10 @@
             e.preventDefault(); 
             e.stopPropagation();
             
-            // Chỉ cho phép drop vào drop-zone
-            if (!e.target.classList.contains('drop-zone')) {
-                return false;
-            }
+            const target = e.target.closest && e.target.closest('.drop-zone');
+            if (!target) return false;
             
-            // Reset background
-            e.target.style.background = '';
+            target.style.background = '';
             
             const data = e.dataTransfer.getData("text"); 
             if (!data) return false;

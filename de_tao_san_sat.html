@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SAT Practice Tests - TOAN.VN</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style_final.css">
+    <style>
+        body {
+            font-family: 'Montserrat', sans-serif;
+            margin: 0;
+            background: #f5f7fb;
+            color: #2c3e50;
+        }
+        /* Make brand-logo fixed when scrolling */
+        .brand-logo {
+            position: fixed !important;
+            top: 15px;
+            left: 20px;
+            z-index: 1000;
+        }
+        .page-wrapper {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 90px 20px 40px;
+        }
+        .top-bar {
+            background: white;
+            border-radius: 14px;
+            padding: 16px 18px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.06);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        .title-block h1 {
+            margin: 0;
+            font-size: 1.4rem;
+            background: linear-gradient(135deg, #5b5fc7 0%, #e67e22 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .title-block h1 i {
+            background: none;
+            -webkit-text-fill-color: #e67e22;
+        }
+        .title-block p {
+            margin: 4px 0 0;
+            color: #666;
+            font-size: 0.95rem;
+        }
+        .btn-back {
+            padding: 11px 16px;
+            background: white;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            color: #555;
+            transition: all 0.25s ease;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .btn-back:hover { 
+            background: #fff5eb; 
+            border-color: #f39c12; 
+            color: #e67e22; 
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            justify-content: center;
+            gap: 0;
+            margin-bottom: 20px;
+        }
+        .tab-btn {
+            padding: 16px 70px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            border: 3px solid #e0e6ed;
+            background: white;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: #666;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .tab-btn:first-child {
+            border-radius: 12px 0 0 12px;
+            border-right: none;
+        }
+        .tab-btn:last-child {
+            border-radius: 0 12px 12px 0;
+        }
+        .tab-btn.active {
+            background: linear-gradient(135deg, #5b5fc7 0%, #4a4eb8 100%);
+            color: white;
+            border-color: #5b5fc7;
+            box-shadow: 0 4px 15px rgba(91, 95, 199, 0.35);
+        }
+        .tab-btn:hover:not(.active) {
+            background: #fff5eb;
+            border-color: #f39c12;
+            color: #e67e22;
+        }
+
+        /* Filter Bar */
+        .filter-bar {
+            background: white;
+            border-radius: 16px;
+            padding: 20px 28px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+            margin-bottom: 24px;
+            display: flex;
+            gap: 24px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-left: 5px solid #e67e22;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        .filter-label {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #555;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .filter-label i { color: #e67e22; }
+        .search-input {
+            padding: 12px 16px;
+            border: 2px solid #e0e6ed;
+            border-radius: 10px;
+            font-size: 0.95rem;
+            width: 280px;
+            outline: none;
+            transition: 0.3s;
+            font-family: 'Montserrat', sans-serif;
+        }
+        .search-input:focus {
+            border-color: #e67e22;
+            box-shadow: 0 0 0 4px rgba(230, 126, 34, 0.15);
+        }
+        .year-slider-container {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .year-slider {
+            width: 180px;
+            height: 8px;
+            -webkit-appearance: none;
+            appearance: none;
+            background: linear-gradient(90deg, #5b5fc7 0%, #f39c12 50%, #e67e22 100%);
+            border-radius: 4px;
+            outline: none;
+        }
+        .year-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+            border: 3px solid #e67e22;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(230, 126, 34, 0.4);
+            transition: 0.2s;
+        }
+        .year-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.1);
+            border-color: #d35400;
+        }
+        .year-slider::-moz-range-thumb {
+            width: 26px;
+            height: 26px;
+            background: linear-gradient(135deg, #fff 0%, #f5f5f5 100%);
+            border: 3px solid #e67e22;
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 3px 12px rgba(230, 126, 34, 0.4);
+        }
+        .year-display {
+            font-weight: 800;
+            color: #fff;
+            font-size: 1rem;
+            min-width: 70px;
+            text-align: center;
+            background: linear-gradient(135deg, #e67e22 0%, #d35400 100%);
+            padding: 8px 14px;
+            border-radius: 8px;
+            box-shadow: 0 3px 10px rgba(230, 126, 34, 0.3);
+        }
+        .btn-clear {
+            padding: 11px 18px;
+            background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.25s ease;
+            margin-left: auto;
+            font-family: 'Montserrat', sans-serif;
+            box-shadow: 0 4px 12px rgba(231, 76, 60, 0.25);
+        }
+        .btn-clear:hover {
+            background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(231, 76, 60, 0.35);
+        }
+        .selection-count {
+            background: linear-gradient(135deg, #fff5eb 0%, #ffecd2 100%);
+            color: #d35400;
+            padding: 10px 16px;
+            border-radius: 10px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            border: 2px solid rgba(230, 126, 34, 0.2);
+        }
+
+        /* Cards Grid */
+        .cards-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 24px;
+        }
+        @media (max-width: 1100px) {
+            .cards-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Exam Card */
+        .exam-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        .exam-card:hover {
+            transform: translateY(-6px);
+            box-shadow: 0 12px 35px rgba(230, 126, 34, 0.15);
+            border-color: rgba(230, 126, 34, 0.3);
+        }
+        .card-header {
+            background: linear-gradient(135deg, #5b5fc7 0%, #4a4eb8 60%, #7c3aed 100%);
+            color: white;
+            padding: 20px 22px;
+            position: relative;
+            overflow: hidden;
+        }
+        .card-header::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(243, 156, 18, 0.2) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .card-header h3 {
+            margin: 0 0 10px;
+            font-size: 1.1rem;
+            font-weight: 700;
+            position: relative;
+        }
+        .card-header h3 i {
+            color: #feca57;
+        }
+        .card-meta {
+            display: flex;
+            gap: 18px;
+            font-size: 0.82rem;
+            opacity: 0.95;
+            position: relative;
+            flex-wrap: nowrap;
+        }
+        .card-meta span {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            white-space: nowrap;
+        }
+        .card-meta i {
+            color: #feca57;
+        }
+        .card-body {
+            padding: 18px 22px 22px;
+            background: linear-gradient(180deg, #fafbfc 0%, white 100%);
+        }
+
+        /* Module Row with Checkbox */
+        .module-row {
+            display: flex;
+            align-items: center;
+            padding: 14px 16px;
+            border: 2px solid #e8eef5;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            gap: 14px;
+            background: white;
+        }
+        .module-row:last-child {
+            margin-bottom: 0;
+        }
+        .module-row:hover:not(.disabled):not(.selected) {
+            border-color: #f39c12;
+            background: #fffbf5;
+            box-shadow: 0 2px 10px rgba(243, 156, 18, 0.12);
+        }
+        .module-row.selected {
+            border-color: #e67e22;
+            background: linear-gradient(135deg, #fff8f0 0%, #fff3e6 100%);
+            box-shadow: 0 3px 12px rgba(230, 126, 34, 0.18);
+        }
+        .module-row.disabled {
+            opacity: 0.35;
+            cursor: not-allowed;
+            background: #f5f5f5;
+        }
+        .module-checkbox {
+            width: 24px;
+            height: 24px;
+            border: 2.5px solid #ccd5e0;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            transition: all 0.25s ease;
+        }
+        .module-row.selected .module-checkbox {
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 100%);
+            border-color: #e67e22;
+            color: white;
+            box-shadow: 0 2px 8px rgba(230, 126, 34, 0.35);
+        }
+        .module-row.disabled .module-checkbox {
+            background: #e0e0e0;
+            border-color: #ccc;
+        }
+        .module-info {
+            flex: 1;
+        }
+        .module-name {
+            font-weight: 700;
+            color: #2c3e50;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .module-name i {
+            color: #5b5fc7;
+            font-size: 0.85rem;
+        }
+        .module-row.selected .module-name {
+            color: #d35400;
+        }
+        .module-row.selected .module-name i {
+            color: #e67e22;
+        }
+
+        /* Guide Box */
+        .guide-box {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            border-radius: 14px;
+            padding: 16px 20px;
+            box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+            z-index: 50;
+            border-left: 4px solid #5b5fc7;
+        }
+        .guide-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #555;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .guide-title i {
+            color: #5b5fc7;
+        }
+        .guide-item {
+            position: relative;
+            padding: 10px 14px;
+            margin-bottom: 6px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 0.9rem;
+            color: #2c3e50;
+            cursor: help;
+            transition: 0.2s;
+            background: #f8f9fa;
+            border: 2px solid transparent;
+        }
+        .guide-item:last-child {
+            margin-bottom: 0;
+        }
+        .guide-item:hover {
+            background: #fff5eb;
+            border-color: #f39c12;
+            color: #e67e22;
+        }
+        .guide-item .tooltip {
+            position: absolute;
+            right: 110%;
+            top: 50%;
+            transform: translateY(-50%);
+            background: linear-gradient(135deg, #2c3e50 0%, #1a252f 100%);
+            color: white;
+            padding: 10px 14px;
+            border-radius: 8px;
+            font-size: 0.8rem;
+            font-weight: 500;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.25s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+        .guide-item .tooltip::after {
+            content: '';
+            position: absolute;
+            left: 100%;
+            top: 50%;
+            transform: translateY(-50%);
+            border: 6px solid transparent;
+            border-left-color: #2c3e50;
+        }
+        .guide-item:hover .tooltip {
+            opacity: 1;
+            visibility: visible;
+        }
+        .guide-item.m1 { border-left: 3px solid #5b5fc7; }
+        .guide-item.m2a { border-left: 3px solid #27ae60; }
+        .guide-item.m2b { border-left: 3px solid #e74c3c; }
+
+        @media (max-width: 1200px) {
+            .guide-box {
+                position: static;
+                margin: 0 auto 20px;
+                max-width: 600px;
+                display: flex;
+                flex-direction: column;
+                align-items: stretch;
+                gap: 8px;
+                padding: 16px 20px;
+            }
+            .guide-title {
+                margin-bottom: 8px;
+                text-align: center;
+            }
+            .guide-item {
+                margin-bottom: 0;
+                display: flex;
+                align-items: center;
+                gap: 10px;
+            }
+            .guide-item .tooltip {
+                right: auto;
+                left: 50%;
+                top: auto;
+                bottom: 120%;
+                transform: translateX(-50%);
+            }
+            .guide-item .tooltip::after {
+                left: 50%;
+                top: 100%;
+                transform: translateX(-50%);
+                border-left-color: transparent;
+                border-top-color: #2c3e50;
+            }
+        }
+
+        /* Bottom Action Bar */
+        .action-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            padding: 18px 30px;
+            box-shadow: 0 -4px 30px rgba(0,0,0,0.2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 25px;
+            z-index: 100;
+        }
+        .action-bar .selection-count {
+            background: rgba(255, 255, 255, 0.15);
+            color: #fff;
+            font-weight: 700;
+            padding: 10px 18px;
+            border-radius: 10px;
+            backdrop-filter: blur(5px);
+        }
+        .btn-start-all {
+            font-family: 'Montserrat', sans-serif;
+            background: linear-gradient(135deg, #f39c12 0%, #e67e22 50%, #d35400 100%);
+            color: white;
+            border: none;
+            padding: 16px 45px;
+            border-radius: 14px;
+            font-weight: 800;
+            font-size: 1.15rem;
+            cursor: pointer;
+            box-shadow: 0 6px 25px rgba(230, 126, 34, 0.5);
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .btn-start-all i {
+            font-size: 1.2rem;
+        }
+        .btn-start-all:hover {
+            transform: translateY(-3px) scale(1.02);
+            box-shadow: 0 10px 35px rgba(230, 126, 34, 0.6);
+        }
+        .btn-start-all:disabled {
+            background: linear-gradient(135deg, #95a5a6 0%, #7f8c8d 100%);
+            cursor: not-allowed;
+            box-shadow: none;
+            transform: none;
+        }
+
+        /* CTA */
+        .cta {
+            margin-top: 30px;
+            margin-bottom: 100px;
+            text-align: center;
+        }
+        .cta button {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white;
+            border: none;
+            padding: 14px 24px;
+            border-radius: 12px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 6px 14px rgba(211, 84, 0, 0.24);
+            display: inline-flex;
+            gap: 10px;
+            align-items: center;
+            font-size: 1rem;
+            transition: 0.2s;
+        }
+        .cta button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(211, 84, 0, 0.3);
+        }
+
+        .no-results {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 40px;
+            color: #888;
+            font-size: 1.1rem;
+        }
+
+        @media (max-width: 768px) {
+            .filter-bar {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            .search-input {
+                width: 100%;
+            }
+            .btn-clear {
+                margin-left: 0;
+            }
+            .cards-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="brand-logo" onclick="window.location.href='index.html'" style="cursor: pointer;">
+        <h2><i class="fas fa-shapes"></i> TOAN.VN</h2>
+        <span>Yêu học toán</span>
+    </div>
+    <div class="contact-btn" onclick="alert('Hotline: 024.7301.8910')">
+        <i class="fas fa-phone-alt"></i> 024.7301.8910
+    </div>
+
+    <!-- Guide Box -->
+    <div class="guide-box">
+        <div class="guide-title"><i class="fas fa-info-circle"></i> Hướng dẫn</div>
+        <div class="guide-item m1">
+            <i class="fas fa-cube"></i> Module 1
+            <div class="tooltip">Phần 1 - Độ khó chuẩn, bắt buộc làm</div>
+        </div>
+        <div class="guide-item m2a">
+            <i class="fas fa-cube"></i> Module 2A
+            <div class="tooltip">Phần 2 - Dễ hơn (dành cho bạn chưa làm tốt Module 1)</div>
+        </div>
+        <div class="guide-item m2b">
+            <i class="fas fa-cube"></i> Module 2B
+            <div class="tooltip">Phần 2 - Khó hơn (dành cho bạn làm tốt Module 1)</div>
+        </div>
+    </div>
+
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <button class="btn-back" onclick="window.location.href='menu.html'">
+                <i class="fas fa-arrow-left"></i> Quay lại danh mục
+            </button>
+            <div class="title-block">
+                <h1><i class="fas fa-graduation-cap"></i> SAT Practice Tests</h1>
+                <p>Luyện đề SAT Digital theo format mới nhất</p>
+            </div>
+            <div></div>
+        </div>
+
+        <!-- Tabs: Math bên trái, English bên phải -->
+        <div class="tabs-container">
+            <button class="tab-btn active" onclick="switchTab('math')">Math</button>
+            <button class="tab-btn" onclick="switchTab('english')">English</button>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="filter-bar">
+            <div class="filter-group">
+                <div class="filter-label"><i class="fas fa-search"></i> Tìm kiếm</div>
+                <input type="text" class="search-input" id="searchInput" placeholder="Nhập tên đề..." oninput="applyFilters()">
+            </div>
+            <div class="filter-group">
+                <div class="filter-label"><i class="fas fa-calendar-alt"></i> Lọc theo năm</div>
+                <div class="year-slider-container">
+                    <input type="range" class="year-slider" id="yearSlider" min="0" max="3" value="0" oninput="updateYearFilter()">
+                    <span class="year-display" id="yearDisplay">Tất cả</span>
+                </div>
+            </div>
+            <div class="selection-count" id="selectionCount">Đã chọn: 0 module</div>
+            <button class="btn-clear" onclick="clearAllSelections()">
+                <i class="fas fa-trash-alt"></i> Xóa các module đã chọn
+            </button>
+        </div>
+
+        <!-- Cards Grid -->
+        <div class="cards-grid" id="cardsGrid"></div>
+
+        <div class="cta">
+            <button onclick="tuTaoNgay()"><i class="fas fa-magic"></i> Muốn luyện theo chuyên đề? Tự tạo đề ngay!</button>
+        </div>
+    </div>
+
+    <!-- Bottom Action Bar -->
+    <div class="action-bar">
+        <div class="selection-count" id="selectionCountBottom">Đã chọn: 0 module</div>
+        <button class="btn-start-all" id="btnStartAll" onclick="startSelectedModules()" disabled>
+            <i class="fas fa-play-circle"></i> BẮT ĐẦU LUYỆN TẬP
+        </button>
+    </div>
+
+    <script>
+        // SAT Practice Tests Data
+        const SAT_TESTS = [
+            { id: "mar2023a", name: "March 2023 Form A", year: 2023, month: "03", minutes: 32, questions: 27 },
+            { id: "may2023a", name: "May 2023 Form A", year: 2023, month: "05", minutes: 32, questions: 27 },
+            { id: "jun2023a", name: "June 2023 Form A", year: 2023, month: "06", minutes: 32, questions: 27 },
+            { id: "aug2023a", name: "August 2023 Form A", year: 2023, month: "08", minutes: 32, questions: 27 },
+            { id: "oct2023a", name: "October 2023 Form A", year: 2023, month: "10", minutes: 32, questions: 27 },
+            { id: "nov2023a", name: "November 2023 Form A", year: 2023, month: "11", minutes: 32, questions: 27 },
+            { id: "nov2023b", name: "November 2023 Form B", year: 2023, month: "11", minutes: 32, questions: 27 },
+            { id: "nov2023c", name: "November 2023 Form C", year: 2023, month: "11", minutes: 32, questions: 27 },
+            { id: "dec2023a", name: "December 2023 Form A", year: 2023, month: "12", minutes: 32, questions: 27 },
+            { id: "dec2023b", name: "December 2023 Form B", year: 2023, month: "12", minutes: 32, questions: 27 },
+            { id: "dec2023c", name: "December 2023 Form C", year: 2023, month: "12", minutes: 32, questions: 27 },
+            { id: "mar2024intl", name: "March 2024 International Form A", year: 2024, month: "03", minutes: 32, questions: 27 },
+            { id: "mar2024a", name: "March 2024 Form A", year: 2024, month: "03", minutes: 32, questions: 27 },
+            { id: "may2024a", name: "May 2024 Form A", year: 2024, month: "05", minutes: 32, questions: 27 },
+            { id: "jun2024a", name: "June 2024 Form A", year: 2024, month: "06", minutes: 32, questions: 27 },
+            { id: "aug2024a", name: "August 2024 Form A", year: 2024, month: "08", minutes: 32, questions: 27 },
+            { id: "oct2024a", name: "October 2024 Form A", year: 2024, month: "10", minutes: 32, questions: 27 },
+            { id: "nov2024a", name: "November 2024 Form A", year: 2024, month: "11", minutes: 32, questions: 27 },
+            { id: "dec2024a", name: "December 2024 Form A", year: 2024, month: "12", minutes: 32, questions: 27 },
+            { id: "mar2025a", name: "March 2025 Form A", year: 2025, month: "03", minutes: 32, questions: 27 },
+            { id: "may2025a", name: "May 2025 Form A", year: 2025, month: "05", minutes: 32, questions: 27 },
+            { id: "jun2025a", name: "June 2025 Form A", year: 2025, month: "06", minutes: 32, questions: 27 }
+        ];
+
+        let currentTab = 'math';
+        let yearFilter = 'all'; // 'all', 2023, 2024, 2025
+        const YEAR_OPTIONS = ['all', 2023, 2024, 2025];
+        
+        // Lưu trữ các module đã chọn - persist giữa Math/English
+        // Format: { "testId": { "m1": true, "m2a": true, "m2b": false }, ... }
+        let selectedModules = {};
+
+        // Load từ localStorage
+        function loadSelections() {
+            const saved = localStorage.getItem('sat_selectedModules');
+            if (saved) {
+                try {
+                    selectedModules = JSON.parse(saved);
+                } catch (e) {
+                    selectedModules = {};
+                }
+            }
+        }
+
+        // Save vào localStorage
+        function saveSelections() {
+            localStorage.setItem('sat_selectedModules', JSON.stringify(selectedModules));
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            if (tab === 'math') {
+                document.querySelector('.tab-btn:first-child').classList.add('active');
+            } else {
+                document.querySelector('.tab-btn:last-child').classList.add('active');
+            }
+            renderCards();
+        }
+
+        function updateYearFilter() {
+            const sliderValue = parseInt(document.getElementById('yearSlider').value);
+            yearFilter = YEAR_OPTIONS[sliderValue];
+            
+            // Update display
+            const display = document.getElementById('yearDisplay');
+            if (yearFilter === 'all') {
+                display.innerText = 'Tất cả';
+            } else {
+                display.innerText = yearFilter;
+            }
+            
+            applyFilters();
+        }
+
+        function applyFilters() {
+            renderCards();
+        }
+
+        function getSelectionKey(testId, subject) {
+            return `${subject}_${testId}`;
+        }
+
+        function toggleModule(testId, moduleType) {
+            const key = getSelectionKey(testId, currentTab);
+            
+            if (!selectedModules[key]) {
+                selectedModules[key] = { m1: false, m2a: false, m2b: false };
+            }
+
+            const current = selectedModules[key];
+
+            if (moduleType === 'm1') {
+                current.m1 = !current.m1;
+            } else if (moduleType === 'm2a') {
+                if (current.m2b) return; // Không cho chọn nếu 2b đã chọn
+                current.m2a = !current.m2a;
+            } else if (moduleType === 'm2b') {
+                if (current.m2a) return; // Không cho chọn nếu 2a đã chọn
+                current.m2b = !current.m2b;
+            }
+
+            saveSelections();
+            renderCards();
+            updateSelectionCount();
+        }
+
+        function clearAllSelections() {
+            if (confirm('Bạn có chắc muốn xóa tất cả các module đã chọn?')) {
+                selectedModules = {};
+                saveSelections();
+                renderCards();
+                updateSelectionCount();
+            }
+        }
+
+        function updateSelectionCount() {
+            let count = 0;
+            Object.values(selectedModules).forEach(mods => {
+                if (mods.m1) count++;
+                if (mods.m2a) count++;
+                if (mods.m2b) count++;
+            });
+            
+            document.getElementById('selectionCount').innerText = `Đã chọn: ${count} module`;
+            document.getElementById('selectionCountBottom').innerText = `Đã chọn: ${count} module`;
+            document.getElementById('btnStartAll').disabled = count === 0;
+        }
+
+        function renderCards() {
+            const grid = document.getElementById('cardsGrid');
+            const searchQuery = document.getElementById('searchInput').value.toLowerCase().trim();
+            
+            let tests = SAT_TESTS;
+            
+            // Filter by year
+            if (yearFilter !== 'all') {
+                tests = tests.filter(t => t.year === yearFilter);
+            }
+            
+            // Filter by search query
+            if (searchQuery) {
+                tests = tests.filter(t => t.name.toLowerCase().includes(searchQuery));
+            }
+
+            // Sort by year and month descending
+            tests = tests.sort((a, b) => {
+                if (b.year !== a.year) return b.year - a.year;
+                return b.month.localeCompare(a.month);
+            });
+
+            if (tests.length === 0) {
+                grid.innerHTML = '<div class="no-results"><i class="fas fa-search"></i> Không tìm thấy đề phù hợp</div>';
+                return;
+            }
+
+            grid.innerHTML = tests.map(test => {
+                const key = getSelectionKey(test.id, currentTab);
+                const mods = selectedModules[key] || { m1: false, m2a: false, m2b: false };
+                
+                const m1Selected = mods.m1 ? 'selected' : '';
+                const m2aSelected = mods.m2a ? 'selected' : '';
+                const m2bSelected = mods.m2b ? 'selected' : '';
+                const m2aDisabled = mods.m2b ? 'disabled' : '';
+                const m2bDisabled = mods.m2a ? 'disabled' : '';
+
+                return `
+                <div class="exam-card" data-year="${test.year}">
+                    <div class="card-header">
+                        <h3><i class="fas fa-calendar-alt"></i> ${test.name}</h3>
+                        <div class="card-meta">
+                            <span><i class="fas fa-clock"></i> ${test.minutes} minutes/module</span>
+                            <span><i class="fas fa-list"></i> ${test.questions} questions/module</span>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div class="module-row ${m1Selected}" onclick="toggleModule('${test.id}', 'm1')">
+                            <div class="module-checkbox">
+                                ${mods.m1 ? '<i class="fas fa-check"></i>' : ''}
+                            </div>
+                            <div class="module-info">
+                                <div class="module-name"><i class="fas fa-cube"></i> Module 1</div>
+                            </div>
+                        </div>
+                        <div class="module-row ${m2aSelected} ${m2aDisabled}" onclick="toggleModule('${test.id}', 'm2a')">
+                            <div class="module-checkbox">
+                                ${mods.m2a ? '<i class="fas fa-check"></i>' : ''}
+                            </div>
+                            <div class="module-info">
+                                <div class="module-name"><i class="fas fa-cube"></i> Module 2A</div>
+                            </div>
+                        </div>
+                        <div class="module-row ${m2bSelected} ${m2bDisabled}" onclick="toggleModule('${test.id}', 'm2b')">
+                            <div class="module-checkbox">
+                                ${mods.m2b ? '<i class="fas fa-check"></i>' : ''}
+                            </div>
+                            <div class="module-info">
+                                <div class="module-name"><i class="fas fa-cube"></i> Module 2B</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            }).join('');
+
+            updateSelectionCount();
+        }
+
+        function startSelectedModules() {
+            // Collect all selected modules
+            const toStart = [];
+            
+            Object.entries(selectedModules).forEach(([key, mods]) => {
+                const [subject, testId] = key.split('_');
+                const test = SAT_TESTS.find(t => t.id === testId);
+                if (!test) return;
+                
+                if (mods.m1) {
+                    toStart.push({
+                        testId,
+                        testName: test.name,
+                        module: '1',
+                        subject,
+                        minutes: test.minutes,
+                        questions: test.questions
+                    });
+                }
+                if (mods.m2a) {
+                    toStart.push({
+                        testId,
+                        testName: test.name,
+                        module: '2A',
+                        subject,
+                        minutes: test.minutes,
+                        questions: test.questions
+                    });
+                }
+                if (mods.m2b) {
+                    toStart.push({
+                        testId,
+                        testName: test.name,
+                        module: '2B',
+                        subject,
+                        minutes: test.minutes,
+                        questions: test.questions
+                    });
+                }
+            });
+
+            if (toStart.length === 0) {
+                alert('Vui lòng chọn ít nhất một module để luyện tập!');
+                return;
+            }
+
+            // Nếu chỉ chọn 1 module, bắt đầu ngay
+            if (toStart.length === 1) {
+                const m = toStart[0];
+                startSingleModule(m);
+                return;
+            }
+
+            // Nhiều module - hỏi người dùng muốn làm cái nào trước
+            const choices = toStart.map((m, i) => `${i + 1}. SAT ${m.subject === 'math' ? 'Math' : 'English'} - ${m.testName} - Module ${m.module}`).join('\n');
+            const choice = prompt(`Bạn đã chọn ${toStart.length} module:\n${choices}\n\nNhập số thứ tự module muốn làm trước (1-${toStart.length}):`);
+            
+            const idx = parseInt(choice) - 1;
+            if (idx >= 0 && idx < toStart.length) {
+                startSingleModule(toStart[idx]);
+            }
+        }
+
+        function startSingleModule(m) {
+            const subjectLabel = m.subject === 'math' ? 'Math' : 'English';
+            const fullTitle = `SAT ${subjectLabel} - ${m.testName} - Module ${m.module}`;
+            
+            const examConfig = {
+                tenDe: fullTitle,
+                totalTime: m.minutes,
+                totalQuestions: m.questions,
+                grade: 'SAT',
+                testId: m.testId,
+                module: m.module,
+                subject: m.subject
+            };
+            localStorage.setItem('examConfig', JSON.stringify(examConfig));
+            
+            const params = new URLSearchParams({
+                tenDe: fullTitle,
+                thoiGian: m.minutes,
+                soCau: m.questions
+            });
+            window.location.href = `exam_interface.html?${params.toString()}`;
+        }
+
+        function tuTaoNgay() {
+            localStorage.setItem('cheDoLuyenDe', 'TuTao');
+            window.location.href = 'sat_tutao.html';
+        }
+
+        // Init
+        loadSelections();
+        renderCards();
+    </script>
+</body>
+</html>

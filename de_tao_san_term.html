@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Danh sách đề - Kho đề có sẵn</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Montserrat', sans-serif; margin: 0; background: #f6f8fb; color: #2c3e50; }
+        .page-wrapper { max-width: 1100px; margin: 0 auto; padding: 80px 18px 40px; }
+        .top-bar {
+            display: flex; align-items: center; justify-content: space-between;
+            gap: 12px; background: white; padding: 14px 16px; border-radius: 12px;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.05);
+        }
+        .title-block h1 { margin: 0; font-size: 1.2rem; color: #27ae60; text-transform: uppercase; }
+        .title-block p { margin: 4px 0 0; color: #666; font-size: 0.95rem; }
+        .tag { background: #ecf8f2; color: #27ae60; padding: 7px 10px; border-radius: 999px; font-weight: 700; font-size: 0.85rem; border: 1px solid #d8f0e5; display: inline-flex; gap: 6px; align-items: center; }
+        .btn-back { padding: 10px 12px; border: 1px solid #dfe6ee; background: #f4f6f8; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; color: #34495e; }
+        .btn-back:hover { background: #e9f2ff; border-color: #b9d7ff; color: #2980b9; }
+
+        .filter-row { margin: 14px 0 10px; display: flex; gap: 10px; flex-wrap: wrap; }
+        .filter-row input, .filter-row select {
+            padding: 10px 12px; border-radius: 10px; border: 2px solid #e0e6ed; font-size: 0.95rem; outline: none;
+        }
+        .filter-row input:focus, .filter-row select:focus { border-color: #27ae60; box-shadow: 0 0 0 3px rgba(39,174,96,0.12); }
+        .btn-primary { padding: 10px 14px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; background: #27ae60; color: white; box-shadow: 0 4px 12px rgba(39,174,96,0.35); }
+        .btn-ghost { padding: 10px 14px; border: none; border-radius: 10px; font-weight: 700; cursor: pointer; display: inline-flex; gap: 8px; align-items: center; background: #ecf0f1; color: #7f8c8d; }
+
+        .list { margin-top: 12px; display: grid; gap: 10px; }
+        .card {
+            background: white; border: 1px solid #e8eef5; border-radius: 12px; padding: 12px 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.04); display: grid; gap: 6px;
+        }
+        .card h3 { margin: 0; font-size: 1rem; color: #2c3e50; }
+        .meta { display: flex; gap: 10px; flex-wrap: wrap; font-size: 0.9rem; color: #566573; }
+        .pill { padding: 4px 8px; border-radius: 999px; font-size: 0.78rem; font-weight: 700; background: #e8f6ef; color: #1e8449; border: 1px solid #d5eddd; }
+        .pill.gray { background: #f0f3f6; color: #6c7a89; border-color: #e0e6ed; }
+        .card-footer { display: flex; justify-content: space-between; align-items: center; }
+        .btn-link { border: 1px solid #27ae60; background: #27ae600d; color: #1e8449; border-radius: 8px; padding: 8px 12px; font-weight: 700; cursor: pointer; }
+        .empty { padding: 18px; text-align: center; color: #7f8c8d; background: #fff8e6; border: 1px solid #ffe1a6; border-radius: 10px; }
+        .cta { margin-top: 18px; text-align: center; }
+        .cta button {
+            background: linear-gradient(135deg, #e67e22, #d35400);
+            color: white; border: none; padding: 12px 20px; border-radius: 12px;
+            font-weight: 700; letter-spacing: 0.2px;
+            cursor: pointer; box-shadow: 0 6px 14px rgba(211, 84, 0, 0.24);
+            display: inline-flex; gap: 10px; align-items: center; font-size: 0.98rem;
+        }
+        .cta button:hover { transform: translateY(-1px); }
+    </style>
+</head>
+<body>
+    <div class="brand-logo" onclick="window.location.href='index.html'" style="cursor: pointer; position: fixed; top: 15px; left: 20px; z-index: 1000; background: white; padding: 6px 15px; border-radius: 30px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); display: flex; align-items: center; border: 2px solid #27ae60;">
+        <h2 style="margin:0; color:#27ae60; font-size:1.1rem;"><i class="fas fa-shapes"></i> TOAN.VN</h2>
+        <span style="color:#555; font-size:0.75rem; margin-left:5px;">Yêu học toán</span>
+    </div>
+    <div class="contact-btn" onclick="alert('Hotline: 024.7301.8910')" style="position: fixed; bottom: 20px; right: 20px; background: #e74c3c; color: white; padding: 10px 18px; border-radius: 50px; box-shadow: 0 4px 15px rgba(231, 76, 60, 0.4); font-weight: bold; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 0.9rem; z-index: 1000;">
+        <i class="fas fa-phone-alt"></i> 024.7301.8910
+    </div>
+
+    <div class="page-wrapper">
+        <div class="top-bar">
+            <button class="btn-back" onclick="window.location.href='de_tao_san.html'"><i class="fas fa-arrow-left"></i> Quay lại</button>
+            <div class="title-block">
+                <h1 id="pageTitle">Danh sách đề</h1>
+                <p id="pageSubtitle">Kỳ 1 · Đề 15 phút</p>
+            </div>
+            <div style="display:flex; gap:6px; flex-wrap:wrap; justify-content:flex-end;">
+                <span class="tag" id="tagProgram"></span>
+                <span class="tag" id="tagLevel" style="background:#eef4ff; color:#2c3e50; border-color:#d8e3ff;"></span>
+            </div>
+        </div>
+
+        <div class="filter-row">
+            <input id="searchInput" type="text" placeholder="Tìm kiếm trong danh sách đề..." oninput="filterList()" />
+            <select id="yearFilter" onchange="filterList()">
+                <option value="all">Năm up đề: Tất cả</option>
+                <option value="2025">2025</option>
+                <option value="2024">2024</option>
+                <option value="2023">2023</option>
+                <option value="2022">2022</option>
+            </select>
+            <button class="btn-primary" onclick="filterList()"><i class="fas fa-search"></i> Lọc</button>
+            <button class="btn-ghost" onclick="resetFilters()"><i class="fas fa-eraser"></i> Xóa lọc</button>
+        </div>
+
+        <div class="list" id="examList"></div>
+        <div class="empty" id="emptyBox" style="display:none;">Không tìm thấy đề phù hợp với bộ lọc.</div>
+        <div class="cta">
+            <button onclick="tuTaoNgay()"><i class="fas fa-magic"></i> Không tìm thấy đề bạn muốn luyện? => Tự tạo ngay</button>
+        </div>
+    </div>
+
+    <script>
+        const CATEGORY_LABELS = {
+            de15p: "Đề ngắn (15 phút)",
+            de45p: "Đề trung bình (30-45 phút)",
+            giuaKy: "Đề giữa kỳ",
+            cuoiKy: "Đề cuối kỳ",
+            khaoSat: "Đề khảo sát chất lượng",
+            thiThu: "Đề thi thử",
+            hsg: "Đề thi HSG"
+        };
+
+        const PROGRAM_LABELS = {
+            PhoThong: "Chương trình Phổ thông",
+            ChuyenCap: "Thi chuyển cấp",
+            KyThiRieng: "Kỳ thi riêng",
+            QuocTe: "Toán quốc tế"
+        };
+
+        const LEVEL_LABELS = {
+            Lop1: "Lớp 1", Lop2: "Lớp 2", Lop3: "Lớp 3", Lop4: "Lớp 4", Lop5: "Lớp 5",
+            Lop6: "Lớp 6", Lop7: "Lớp 7", Lop8: "Lớp 8", Lop9: "Lớp 9",
+            Lop10: "Lớp 10", Lop11: "Lớp 11", Lop12: "Lớp 12",
+            Vao6: "Thi vào lớp 6 CLC", Vao10: "Thi vào lớp 10", THPTQG: "Tốt nghiệp THPT & ĐH",
+            HSA: "HSA - ĐGNL ĐHQG Hà Nội", TSA: "TSA - ĐGTD Bách Khoa",
+            VACT: "V-ACT", SuPham: "Đánh giá Sư phạm", CongAn: "Đánh giá Bộ Công An",
+            SAT: "SAT Math", IGCSE: "IGCSE", ALevel: "A-Level", ASLevel: "AS-Level"
+        };
+
+        const TOPIC_PRESETS = {
+            Lop10: { ky1: ["Mệnh đề - Tập hợp", "BPT bậc nhất hai ẩn", "Hàm số bậc hai", "Thống kê cơ bản"], ky2: ["BPT bậc hai", "Tổ hợp - Xác suất", "Vectơ & Tích vô hướng", "Phương trình đường thẳng"] },
+            Lop11: { ky1: ["Góc lượng giác", "Giá trị lượng giác", "Hàm số lượng giác", "Dãy số & Giới hạn"], ky2: ["Cấp số cộng/nhân", "Giới hạn hàm số", "Đạo hàm và ứng dụng", "Hình học không gian"] },
+            Lop12: { ky1: ["Ứng dụng đạo hàm", "Hàm số mũ - Logarit", "Nguyên hàm - Tích phân", "Số phức"], ky2: ["Hình học Oxyz", "Vectơ và mặt phẳng", "Khối đa diện", "Khối tròn xoay"] }
+        };
+
+        const YEARS = [2025, 2024, 2023, 2022];
+        const SCHOOL_POOL = [
+            "THPT Trần Phú", "THPT Chuyên Hà Nội - Amsterdam", "THPT Chuyên Vinh",
+            "THPT Nguyễn Huệ", "THCS-THPT Lương Thế Vinh", "THPT Phan Bội Châu"
+        ];
+
+        function pickSchool(idx) {
+            return SCHOOL_POOL[idx % SCHOOL_POOL.length];
+        }
+
+        function generateList(levelKey, term, category) {
+            const preset = TOPIC_PRESETS[levelKey] || { ky1: ["Ôn tập chủ đề 1", "Ôn tập chủ đề 2", "Ôn tập chủ đề 3"], ky2: ["Ôn tập chủ đề 1", "Ôn tập chủ đề 2", "Ôn tập chủ đề 3"] };
+            const topics = term === "ky2" ? (preset.ky2 || preset.ky1) : preset.ky1;
+            const topicPool = term === "all" ? [...(preset.ky1 || []), ...(preset.ky2 || [])] : topics;
+            const baseTopics = topicPool.length ? topicPool : ["Ôn tập tổng hợp"];
+            const catLabel = CATEGORY_LABELS[category] || "Đề luyện tập";
+            const termLabel = term === "ky1" ? "Kỳ 1" : term === "ky2" ? "Kỳ 2" : "Kỳ 1-2";
+            const list = [];
+
+            if (category === "giuaKy" || category === "cuoiKy" || category === "khaoSat" || category === "thiThu" || category === "hsg") {
+                const need = Math.min(8, Math.max(5, baseTopics.length + 1));
+                for (let i = 0; i < need; i++) {
+                    const year = YEARS[i % YEARS.length];
+                    const termNum = term === "ky2" ? 2 : 1;
+                    let title;
+                    if (category === "giuaKy") {
+                        title = `Giữa kỳ ${termNum} năm ${year}`;
+                    } else if (category === "cuoiKy") {
+                        title = `Đề cuối kỳ ${termNum} năm ${year}`;
+                    } else if (category === "khaoSat" || category === "thiThu" || category === "hsg") {
+                        const school = pickSchool(i);
+                        title = `${school} - ${catLabel.replace("Đề ", "")} năm ${year}`;
+                    } else {
+                        const school = pickSchool(i);
+                        title = `${school} - ${catLabel.replace("Đề ", "")} ${termLabel} ${year}`;
+                    }
+                    const durationMinutes =
+                        category === "cuoiKy" ? 90 :
+                        category === "giuaKy" ? 60 :
+                        category === "khaoSat" ? 60 :
+                        category === "thiThu" ? 90 : 120;
+                    const soCau =
+                        category === "cuoiKy" ? 40 :
+                        category === "giuaKy" ? 30 :
+                        category === "khaoSat" ? 30 :
+                        category === "thiThu" ? 40 : 50;
+                    list.push({
+                        title,
+                        topic: "Tổng hợp",
+                        year,
+                        duration: `${durationMinutes} phút`,
+                        durationMinutes,
+                        code: `${(term || "ALL").toUpperCase()}-${category}-${i + 1}`,
+                        topicHidden: true,
+                        soCau
+                    });
+                }
+            } else {
+                baseTopics.forEach((topic, idx) => {
+                    const year = YEARS[idx % YEARS.length];
+                    const is30 = idx % 2 === 0;
+                    const durationMinutes = category === "de45p" ? (is30 ? 30 : 45) : 15;
+                    const soCau =
+                        category === "de15p" ? 12 :
+                        category === "de45p" ? (is30 ? 18 : 22) : 20;
+                    const title = category === "de45p"
+                        ? `Đề ${durationMinutes} phút - ${topic}`
+                        : `${catLabel} - ${topic}`;
+                    list.push({
+                        title,
+                        topic,
+                        year,
+                        duration: `${durationMinutes} phút`,
+                        durationMinutes,
+                        code: `${(term || "ALL").toUpperCase()}-${category}-${idx + 1}`,
+                        topicHidden: false,
+                        soCau
+                    });
+                });
+            }
+            return list.slice(0, 8);
+        }
+
+        let LIST = [];
+
+        function renderList() {
+            const box = document.getElementById("examList");
+            box.innerHTML = "";
+            LIST.forEach(item => {
+                const card = document.createElement("div");
+                card.className = "card";
+                card.dataset.search = `${item.title} ${item.topic} ${item.year}`.toLowerCase();
+                card.dataset.year = item.year;
+                const topicPart = item.topicHidden ? "" : `<span><i class="fas fa-book"></i> ${item.topic}</span>`;
+                card.innerHTML = `
+                    <h3>${item.title}</h3>
+                    <div class="meta">
+                        ${topicPart}
+                        <span><i class="fas fa-clock"></i> ${item.duration}</span>
+                        <span><i class="fas fa-calendar"></i> Năm up đề: ${item.year}</span>
+                        <span class="pill gray">${item.code}</span>
+                    </div>
+                    <div class="card-footer">
+                        <span class="pill">${CATEGORY_LABELS[item.category] || "Đề luyện tập"}</span>
+                        <button class="btn-link" onclick="startExam('${encodeURIComponent(item.title)}', ${item.durationMinutes || 60}, ${item.soCau || 20})">Làm đề ngay</button>
+                    </div>
+                `;
+                box.appendChild(card);
+            });
+            filterList();
+        }
+
+        function filterList() {
+            const q = (document.getElementById("searchInput").value || "").toLowerCase().trim();
+            const year = document.getElementById("yearFilter").value;
+            const cards = document.querySelectorAll(".card");
+            let visible = 0;
+            cards.forEach(card => {
+                const matchText = !q || card.dataset.search.includes(q);
+                const matchYear = year === "all" || card.dataset.year === year;
+                const show = matchText && matchYear;
+                card.style.display = show ? "grid" : "none";
+                if (show) visible++;
+            });
+            document.getElementById("emptyBox").style.display = visible === 0 ? "block" : "none";
+        }
+
+        function resetFilters() {
+            document.getElementById("searchInput").value = "";
+            document.getElementById("yearFilter").value = "all";
+            filterList();
+        }
+
+        function startExam(encodedTitle, durationMinutes, soCau) {
+            const title = decodeURIComponent(encodedTitle);
+            const level = localStorage.getItem("deCoSan_level") || "Lop10";
+            const examConfig = {
+                title,
+                totalTime: durationMinutes,
+                totalQuestions: soCau,
+                grade: level,
+                questions: []
+            };
+            localStorage.setItem("examConfig", JSON.stringify(examConfig));
+
+            const params = new URLSearchParams({
+                tenDe: title,
+                thoiGian: durationMinutes,
+                soCau: soCau
+            });
+            window.location.href = `exam_interface.html?${params.toString()}`;
+        }
+
+        function tuTaoNgay() {
+            localStorage.setItem('cheDoLuyenDe', 'TuTao');
+            window.location.href = 'index.html';
+        }
+
+        (function initPage() {
+            const program = localStorage.getItem("deCoSan_program") || "PhoThong";
+            const level = localStorage.getItem("deCoSan_level") || "Lop10";
+            const term = localStorage.getItem("deCoSan_term") || "ky1";
+            const category = localStorage.getItem("deCoSan_category") || "de15p";
+            const year = localStorage.getItem("deCoSan_yearFilter") || "all";
+            const keyword = localStorage.getItem("deCoSan_keyword") || "";
+
+            document.getElementById("tagProgram").innerText = PROGRAM_LABELS[program] || program;
+            document.getElementById("tagLevel").innerText = LEVEL_LABELS[level] || level;
+            document.getElementById("pageTitle").innerText = "Danh sách đề";
+            const termLabel = term === "ky1" ? "Kỳ 1" : term === "ky2" ? "Kỳ 2" : "Tổng hợp";
+            document.getElementById("pageSubtitle").innerText = `${termLabel} · ${CATEGORY_LABELS[category] || "Đề luyện tập"}`;
+
+            document.getElementById("yearFilter").value = year;
+            document.getElementById("searchInput").value = keyword;
+
+            LIST = generateList(level, term, category).map(item => ({ ...item, category }));
+            renderList();
+        })();
+    </script>
+</body>
+</html>
+

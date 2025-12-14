@@ -144,6 +144,17 @@
             }
         });
 
+        const PROGRAM_MAP = {
+            PhoThong: ['Lop1','Lop2','Lop3','Lop4','Lop5','Lop6','Lop7','Lop8','Lop9','Lop10','Lop11','Lop12'],
+            ChuyenCap: ['Vao6','Vao10','THPTQG'],
+            KyThiRieng: ['HSA','TSA','VACT','SuPham','CongAn'],
+            QuocTe: ['SAT','IGCSE','ALevel','ASLevel']
+        };
+
+        function detectProgram(maLop) {
+            return Object.keys(PROGRAM_MAP).find(key => PROGRAM_MAP[key].includes(maLop)) || 'PhoThong';
+        }
+
         // Hàm xử lý khi bấm nút chọn lớp/kỳ thi
         function chonChiTiet(maLop) {
             const cheDo = localStorage.getItem('cheDoLuyenDe');
@@ -171,8 +182,16 @@
             }
 
             // 2. Nếu ở chế độ CÓ SẴN (hoặc khác)
-            // (Chỗ này bạn có thể sửa để trỏ đến các trang kho đề sau này)
-            alert(`Kho đề thi có sẵn cho ${maLop} đang được cập nhật!`);
+            // SAT có trang riêng
+            if (maLop === 'SAT') {
+                window.location.href = 'de_tao_san_sat.html';
+                return;
+            }
+            
+            const program = detectProgram(maLop);
+            localStorage.setItem('deCoSan_program', program);
+            localStorage.setItem('deCoSan_level', maLop);
+            window.location.href = 'de_tao_san.html';
         }
         
         function quayLaiMenu() {
